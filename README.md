@@ -10,9 +10,6 @@ El repositorio actual trabaja y documenta sistemáticamente las **asignaciones**
 ---
 
 
-
----
-
 ##  Descripción del proyecto
 **PocketVet** es una aplicación móvil diseñada para apoyar a los dueños de mascotas, en particular perros y gatos, en el cuidado integral de la salud de los mismos.  
 
