@@ -28,7 +28,7 @@ Los siguientes integrantes contribuyen con permisos de lectura, edición, actual
 
 - Esteban Barrera Sanabria  (esbarreras@unal.edu.co)
 - Esteban García Gaitán   (esgarciag@unal.edu.co)
-- María Camila Castro Porras  (macastropo@unal.edu.co)
+- María Camila Castro Porras  (mcastropo@unal.edu.co)
 - Tomás Saldaña Leguizamo    (tsaldana@unal.edu.co)
 
 ---
