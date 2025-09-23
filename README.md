@@ -1,39 +1,94 @@
-# Estamos Meluk
-
-## 📌 Descripción  
-El repositorio actual trabaja y documenta sistemáticamente las **asignaciones** (tareas/talleres), los **casos de uso** y especialmente los **archivos del proyecto** para *Ingeniería de Software I*.  
-
----
-
-# PocketVet
+<!-- Banner principal  -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=rect&color=1e293b&height=150&section=header&text=Estamos%20Meluk&fontSize=45&fontColor=ffffff&animation=fadeIn" />
+</p>
 
 ---
 
-
-##  Descripción del proyecto
-**PocketVet** es una aplicación móvil diseñada para apoyar a los dueños de mascotas, en particular perros y gatos, en el cuidado integral de la salud de los mismos.  
-
-La aplicación incluye:  
-- 📖 **Historial médico digital**: guarda todas las consultas y exámenes.  
-- 💉 **Carnet de vacunas virtual**: con recordatorios automáticos de próximas vacunas.  
-- 🏥 **Localizador de veterinarias**: encuentra fácilmente veterinarias cercanas con servicios específicos.  
-
-**PocketVet** busca centralizar en un solo espacio lo que normalmente estaría disperso en documentos físicos, agendas personales o diferentes aplicaciones.  
-El objetivo es simplificar el cuidado de las mascotas, mejorando el acceso a información médica y a servicios veterinarios.
-
-
-
-## 🤝 Contribución  
-Los siguientes integrantes contribuyen con permisos de lectura, edición, actualización y borrado de documentación:  
-
-- Esteban Barrera Sanabria  (esbarreras@unal.edu.co)
-- Esteban García Gaitán   (esgarciag@unal.edu.co)
-- María Camila Castro Porras  (mcastropo@unal.edu.co)
-- Tomás Saldaña Leguizamo    (tsaldana@unal.edu.co)
+<h1 align="center" style="font-size:42px; color:#4f46e5;">📌 Descripción</h1>
+<div align="justify" style="background-color:#f3f4f6; padding:15px; border-radius:8px;">
+El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones</b> (tareas/talleres), los <b>casos de uso</b> y especialmente los <b>archivos del proyecto</b> para <i>Ingeniería de Software I</i>.
+</div>
 
 ---
 
-## 📂 Estructura del repositorio  
+<!-- Banner PocketVet-->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=venom&color=0:9333ea,100:4f46e5&height=120&section=header&text=PocketVet&fontSize=35&fontColor=ffffff&animation=twinkling" />
+</p>
+
+<!-- Banner PocketVet alineado izquierda con parrafo a la derecha -->
+<table width="100%">
+<tr>
+<td width="55%" valign="middle">
+  <div style="background-color:#e0f7fa; padding:20px; border-radius:10px; box-shadow:2px 2px 10px rgba(0,0,0,0.2); color:#0f172a; font-family:Verdana, Geneva, sans-serif;">
+    <b>PocketVet</b> es una aplicación móvil diseñada para apoyar a los dueños de mascotas, en particular perros y gatos, en el cuidado integral de la salud de los mismos.
+  </div>
+</td>
+</tr>
+</table>
+
+---
+
+<table style="width:100%; border-collapse: collapse;">
+  <tr>
+    <td align="center" style="background-color:#ffecb3; padding:15px; border:2px solid #ffd54f; border-radius:10px; font-weight:bold;">
+      📖<br>Historial médico digital<br>Guarda todas las consultas y exámenes.
+    </td>
+    <td align="center" style="background-color:#c8e6c9; padding:15px; border:2px solid #81c784; border-radius:10px; font-weight:bold;">
+      💉<br>Carnet de vacunas virtual<br>Recordatorios automáticos de próximas vacunas.
+    </td>
+    <td align="center" style="background-color:#bbdefb; padding:15px; border:2px solid #64b5f6; border-radius:10px; font-weight:bold;">
+      🏥<br>Localizador de veterinarias<br>Encuentra fácilmente veterinarias cercanas.
+    </td>
+  </tr>
+</table>
+
+<div align="justify" style="background-color:#f0f4c3; padding:15px; margin-top:10px; border-radius:10px;">
+<p>
+<b>PocketVet</b> centraliza en un solo espacio la información médica y de servicios veterinarios para simplificar el cuidado de las mascotas.
+</p>
+</div>
+
+<div align="center" style="display:flex; justify-content:center; gap:30px; margin-top:15px;">
+  
+![Platform](https://img.shields.io/badge/Platform-Mobile-green?style=for-the-badge&logo=android)
+![Tech](https://img.shields.io/badge/Tech-ReactNative-blue?style=for-the-badge&logo=react)
+![Database](https://img.shields.io/badge/Database-Firebase-orange?style=for-the-badge&logo=firebase)
+
+</div>
+
+
+---
+
+<h1 align="center" style="font-size:42px; color:#4f46e5;">🤝 Contribución</h1>
+
+<p align="center">
+  <table>
+    <tr>
+      <td align="center">
+        <b>👨‍💻 Esteban Barrera Sanabria</b><br>
+        <a href="mailto:esbarreras@unal.edu.co">📧 esbarreras@unal.edu.co</a>
+      </td>
+      <td align="center">
+        <b>👨‍💻 Esteban García Gaitán</b><br>
+        <a href="mailto:esgarciag@unal.edu.co">📧 esgarciag@unal.edu.co</a>
+      </td>
+      <td align="center">
+        <b>👩‍💻 María Camila Castro Porras</b><br>
+        <a href="mailto:mcastropo@unal.edu.co">📧 mcastropo@unal.edu.co</a>
+      </td>
+      <td align="center">
+        <b>👨‍💻 Tomás Saldaña Leguizamo</b><br>
+        <a href="mailto:tsaldana@unal.edu.co">📧 tsaldana@unal.edu.co</a>
+      </td>
+    </tr>
+  </table>
+</p>
+
+---
+
+<h1 align="center" style="font-size:42px; color:#4f46e5;">📂 Estructura del repositorio</h1>
 
 ```bash
 Estamos Meluk/
@@ -55,3 +110,10 @@ Diagramas/ → Diagramas UML relacionados al proyecto.
 Proyecto/ → Documentos asociados al desarrollo formal, scripts.
 
 Proyecto/ → Desarrollo del proyecto principal.
+
+--- 
+<!-- Footer con onda -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=9333ea&height=100&section=footer"/>
+</p>
+---
