@@ -116,4 +116,3 @@ Proyecto/ → Desarrollo del proyecto principal.
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=9333ea&height=100&section=footer"/>
 </p>
----
