@@ -1,0 +1,119 @@
+// PocketVet Database Schema
+// Estructura DBML
+
+//////////////////////////////////////////////////
+// Roles y Usuarios
+//////////////////////////////////////////////////
+
+Table Usuario {
+  id int [pk, increment]
+  nombre varchar(100)
+  correo varchar(100) [unique, not null]
+  telefono varchar(20) [unique]
+  contraseña varchar(100)
+  cuenta_google boolean
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Mascota {
+  id int [pk, increment]
+  id_usuario int [not null]
+  nombre varchar(100)
+  especie varchar(20) [note: 'Perro | Gato']
+  raza varchar(100)
+  edad int
+  peso decimal(5,2)
+  foto varchar(255)
+  alergias text [null]
+  enfermedades text [null]
+  observaciones text [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+//////////////////////////////////////////////////
+// Calendario y Notificaciones
+//////////////////////////////////////////////////
+
+Table Evento {
+  id int [pk, increment]
+  id_mascota int [not null]
+  titulo varchar(50) [note: 'vacuna | consulta | baño | desparasitación | otro']
+  descripcion text [null]
+  fecha_inicio datetime
+  fecha_fin datetime [null]
+  estado varchar(20) [note: 'Pendiente | Completo | Cancelado']
+  repeticion varchar(50) [null] 
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table Notificacion {
+  id int [pk, increment]
+  id_usuario int [not null]
+  id_evento int [unique]
+  tipo varchar(50) [note: 'vacuna | consulta | baño | desparasitación | personalizada']
+  mensaje text
+  fecha_programada datetime [note: 'en la hora del evento | 5 minutos antes | 1 dia antes | 1 semana antes | personalizada']
+  canal varchar(20) [note: 'Push | Email | Ambas']
+  enviada boolean
+  created_at timestamp
+
+}
+
+//////////////////////////////////////////////////
+// Documentos Médicos
+//////////////////////////////////////////////////
+
+Table Documento_Mascota {
+  id int [pk, increment]
+  id_mascota int [not null]
+  tipo varchar(50) [note: 'certificado | viaje | laboratorio | receta | otro']
+  titulo varchar(100)
+  descripcion text [null]
+  archivo_pdf varchar(255) [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+//////////////////////////////////////////////////
+// Carnet Digital exportable 
+//////////////////////////////////////////////////
+
+
+Table Carnet_Digital {
+  id int [pk, increment]
+  id_mascota int [not null, unique]
+  tipo_medicamento varchar(20) [note: 'Vacuna | Desparasitación']
+  nombre_medicamento varchar(100) [not null]
+  fecha_aplicacion date [not null]
+  laboratorio varchar(50) [null]
+  id_lote varchar(50) [not null]
+  fecha_elaboracion date [null]
+  fecha_vencimiento date [not null]
+  peso decimal(5,2) [not null]
+  nombre_veterinaria varchar(100) [not null]
+  telefono_veterinaria varchar(20)
+  direccion_veterinaria varchar(200) [not null]
+  proxima_dosis date [null]
+  observaciones text [null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+
+//////////////////////////////////////////////////
+// Relaciones
+//////////////////////////////////////////////////
+
+Ref: Mascota.id_usuario > Usuario.id
+
+Ref: Evento.id_mascota > Mascota.id
+
+Ref: Notificacion.id_usuario > Usuario.id
+Ref: Notificacion.id_evento - Evento.id
+
+Ref: Documento_Mascota.id_mascota > Mascota.id
+
+Ref: Carnet_Digital.id_mascota - Mascota.id
