@@ -22,7 +22,7 @@ cd .../Proyecto/Frontend
 npm install
 ```
 
-3. Crear un archivo ``.env`` en la raíz con credenciales Firebase, se puede usar la plantilla en ``.env.example``:
+3. Crear un archivo ``.env`` en la raíz (``/Frontend``)con credenciales Firebase, se puede usar la plantilla en ``.env.example``:
 ```env
 EXPO_PUBLIC_API_KEY="AIza..."
 EXPO_PUBLIC_AUTH_DOMAIN="pocketvet-84557.firebaseapp.com"
