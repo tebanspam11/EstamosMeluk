@@ -13,8 +13,8 @@
 
 1. Clonar el repositorio:
 ```bash
-git clone https://github.com/tebanspam11/EstamosMeluk/Proyecto.git
-cd Proyecto/Frontend
+git clone https://github.com/tebanspam11/EstamosMeluk
+cd .../Proyecto/Frontend
 ```
    
 2. Instalar las dependencias:
