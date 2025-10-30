@@ -1,4 +1,3 @@
-<!-- Banner principal  -->
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=rect&color=1e293b&height=150&section=header&text=Estamos%20Meluk&fontSize=45&fontColor=ffffff&animation=fadeIn" />
 </p>
@@ -12,12 +11,10 @@ El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones<
 
 ---
 
-<!-- Banner PocketVet-->
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=venom&color=0:9333ea,100:4f46e5&height=120&section=header&text=PocketVet&fontSize=35&fontColor=ffffff&animation=twinkling" />
 </p>
 
-<!-- Banner PocketVet alineado izquierda con parrafo a la derecha -->
 <table width="100%">
 <tr>
 <td width="55%" valign="middle">
@@ -112,7 +109,6 @@ Proyecto/ → Documentos asociados al desarrollo formal, scripts.
 Proyecto/ → Desarrollo del proyecto principal.
 
 --- 
-<!-- Footer con onda -->
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=9333ea&height=100&section=footer"/>
 </p>
