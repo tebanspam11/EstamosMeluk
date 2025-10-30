@@ -1,6 +1,6 @@
 {
   "name": "pocketvet",
-  "main": "App.tsx",
+  "main": "app/App.tsx",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
