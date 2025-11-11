@@ -35,7 +35,7 @@ android/
 *.swp
 
 # enviroment
-.env
+backend/.env
 .env.local
 .env.development
 .env.production
