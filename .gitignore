@@ -30,7 +30,7 @@ temp/
 .expo-packager-cache/
 .expo-web/
 .expo-dev-client/
-.expo-env.d.ts
+.expo-env.d.ts/
 .metro-health-check*
 
 # editor 
