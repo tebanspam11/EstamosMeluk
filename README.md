@@ -51,7 +51,7 @@ El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones<
   
 ![Platform](https://img.shields.io/badge/Platform-Mobile-green?style=for-the-badge&logo=android)
 ![Tech](https://img.shields.io/badge/Tech-ReactNative-blue?style=for-the-badge&logo=react)
-![Database](https://img.shields.io/badge/Database-Firebase-orange?style=for-the-badge&logo=firebase)
+![Database](https://img.shields.io/badge/Database-postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)
 
 </div>
 
@@ -98,15 +98,15 @@ Estamos Meluk/
 ```
 Asignaciones/ → Entregas de tareas o talleres relacionados.
 
-Documentación/ → Información estructural relevante del proyecto.
+Documentación/ →
 
-Casos de uso/ → Documentos con historiales de usuario.
+  Casos de uso/ → Documentos con historiales de usuario.
 
-Diagramas/ → Diagramas UML relacionados al proyecto.
+  Diagramas/ → Diagramas UML o relacionales coherentes al proyecto.
 
-Proyecto/ → Documentos asociados al desarrollo formal, scripts.
+  Proyecto/ → Documentos asociados a entregas de avance logico.
 
-Proyecto/ → Desarrollo del proyecto principal.
+Proyecto/ → Codigo del proyecto principal.
 
 --- 
 <p align="center">
