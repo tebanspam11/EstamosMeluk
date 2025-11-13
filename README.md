@@ -51,7 +51,7 @@ El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones<
   
 ![Platform](https://img.shields.io/badge/Platform-Mobile-green?style=for-the-badge&logo=android)
 ![Tech](https://img.shields.io/badge/Tech-ReactNative-blue?style=for-the-badge&logo=react)
-![Database](https://img.shields.io/badge/Database-postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Database](https://img.shields.io/badge/Database-postgresql-4169e1?style=for-the-badge&logo=postgresql&logoColor=blue)
 
 </div>
 
