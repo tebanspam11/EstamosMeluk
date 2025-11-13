@@ -19,7 +19,6 @@ try {
   console.warn('DateTimePicker no está disponible');
 }
 
-// Tipos de datos
 type EventType = 'vacuna' | 'consulta' | 'baño' | 'desparasitación' | 'otro';
 type EventStatus = 'Pendiente' | 'Completo' | 'Cancelado';
 
@@ -51,7 +50,6 @@ export default function CalendarScreen() {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   
-  // Estado para nuevo evento
 const [newEvent, setNewEvent] = useState<Partial<Event>>({
   titulo: '',
   descripcion: '',
@@ -217,7 +215,6 @@ const resetNewEvent = () => {
 const handleStartDateChange = (event: any, date?: Date) => {
   setShowStartDatePicker(false);
   if (date) {
-    // Combina la fecha seleccionada en el calendario con la hora del picker
     const combinedDate = new Date(selectedDate);
     combinedDate.setHours(date.getHours());
     combinedDate.setMinutes(date.getMinutes());
@@ -228,7 +225,6 @@ const handleStartDateChange = (event: any, date?: Date) => {
 const handleEndDateChange = (event: any, date?: Date) => {
   setShowEndDatePicker(false);
   if (date) {
-    // Combina la fecha seleccionada con la hora de fin
     const combinedDate = new Date(selectedDate);
     combinedDate.setHours(date.getHours());
     combinedDate.setMinutes(date.getMinutes());
@@ -775,7 +771,7 @@ input: {
   paddingHorizontal: 16,
   paddingVertical: 14,
   fontSize: 16,
-  color: '#333', // Asegúrate que sea oscuro
+  color: '#333', 
 },
   textArea: {
     height: 80,

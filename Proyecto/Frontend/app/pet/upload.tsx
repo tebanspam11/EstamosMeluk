@@ -80,7 +80,6 @@ export default function UploadScreen({ navigation }: any) {
       return;
     }
 
-    // Aquí iría la lógica para guardar la mascota
     const petData = {
       name,
       species,
