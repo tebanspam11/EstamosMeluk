@@ -19,6 +19,7 @@ try {
   console.warn('DateTimePicker no está disponible');
 }
 
+// Tipos de eventos
 type EventType = 'vacuna' | 'consulta' | 'baño' | 'desparasitación' | 'otro';
 type EventStatus = 'Pendiente' | 'Completo' | 'Cancelado';
 
@@ -50,6 +51,7 @@ export default function CalendarScreen() {
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   
+  // Estado para nuevo evento
 const [newEvent, setNewEvent] = useState<Partial<Event>>({
   titulo: '',
   descripcion: '',
@@ -141,7 +143,7 @@ const handleAddEvent = () => {
 
 const resetNewEvent = () => {
   const defaultTime = new Date(selectedDate);
-  defaultTime.setHours(12, 0, 0, 0); // Hora por defecto: 12:00 PM
+  defaultTime.setHours(12, 0, 0, 0); 
   
   setNewEvent({
     titulo: '',
@@ -182,7 +184,7 @@ const resetNewEvent = () => {
     }
   };
 
-  // Generar días del mes
+
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -190,19 +192,19 @@ const resetNewEvent = () => {
     const lastDay = new Date(year, month + 1, 0);
     const days: Array<{date: Date, isCurrentMonth: boolean}> = [];
 
-    // Días del mes anterior
+
     for (let i = firstDay.getDay() - 1; i >= 0; i--) {
       const prevDate = new Date(year, month, -i);
       days.push({ date: prevDate, isCurrentMonth: false });
     }
 
-    // Días del mes actual
+
     for (let i = 1; i <= lastDay.getDate(); i++) {
       const currentDate = new Date(year, month, i);
       days.push({ date: currentDate, isCurrentMonth: true });
     }
 
-    // Días del próximo mes
+
     const totalCells = 42;
     while (days.length < totalCells) {
       const nextDateValue = new Date(year, month + 1, days.length - lastDay.getDate() + 1);
