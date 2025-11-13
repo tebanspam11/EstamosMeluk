@@ -1,11 +1,9 @@
-// index.tsx
 import { registerRootComponent } from 'expo';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 
-// Importar todas las pantallas
 import LoginScreen from './app/auth/login';
 import RegisterScreen from './app/auth/register';
 import HomeScreen from './app/main/home';
@@ -16,7 +14,6 @@ import ClinicHistoryScreen from './app/pet/clinic_history';
 import PetListScreen from './app/pet/list';
 import UploadScreen from './app/pet/upload';
 
-// Crear componentes básicos para las pantallas que faltan
 function VeterinarySearchScreen() {
   const navigation = useNavigation();
   return (
@@ -37,7 +34,6 @@ function NotificationsScreen() {
   );
 }
 
-// Pantalla de inicio temporal (si necesitas mantenerla)
 function TempHomeScreen({ navigation }: any) {
   return (
     <View style={styles.container}>

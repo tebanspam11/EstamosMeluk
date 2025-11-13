@@ -1,6 +1,7 @@
 # s/o
 .DS_Store
 Thumbs.db
+app-example
 
 # dependencies
 node_modules/
@@ -8,12 +9,17 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 expo-error.log
-firebase-debug.log
-.firebaserc
-firebase.json
-storage.rules
-firestore.indexes.json
-firestore.rules
+
+# distribution
+dist/
+build/
+web-build/
+ios/
+android/
+.generated/prisma
+coverage/
+tmp/
+temp/
 
 # Expo
 .expo/
@@ -21,13 +27,7 @@ firestore.rules
 .expo-packager-cache/
 .expo-web/
 .expo-dev-client/
-
-# dev
-web-build/
-dist/
-build/
-ios/
-android/
+.metro-health-check*
 
 # editor 
 .vscode/
@@ -35,11 +35,13 @@ android/
 *.swp
 
 # enviroment
-backend/.env
+.env
 .env.local
 .env.development
 .env.production
 .env.*.local
+Proyecto/Backend/.env
+../.env
 
 # tests/tmp
 coverage/
@@ -60,3 +62,13 @@ temp/
 *.zip
 *.map
 *.lock
+*.orig.*
+*.tsbuildinfo
+
+# keys
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.pem

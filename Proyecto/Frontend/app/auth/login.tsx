@@ -1,4 +1,4 @@
-import LogoImage from '/Users/camilacastro/Desktop/UNIVERSIDAD/SEPTIMO/Ingesoft1/EstamosMeluk/Proyecto/Frontend/assets/images/LogoPocketVet.jpg'
+import LogoImage from '../../assets/images/LogoPocketVet.jpg'
 import React, { useState } from 'react';
 import {
   View,
