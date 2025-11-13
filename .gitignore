@@ -1,3 +1,6 @@
+#AL terminar la app
+#añadir prisma, migrations, schemas, Database
+
 # s/o
 .DS_Store
 Thumbs.db
@@ -27,6 +30,7 @@ temp/
 .expo-packager-cache/
 .expo-web/
 .expo-dev-client/
+.expo-env.d.ts
 .metro-health-check*
 
 # editor 
