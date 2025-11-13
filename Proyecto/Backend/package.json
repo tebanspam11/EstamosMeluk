@@ -5,7 +5,6 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "studio": "npx prisma studio",
     "build": "tsc && npx prisma generate"
   },
   "dependencies": {
