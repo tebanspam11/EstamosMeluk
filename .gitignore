@@ -76,3 +76,6 @@ temp/
 *.key
 *.mobileprovision
 *.pem
+
+!*.test.ts
+!*.test.tsx
