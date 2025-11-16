@@ -4,6 +4,7 @@ module.exports = {
   testEnvironment: "node",
   roots: ["<rootDir>/tests"],
   moduleFileExtensions: ["ts", "js"],
+  moduleDirectories: ["node_modules", "Backend/src", "."],
   transform: {
     "^.+\\.ts$": ["ts-jest", {}],
   },
