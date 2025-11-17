@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image
+  Image,
 } from 'react-native';
 
 export default function RegisterScreen({ navigation }: any) {
@@ -37,7 +37,7 @@ export default function RegisterScreen({ navigation }: any) {
     }
 
     setLoading(true);
-    
+
     // Simulación de proceso de registro
     setTimeout(() => {
       setLoading(false);
@@ -51,7 +51,7 @@ export default function RegisterScreen({ navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -118,7 +118,7 @@ export default function RegisterScreen({ navigation }: any) {
           />
 
           {/* Register Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.registerButton, loading && styles.registerButtonDisabled]}
             onPress={handleRegister}
             disabled={loading}
@@ -136,11 +136,8 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
 
           {/* Google Register Button */}
-          <TouchableOpacity 
-            style={styles.googleButton}
-            onPress={handleGoogleRegister}
-          >
-            <Image 
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister}>
+            <Image
               source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
               style={styles.googleIcon}
             />

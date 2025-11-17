@@ -42,7 +42,6 @@ interface Pet {
   tipo: string;
 }
 
-
 export default function CalendarScreen() {
   const navigation = useNavigation();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -50,17 +49,17 @@ export default function CalendarScreen() {
   const [showModal, setShowModal] = useState(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  
+
   // Estado para nuevo evento
-const [newEvent, setNewEvent] = useState<Partial<Event>>({
-  titulo: '',
-  descripcion: '',
-  fecha_inicio: selectedDate, 
-  fecha_fin: null,
-  estado: 'Pendiente',
-  repeticion: null,
-  id_mascota: 1,
-});
+  const [newEvent, setNewEvent] = useState<Partial<Event>>({
+    titulo: '',
+    descripcion: '',
+    fecha_inicio: selectedDate,
+    fecha_fin: null,
+    estado: 'Pendiente',
+    repeticion: null,
+    id_mascota: 1,
+  });
 
   // Mascotas ejemplo
   const pets: Pet[] = [
@@ -101,60 +100,60 @@ const [newEvent, setNewEvent] = useState<Partial<Event>>({
   }, []);
 
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => {
+    return events.filter((event) => {
       const eventDate = new Date(event.fecha_inicio);
       return eventDate.toDateString() === date.toDateString();
     });
   };
 
-const handleAddEvent = () => {
-  if (!newEvent.titulo) {
-    Alert.alert('Error', 'Por favor completa el título del evento');
-    return;
-  }
+  const handleAddEvent = () => {
+    if (!newEvent.titulo) {
+      Alert.alert('Error', 'Por favor completa el título del evento');
+      return;
+    }
 
-  const eventStart = new Date(selectedDate);
-  
-  if (newEvent.fecha_inicio) {
-    const selectedTime = newEvent.fecha_inicio;
-    eventStart.setHours(selectedTime.getHours());
-    eventStart.setMinutes(selectedTime.getMinutes());
-    eventStart.setSeconds(0);
-  }
+    const eventStart = new Date(selectedDate);
 
-  const event: Event = {
-    id: events.length + 1,
-    id_mascota: newEvent.id_mascota || 1,
-    titulo: newEvent.titulo,
-    descripcion: newEvent.descripcion || '',
-    fecha_inicio: eventStart, 
-    fecha_fin: newEvent.fecha_fin || null,
-    estado: 'Pendiente',
-    repeticion: newEvent.repeticion || null,
-    created_at: new Date(),
-    updated_at: new Date(),
+    if (newEvent.fecha_inicio) {
+      const selectedTime = newEvent.fecha_inicio;
+      eventStart.setHours(selectedTime.getHours());
+      eventStart.setMinutes(selectedTime.getMinutes());
+      eventStart.setSeconds(0);
+    }
+
+    const event: Event = {
+      id: events.length + 1,
+      id_mascota: newEvent.id_mascota || 1,
+      titulo: newEvent.titulo,
+      descripcion: newEvent.descripcion || '',
+      fecha_inicio: eventStart,
+      fecha_fin: newEvent.fecha_fin || null,
+      estado: 'Pendiente',
+      repeticion: newEvent.repeticion || null,
+      created_at: new Date(),
+      updated_at: new Date(),
+    };
+
+    setEvents([...events, event]);
+    setShowModal(false);
+    resetNewEvent();
+    Alert.alert('Éxito', `Evento agregado para el ${eventStart.toLocaleDateString('es-ES')}`);
   };
 
-  setEvents([...events, event]);
-  setShowModal(false);
-  resetNewEvent();
-  Alert.alert('Éxito', `Evento agregado para el ${eventStart.toLocaleDateString('es-ES')}`);
-};
+  const resetNewEvent = () => {
+    const defaultTime = new Date(selectedDate);
+    defaultTime.setHours(12, 0, 0, 0);
 
-const resetNewEvent = () => {
-  const defaultTime = new Date(selectedDate);
-  defaultTime.setHours(12, 0, 0, 0); 
-  
-  setNewEvent({
-    titulo: '',
-    descripcion: '',
-    fecha_inicio: defaultTime,
-    fecha_fin: null,
-    estado: 'Pendiente',
-    repeticion: null,
-    id_mascota: 1,
-  });
-};
+    setNewEvent({
+      titulo: '',
+      descripcion: '',
+      fecha_inicio: defaultTime,
+      fecha_fin: null,
+      estado: 'Pendiente',
+      repeticion: null,
+      id_mascota: 1,
+    });
+  };
 
   const getEventIcon = (type: string) => {
     switch (type.toLowerCase()) {
@@ -184,26 +183,22 @@ const resetNewEvent = () => {
     }
   };
 
-
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const days: Array<{date: Date, isCurrentMonth: boolean}> = [];
-
+    const days: Array<{ date: Date; isCurrentMonth: boolean }> = [];
 
     for (let i = firstDay.getDay() - 1; i >= 0; i--) {
       const prevDate = new Date(year, month, -i);
       days.push({ date: prevDate, isCurrentMonth: false });
     }
 
-
     for (let i = 1; i <= lastDay.getDate(); i++) {
       const currentDate = new Date(year, month, i);
       days.push({ date: currentDate, isCurrentMonth: true });
     }
-
 
     const totalCells = 42;
     while (days.length < totalCells) {
@@ -214,25 +209,25 @@ const resetNewEvent = () => {
     return days;
   };
 
-const handleStartDateChange = (event: any, date?: Date) => {
-  setShowStartDatePicker(false);
-  if (date) {
-    const combinedDate = new Date(selectedDate);
-    combinedDate.setHours(date.getHours());
-    combinedDate.setMinutes(date.getMinutes());
-    setNewEvent({...newEvent, fecha_inicio: combinedDate});
-  }
-};
+  const handleStartDateChange = (event: any, date?: Date) => {
+    setShowStartDatePicker(false);
+    if (date) {
+      const combinedDate = new Date(selectedDate);
+      combinedDate.setHours(date.getHours());
+      combinedDate.setMinutes(date.getMinutes());
+      setNewEvent({ ...newEvent, fecha_inicio: combinedDate });
+    }
+  };
 
-const handleEndDateChange = (event: any, date?: Date) => {
-  setShowEndDatePicker(false);
-  if (date) {
-    const combinedDate = new Date(selectedDate);
-    combinedDate.setHours(date.getHours());
-    combinedDate.setMinutes(date.getMinutes());
-    setNewEvent({...newEvent, fecha_fin: combinedDate});
-  }
-};
+  const handleEndDateChange = (event: any, date?: Date) => {
+    setShowEndDatePicker(false);
+    if (date) {
+      const combinedDate = new Date(selectedDate);
+      combinedDate.setHours(date.getHours());
+      combinedDate.setMinutes(date.getMinutes());
+      setNewEvent({ ...newEvent, fecha_fin: combinedDate });
+    }
+  };
 
   const days = getDaysInMonth(selectedDate);
   const todayEvents = getEventsForDate(selectedDate);
@@ -245,39 +240,42 @@ const handleEndDateChange = (event: any, date?: Date) => {
           <Text style={styles.backButton}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Calendario</Text>
-        <TouchableOpacity 
-          style={styles.addButton}
-          onPress={() => setShowModal(true)}
-        >
+        <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
           <Text style={styles.addButtonText}>+</Text>
         </TouchableOpacity>
       </View>
 
       {/* Selector de Mes */}
-<View style={styles.monthSelector}>
-  <TouchableOpacity onPress={() => {
-    const newDate = new Date(selectedDate);
-    newDate.setMonth(selectedDate.getMonth() - 1);
-    setSelectedDate(newDate);
-  }}>
-    <Text style={styles.monthArrow}>‹</Text>
-  </TouchableOpacity>
-  <Text style={styles.monthText}>
-    {selectedDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
-  </Text>
-  <TouchableOpacity onPress={() => {
-    const newDate = new Date(selectedDate);
-    newDate.setMonth(selectedDate.getMonth() + 1);
-    setSelectedDate(newDate);
-  }}>
-    <Text style={styles.monthArrow}>›</Text>
-  </TouchableOpacity>
-</View>
+      <View style={styles.monthSelector}>
+        <TouchableOpacity
+          onPress={() => {
+            const newDate = new Date(selectedDate);
+            newDate.setMonth(selectedDate.getMonth() - 1);
+            setSelectedDate(newDate);
+          }}
+        >
+          <Text style={styles.monthArrow}>‹</Text>
+        </TouchableOpacity>
+        <Text style={styles.monthText}>
+          {selectedDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
+        </Text>
+        <TouchableOpacity
+          onPress={() => {
+            const newDate = new Date(selectedDate);
+            newDate.setMonth(selectedDate.getMonth() + 1);
+            setSelectedDate(newDate);
+          }}
+        >
+          <Text style={styles.monthArrow}>›</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Días de la semana */}
       <View style={styles.weekDays}>
-        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map(day => (
-          <Text key={day} style={styles.weekDayText}>{day}</Text>
+        {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((day) => (
+          <Text key={day} style={styles.weekDayText}>
+            {day}
+          </Text>
         ))}
       </View>
 
@@ -299,12 +297,14 @@ const handleEndDateChange = (event: any, date?: Date) => {
               ]}
               onPress={() => setSelectedDate(day.date)}
             >
-              <Text style={[
-                styles.dayText,
-                !day.isCurrentMonth && styles.otherMonthText,
-                isToday && styles.todayText,
-                isSelected && styles.selectedText,
-              ]}>
+              <Text
+                style={[
+                  styles.dayText,
+                  !day.isCurrentMonth && styles.otherMonthText,
+                  isToday && styles.todayText,
+                  isSelected && styles.selectedText,
+                ]}
+              >
                 {day.date.getDate()}
               </Text>
               {dayEvents.length > 0 && (
@@ -330,24 +330,29 @@ const handleEndDateChange = (event: any, date?: Date) => {
           {todayEvents.length === 0 ? (
             <Text style={styles.noEventsText}>No hay eventos para este día</Text>
           ) : (
-            todayEvents.map(event => {
-              const pet = pets.find(p => p.id === event.id_mascota);
+            todayEvents.map((event) => {
+              const pet = pets.find((p) => p.id === event.id_mascota);
               return (
                 <View key={event.id} style={styles.eventCard}>
                   <View style={styles.eventHeader}>
-                    <Text style={styles.eventIcon}>
-                      {getEventIcon(event.titulo)}
-                    </Text>
-                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(event.estado) }]}>
+                    <Text style={styles.eventIcon}>{getEventIcon(event.titulo)}</Text>
+                    <View
+                      style={[
+                        styles.statusBadge,
+                        { backgroundColor: getStatusColor(event.estado) },
+                      ]}
+                    >
                       <Text style={styles.statusText}>{event.estado}</Text>
                     </View>
                   </View>
                   <Text style={styles.eventTitle}>{event.titulo}</Text>
-                  <Text style={styles.eventPet}>{pet?.nombre} • {pet?.tipo}</Text>
+                  <Text style={styles.eventPet}>
+                    {pet?.nombre} • {pet?.tipo}
+                  </Text>
                   <Text style={styles.eventTime}>
-                    {new Date(event.fecha_inicio).toLocaleTimeString('es-ES', { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
+                    {new Date(event.fecha_inicio).toLocaleTimeString('es-ES', {
+                      hour: '2-digit',
+                      minute: '2-digit',
                     })}
                   </Text>
                   {event.descripcion && (
@@ -374,15 +379,19 @@ const handleEndDateChange = (event: any, date?: Date) => {
             <ScrollView style={styles.modalForm}>
               {/* Mascota */}
               <Text style={styles.label}>Mascota</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.petsScroll}>
-                {pets.map(pet => (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.petsScroll}
+              >
+                {pets.map((pet) => (
                   <TouchableOpacity
                     key={pet.id}
                     style={[
                       styles.petOption,
-                      newEvent.id_mascota === pet.id && styles.selectedPetOption
+                      newEvent.id_mascota === pet.id && styles.selectedPetOption,
                     ]}
-                    onPress={() => setNewEvent({...newEvent, id_mascota: pet.id})}
+                    onPress={() => setNewEvent({ ...newEvent, id_mascota: pet.id })}
                   >
                     <Text style={styles.petIcon}>🐶</Text>
                     <Text style={styles.petName}>{pet.nombre}</Text>
@@ -392,15 +401,19 @@ const handleEndDateChange = (event: any, date?: Date) => {
 
               {/* Tipo de Evento */}
               <Text style={styles.label}>Tipo de Evento</Text>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.eventTypesScroll}>
-                {['vacuna', 'consulta', 'baño', 'desparasitación', 'otro'].map(type => (
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.eventTypesScroll}
+              >
+                {['vacuna', 'consulta', 'baño', 'desparasitación', 'otro'].map((type) => (
                   <TouchableOpacity
                     key={type}
                     style={[
                       styles.eventTypeOption,
-                      newEvent.titulo?.toLowerCase().includes(type) && styles.selectedEventType
+                      newEvent.titulo?.toLowerCase().includes(type) && styles.selectedEventType,
                     ]}
-                    onPress={() => setNewEvent({...newEvent, titulo: type})}
+                    onPress={() => setNewEvent({ ...newEvent, titulo: type })}
                   >
                     <Text style={styles.eventTypeIcon}>{getEventIcon(type)}</Text>
                     <Text style={styles.eventTypeText}>{type}</Text>
@@ -414,7 +427,7 @@ const handleEndDateChange = (event: any, date?: Date) => {
                 style={styles.input}
                 placeholder="Ej: Vacuna anual"
                 value={newEvent.titulo}
-                onChangeText={(text) => setNewEvent({...newEvent, titulo: text})}
+                onChangeText={(text) => setNewEvent({ ...newEvent, titulo: text })}
               />
 
               {/* Descripción */}
@@ -423,36 +436,38 @@ const handleEndDateChange = (event: any, date?: Date) => {
                 style={[styles.input, styles.textArea]}
                 placeholder="Descripción del evento..."
                 value={newEvent.descripcion}
-                onChangeText={(text) => setNewEvent({...newEvent, descripcion: text})}
+                onChangeText={(text) => setNewEvent({ ...newEvent, descripcion: text })}
                 multiline
                 numberOfLines={3}
               />
 
-            <Text style={styles.label}>Hora del Evento</Text>
-            <TouchableOpacity 
-              style={styles.dateButton}
-              onPress={() => setShowStartDatePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {newEvent.fecha_inicio?.toLocaleTimeString('es-ES', { 
-                  hour: '2-digit', 
-                  minute: '2-digit' 
-                })}
-              </Text>
-            </TouchableOpacity>
+              <Text style={styles.label}>Hora del Evento</Text>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowStartDatePicker(true)}
+              >
+                <Text style={styles.dateButtonText}>
+                  {newEvent.fecha_inicio?.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Text>
+              </TouchableOpacity>
 
-            <Text style={styles.label}>Duración (Opcional)</Text>
-            <TouchableOpacity 
-              style={styles.dateButton}
-              onPress={() => setShowEndDatePicker(true)}
-            >
-              <Text style={styles.dateButtonText}>
-                {newEvent.fecha_fin 
-                  ? newEvent.fecha_fin.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-                  : 'Seleccionar hora de fin'
-                }
-              </Text>
-            </TouchableOpacity>
+              <Text style={styles.label}>Duración (Opcional)</Text>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowEndDatePicker(true)}
+              >
+                <Text style={styles.dateButtonText}>
+                  {newEvent.fecha_fin
+                    ? newEvent.fecha_fin.toLocaleTimeString('es-ES', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })
+                    : 'Seleccionar hora de fin'}
+                </Text>
+              </TouchableOpacity>
 
               {showEndDatePicker && (
                 <DateTimePicker
@@ -466,13 +481,13 @@ const handleEndDateChange = (event: any, date?: Date) => {
 
             {/* Botones del Modal */}
             <View style={styles.modalButtons}>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => setShowModal(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton]}
                 onPress={handleAddEvent}
               >
@@ -533,13 +548,13 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: '#fff',
   },
-monthArrow: {
-  fontSize: 28, 
-  color: '#4A90E2',
-  fontWeight: 'bold',
-  paddingHorizontal: 20, 
-  paddingVertical: 10,
-},
+  monthArrow: {
+    fontSize: 28,
+    color: '#4A90E2',
+    fontWeight: 'bold',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   monthText: {
     fontSize: 18,
     fontWeight: '600',
@@ -565,13 +580,13 @@ monthArrow: {
     backgroundColor: '#fff',
     padding: 5,
   },
-dayCell: {
-  width: '14.28%',
-  height: 60,
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 8, 
-},
+  dayCell: {
+    width: '14.28%',
+    height: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 8,
+  },
   otherMonthDay: {
     opacity: 0.3,
   },
@@ -679,19 +694,19 @@ dayCell: {
     color: '#666',
     lineHeight: 20,
   },
-modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  justifyContent: 'flex-start', 
-},
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-start',
+  },
 
-modalContent: {
-  backgroundColor: '#fff',
-  borderBottomLeftRadius: 20,
-  borderBottomRightRadius: 20, 
-  maxHeight: '90%',
-  marginTop: 50,
-},
+  modalContent: {
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    maxHeight: '90%',
+    marginTop: 50,
+  },
   modalTitle: {
     fontSize: 20,
     fontWeight: 'bold',
@@ -701,10 +716,10 @@ modalContent: {
     borderBottomWidth: 1,
     borderBottomColor: '#e1e1e1',
   },
-modalForm: {
-  padding: 20,
-  maxHeight: 500, 
-},
+  modalForm: {
+    padding: 20,
+    maxHeight: 500,
+  },
   label: {
     fontSize: 16,
     fontWeight: '600',
@@ -765,16 +780,16 @@ modalForm: {
     color: '#333',
     textTransform: 'capitalize',
   },
-input: {
-  backgroundColor: '#f8f8f8',
-  borderWidth: 1,
-  borderColor: '#e1e1e1',
-  borderRadius: 12,
-  paddingHorizontal: 16,
-  paddingVertical: 14,
-  fontSize: 16,
-  color: '#333', 
-},
+  input: {
+    backgroundColor: '#f8f8f8',
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#333',
+  },
   textArea: {
     height: 80,
     textAlignVertical: 'top',
@@ -787,11 +802,11 @@ input: {
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
-dateButtonText: {
-  fontSize: 16,
-  color: '#100f0fff', 
-  fontWeight: '500',
-},
+  dateButtonText: {
+    fontSize: 16,
+    color: '#100f0fff',
+    fontWeight: '500',
+  },
   modalButtons: {
     flexDirection: 'row',
     padding: 20,

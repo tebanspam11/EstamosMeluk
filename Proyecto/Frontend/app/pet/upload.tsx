@@ -31,9 +31,12 @@ export default function UploadScreen({ navigation }: any) {
   // Función para seleccionar imagen
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
+
     if (status !== 'granted') {
-      Alert.alert('Permiso necesario', 'Necesitamos acceso a tu galería para seleccionar una foto.');
+      Alert.alert(
+        'Permiso necesario',
+        'Necesitamos acceso a tu galería para seleccionar una foto.'
+      );
       return;
     }
 
@@ -52,7 +55,7 @@ export default function UploadScreen({ navigation }: any) {
   // Función para tomar foto
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    
+
     if (status !== 'granted') {
       Alert.alert('Permiso necesario', 'Necesitamos acceso a tu cámara para tomar una foto.');
       return;
@@ -90,9 +93,9 @@ export default function UploadScreen({ navigation }: any) {
     };
 
     Alert.alert('Éxito', 'Mascota registrada correctamente', [
-      { text: 'OK', onPress: () => navigation.goBack() }
+      { text: 'OK', onPress: () => navigation.goBack() },
     ]);
-    
+
     console.log('Datos de la mascota:', petData);
   };
 
@@ -102,10 +105,7 @@ export default function UploadScreen({ navigation }: any) {
 
       {/* Sección de Foto */}
       <View style={styles.imageSection}>
-        <TouchableOpacity 
-          style={styles.imageContainer}
-          onPress={pickImage}
-        >
+        <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
           {petImage ? (
             <Image source={{ uri: petImage }} style={styles.petImage} />
           ) : (
@@ -138,10 +138,7 @@ export default function UploadScreen({ navigation }: any) {
 
         {/* Especie */}
         <Text style={styles.label}>Especie *</Text>
-        <TouchableOpacity 
-          style={styles.dropdownButton}
-          onPress={() => setShowSpeciesModal(true)}
-        >
+        <TouchableOpacity style={styles.dropdownButton} onPress={() => setShowSpeciesModal(true)}>
           <Text style={species ? styles.dropdownTextSelected : styles.dropdownTextPlaceholder}>
             {species || 'Selecciona una especie'}
           </Text>

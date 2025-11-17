@@ -75,7 +75,7 @@ export default function CarnetScreen() {
       fecha_nacimiento: new Date(2020, 5, 15),
       color: 'Dorado',
       sexo: 'Macho',
-      foto: 'https://via.placeholder.com/100x100?text=🐶'
+      foto: 'https://via.placeholder.com/100x100?text=🐶',
     },
     {
       id: 2,
@@ -85,7 +85,7 @@ export default function CarnetScreen() {
       fecha_nacimiento: new Date(2021, 2, 10),
       color: 'Blanco',
       sexo: 'Hembra',
-      foto: 'https://via.placeholder.com/100x100?text=🐱'
+      foto: 'https://via.placeholder.com/100x100?text=🐱',
     },
   ];
 
@@ -132,35 +132,36 @@ export default function CarnetScreen() {
     setSelectedPet(pets[0]);
   }, []);
 
-const handleAddRecord = () => {
-  if (!selectedPet || !newRecord.nombre_medicamento || !newRecord.id_lote) {
-    Alert.alert('Error', 'Por favor completa los campos obligatorios');
-    return;
-  }
+  const handleAddRecord = () => {
+    if (!selectedPet || !newRecord.nombre_medicamento || !newRecord.id_lote) {
+      Alert.alert('Error', 'Por favor completa los campos obligatorios');
+      return;
+    }
 
-  const record: CarnetRecord = {
-    id: carnetRecords.length + 1,
-    id_mascota: selectedPet.id,
-    tipo_medicamento: newRecord.tipo_medicamento || 'Vacuna',
-    nombre_medicamento: newRecord.nombre_medicamento,
-    fecha_aplicacion: newRecord.fecha_aplicacion || new Date(),
-    laboratorio: newRecord.laboratorio || '',
-    id_lote: newRecord.id_lote,
-    fecha_elaboracion: newRecord.fecha_elaboracion !== undefined ? newRecord.fecha_elaboracion : null, // CORREGIDO
-    fecha_vencimiento: newRecord.fecha_vencimiento || new Date(),
-    peso: newRecord.peso || 0,
-    nombre_veterinaria: newRecord.nombre_veterinaria || '',
-    telefono_veterinaria: newRecord.telefono_veterinaria || '',
-    direccion_veterinaria: newRecord.direccion_veterinaria || '',
-    proxima_dosis: newRecord.proxima_dosis !== undefined ? newRecord.proxima_dosis : null, // CORREGIDO
-    observaciones: newRecord.observaciones || '',
+    const record: CarnetRecord = {
+      id: carnetRecords.length + 1,
+      id_mascota: selectedPet.id,
+      tipo_medicamento: newRecord.tipo_medicamento || 'Vacuna',
+      nombre_medicamento: newRecord.nombre_medicamento,
+      fecha_aplicacion: newRecord.fecha_aplicacion || new Date(),
+      laboratorio: newRecord.laboratorio || '',
+      id_lote: newRecord.id_lote,
+      fecha_elaboracion:
+        newRecord.fecha_elaboracion !== undefined ? newRecord.fecha_elaboracion : null, // CORREGIDO
+      fecha_vencimiento: newRecord.fecha_vencimiento || new Date(),
+      peso: newRecord.peso || 0,
+      nombre_veterinaria: newRecord.nombre_veterinaria || '',
+      telefono_veterinaria: newRecord.telefono_veterinaria || '',
+      direccion_veterinaria: newRecord.direccion_veterinaria || '',
+      proxima_dosis: newRecord.proxima_dosis !== undefined ? newRecord.proxima_dosis : null, // CORREGIDO
+      observaciones: newRecord.observaciones || '',
+    };
+
+    setCarnetRecords([...carnetRecords, record]);
+    setShowAddModal(false);
+    resetNewRecord();
+    Alert.alert('Éxito', 'Registro agregado al carnet');
   };
-
-  setCarnetRecords([...carnetRecords, record]);
-  setShowAddModal(false);
-  resetNewRecord();
-  Alert.alert('Éxito', 'Registro agregado al carnet');
-};
 
   const resetNewRecord = () => {
     setNewRecord({
@@ -186,25 +187,21 @@ const handleAddRecord = () => {
       return;
     }
 
-    Alert.alert(
-      'Exportar PDF',
-      'Esta función exportará el carnet a formato PDF. ¿Continuar?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Exportar', 
-          onPress: () => {
-            // Simulación de exportación
-            Alert.alert('Éxito', 'PDF generado exitosamente (simulación)');
-          }
+    Alert.alert('Exportar PDF', 'Esta función exportará el carnet a formato PDF. ¿Continuar?', [
+      { text: 'Cancelar', style: 'cancel' },
+      {
+        text: 'Exportar',
+        onPress: () => {
+          // Simulación de exportación
+          Alert.alert('Éxito', 'PDF generado exitosamente (simulación)');
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const getRecordsByType = (type: 'Vacuna' | 'Desparasitación') => {
-    return carnetRecords.filter(record => 
-      record.tipo_medicamento === type && record.id_mascota === selectedPet?.id
+    return carnetRecords.filter(
+      (record) => record.tipo_medicamento === type && record.id_mascota === selectedPet?.id
     );
   };
 
@@ -227,14 +224,8 @@ const handleAddRecord = () => {
       </View>
 
       {/* Selector de Mascota */}
-      <TouchableOpacity 
-        style={styles.petSelector}
-        onPress={() => setShowPetsModal(true)}
-      >
-        <Image 
-          source={{ uri: selectedPet?.foto }} 
-          style={styles.petImage}
-        />
+      <TouchableOpacity style={styles.petSelector} onPress={() => setShowPetsModal(true)}>
+        <Image source={{ uri: selectedPet?.foto }} style={styles.petImage} />
         <View style={styles.petInfo}>
           <Text style={styles.petName}>{selectedPet?.nombre || 'Seleccionar mascota'}</Text>
           <Text style={styles.petDetails}>
@@ -256,20 +247,19 @@ const handleAddRecord = () => {
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {carnetRecords.filter(r => 
-              r.id_mascota === selectedPet?.id && 
-              new Date(r.fecha_vencimiento) > new Date()
-            ).length}
+            {
+              carnetRecords.filter(
+                (r) =>
+                  r.id_mascota === selectedPet?.id && new Date(r.fecha_vencimiento) > new Date()
+              ).length
+            }
           </Text>
           <Text style={styles.statLabel}>Vigentes</Text>
         </View>
       </View>
 
       {/* Botón Agregar Registro */}
-      <TouchableOpacity 
-        style={styles.addRecordButton}
-        onPress={() => setShowAddModal(true)}
-      >
+      <TouchableOpacity style={styles.addRecordButton} onPress={() => setShowAddModal(true)}>
         <Text style={styles.addRecordButtonText}>+ Agregar Registro</Text>
       </TouchableOpacity>
 
@@ -281,22 +271,31 @@ const handleAddRecord = () => {
           {getRecordsByType('Vacuna').length === 0 ? (
             <Text style={styles.emptyText}>No hay vacunas registradas</Text>
           ) : (
-            getRecordsByType('Vacuna').map(record => (
+            getRecordsByType('Vacuna').map((record) => (
               <View key={record.id} style={styles.recordCard}>
                 <View style={styles.recordHeader}>
                   <Text style={styles.recordName}>{record.nombre_medicamento}</Text>
-                  <View style={[
-                    styles.statusBadge,
-                    { backgroundColor: new Date(record.fecha_vencimiento) > new Date() ? '#4CAF50' : '#FF6B6B' }
-                  ]}>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {
+                        backgroundColor:
+                          new Date(record.fecha_vencimiento) > new Date() ? '#4CAF50' : '#FF6B6B',
+                      },
+                    ]}
+                  >
                     <Text style={styles.statusText}>
                       {new Date(record.fecha_vencimiento) > new Date() ? 'Vigente' : 'Vencida'}
                     </Text>
                   </View>
                 </View>
                 <Text style={styles.recordDetail}>Lote: {record.id_lote}</Text>
-                <Text style={styles.recordDetail}>Aplicación: {formatDate(record.fecha_aplicacion)}</Text>
-                <Text style={styles.recordDetail}>Vence: {formatDate(record.fecha_vencimiento)}</Text>
+                <Text style={styles.recordDetail}>
+                  Aplicación: {formatDate(record.fecha_aplicacion)}
+                </Text>
+                <Text style={styles.recordDetail}>
+                  Vence: {formatDate(record.fecha_vencimiento)}
+                </Text>
                 {record.observaciones && (
                   <Text style={styles.recordObservations}>{record.observaciones}</Text>
                 )}
@@ -311,22 +310,31 @@ const handleAddRecord = () => {
           {getRecordsByType('Desparasitación').length === 0 ? (
             <Text style={styles.emptyText}>No hay desparasitaciones registradas</Text>
           ) : (
-            getRecordsByType('Desparasitación').map(record => (
+            getRecordsByType('Desparasitación').map((record) => (
               <View key={record.id} style={styles.recordCard}>
                 <View style={styles.recordHeader}>
                   <Text style={styles.recordName}>{record.nombre_medicamento}</Text>
-                  <View style={[
-                    styles.statusBadge,
-                    { backgroundColor: new Date(record.fecha_vencimiento) > new Date() ? '#4CAF50' : '#FF6B6B' }
-                  ]}>
+                  <View
+                    style={[
+                      styles.statusBadge,
+                      {
+                        backgroundColor:
+                          new Date(record.fecha_vencimiento) > new Date() ? '#4CAF50' : '#FF6B6B',
+                      },
+                    ]}
+                  >
                     <Text style={styles.statusText}>
                       {new Date(record.fecha_vencimiento) > new Date() ? 'Vigente' : 'Vencida'}
                     </Text>
                   </View>
                 </View>
                 <Text style={styles.recordDetail}>Lote: {record.id_lote}</Text>
-                <Text style={styles.recordDetail}>Aplicación: {formatDate(record.fecha_aplicacion)}</Text>
-                <Text style={styles.recordDetail}>Vence: {formatDate(record.fecha_vencimiento)}</Text>
+                <Text style={styles.recordDetail}>
+                  Aplicación: {formatDate(record.fecha_aplicacion)}
+                </Text>
+                <Text style={styles.recordDetail}>
+                  Vence: {formatDate(record.fecha_vencimiento)}
+                </Text>
                 <Text style={styles.recordDetail}>Peso: {record.peso} kg</Text>
                 {record.observaciones && (
                   <Text style={styles.recordObservations}>{record.observaciones}</Text>
@@ -342,7 +350,7 @@ const handleAddRecord = () => {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Seleccionar Mascota</Text>
-            {pets.map(pet => (
+            {pets.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
                 style={styles.petOption}
@@ -354,14 +362,13 @@ const handleAddRecord = () => {
                 <Image source={{ uri: pet.foto }} style={styles.petOptionImage} />
                 <View style={styles.petOptionInfo}>
                   <Text style={styles.petOptionName}>{pet.nombre}</Text>
-                  <Text style={styles.petOptionDetails}>{pet.raza} • {pet.tipo}</Text>
+                  <Text style={styles.petOptionDetails}>
+                    {pet.raza} • {pet.tipo}
+                  </Text>
                 </View>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity 
-              style={styles.cancelButton}
-              onPress={() => setShowPetsModal(false)}
-            >
+            <TouchableOpacity style={styles.cancelButton} onPress={() => setShowPetsModal(false)}>
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
@@ -374,24 +381,25 @@ const handleAddRecord = () => {
           <View style={[styles.modalContent, styles.addModalContent]}>
             <Text style={styles.modalTitle}>Agregar Registro</Text>
             <ScrollView style={styles.form}>
-              
               <Text style={styles.label}>Tipo de Medicamento *</Text>
               <View style={styles.typeSelector}>
                 <TouchableOpacity
                   style={[
                     styles.typeOption,
-                    newRecord.tipo_medicamento === 'Vacuna' && styles.selectedType
+                    newRecord.tipo_medicamento === 'Vacuna' && styles.selectedType,
                   ]}
-                  onPress={() => setNewRecord({...newRecord, tipo_medicamento: 'Vacuna'})}
+                  onPress={() => setNewRecord({ ...newRecord, tipo_medicamento: 'Vacuna' })}
                 >
                   <Text style={styles.typeText}>💉 Vacuna</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.typeOption,
-                    newRecord.tipo_medicamento === 'Desparasitación' && styles.selectedType
+                    newRecord.tipo_medicamento === 'Desparasitación' && styles.selectedType,
                   ]}
-                  onPress={() => setNewRecord({...newRecord, tipo_medicamento: 'Desparasitación'})}
+                  onPress={() =>
+                    setNewRecord({ ...newRecord, tipo_medicamento: 'Desparasitación' })
+                  }
                 >
                   <Text style={styles.typeText}>💊 Desparasitación</Text>
                 </TouchableOpacity>
@@ -402,7 +410,7 @@ const handleAddRecord = () => {
                 style={styles.input}
                 placeholder="Ej: Vacuna Antirrábica"
                 value={newRecord.nombre_medicamento}
-                onChangeText={(text) => setNewRecord({...newRecord, nombre_medicamento: text})}
+                onChangeText={(text) => setNewRecord({ ...newRecord, nombre_medicamento: text })}
               />
 
               <Text style={styles.label}>ID Lote *</Text>
@@ -410,7 +418,7 @@ const handleAddRecord = () => {
                 style={styles.input}
                 placeholder="Ej: RB2024A"
                 value={newRecord.id_lote}
-                onChangeText={(text) => setNewRecord({...newRecord, id_lote: text})}
+                onChangeText={(text) => setNewRecord({ ...newRecord, id_lote: text })}
               />
 
               <Text style={styles.label}>Laboratorio</Text>
@@ -418,7 +426,7 @@ const handleAddRecord = () => {
                 style={styles.input}
                 placeholder="Ej: Zoetis"
                 value={newRecord.laboratorio}
-                onChangeText={(text) => setNewRecord({...newRecord, laboratorio: text})}
+                onChangeText={(text) => setNewRecord({ ...newRecord, laboratorio: text })}
               />
 
               <Text style={styles.label}>Peso (kg) *</Text>
@@ -427,7 +435,7 @@ const handleAddRecord = () => {
                 placeholder="Ej: 25.5"
                 keyboardType="numeric"
                 value={newRecord.peso?.toString()}
-                onChangeText={(text) => setNewRecord({...newRecord, peso: parseFloat(text) || 0})}
+                onChangeText={(text) => setNewRecord({ ...newRecord, peso: parseFloat(text) || 0 })}
               />
 
               <Text style={styles.label}>Veterinaria *</Text>
@@ -435,7 +443,7 @@ const handleAddRecord = () => {
                 style={styles.input}
                 placeholder="Nombre de la veterinaria"
                 value={newRecord.nombre_veterinaria}
-                onChangeText={(text) => setNewRecord({...newRecord, nombre_veterinaria: text})}
+                onChangeText={(text) => setNewRecord({ ...newRecord, nombre_veterinaria: text })}
               />
 
               <Text style={styles.label}>Observaciones</Text>
@@ -443,19 +451,19 @@ const handleAddRecord = () => {
                 style={[styles.input, styles.textArea]}
                 placeholder="Observaciones adicionales..."
                 value={newRecord.observaciones}
-                onChangeText={(text) => setNewRecord({...newRecord, observaciones: text})}
+                onChangeText={(text) => setNewRecord({ ...newRecord, observaciones: text })}
                 multiline
                 numberOfLines={3}
               />
 
               <View style={styles.modalButtons}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.modalButton, styles.cancelButton]}
                   onPress={() => setShowAddModal(false)}
                 >
                   <Text style={styles.cancelButtonText}>Cancelar</Text>
                 </TouchableOpacity>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.modalButton, styles.saveButton]}
                   onPress={handleAddRecord}
                 >

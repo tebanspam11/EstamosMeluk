@@ -1,4 +1,4 @@
-import LogoImage from '../../assets/images/LogoPocketVet.jpg'
+import LogoImage from '../../assets/images/LogoPocketVet.jpg';
 import React, { useState } from 'react';
 import {
   View,
@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Image
+  Image,
 } from 'react-native';
 
 export default function LoginScreen({ navigation }: any) {
@@ -25,7 +25,7 @@ export default function LoginScreen({ navigation }: any) {
     }
 
     setLoading(true);
-    
+
     // Simulación de proceso de login
     setTimeout(() => {
       setLoading(false);
@@ -46,7 +46,7 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
@@ -58,12 +58,8 @@ export default function LoginScreen({ navigation }: any) {
         </View>
 
         <View style={styles.imageContainer}>
-          <Image 
-            source={LogoImage}
-            style={styles.headerImage}
-            resizeMode="contain"
-            />
-          </View>
+          <Image source={LogoImage} style={styles.headerImage} resizeMode="contain" />
+        </View>
 
         {/* Form */}
         <View style={styles.form}>
@@ -95,7 +91,7 @@ export default function LoginScreen({ navigation }: any) {
           </TouchableOpacity>
 
           {/* Login Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.loginButton, loading && styles.loginButtonDisabled]}
             onPress={handleLogin}
             disabled={loading}
@@ -113,11 +109,8 @@ export default function LoginScreen({ navigation }: any) {
           </View>
 
           {/* Google Login Button */}
-          <TouchableOpacity 
-            style={styles.googleButton}
-            onPress={handleGoogleLogin}
-          >
-            <Image 
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+            <Image
               source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
               style={styles.googleIcon}
             />
@@ -254,11 +247,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   imageContainer: {
-  alignItems: 'center',
-  marginBottom: 30,
-},
-headerImage: {
-  width: 150,
-  height: 150,
-},
+    alignItems: 'center',
+    marginBottom: 30,
+  },
+  headerImage: {
+    width: 150,
+    height: 150,
+  },
 });

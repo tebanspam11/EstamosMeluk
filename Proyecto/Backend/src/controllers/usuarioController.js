@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const obtenerUsuarios = async (req, res) => {
@@ -7,7 +7,7 @@ export const obtenerUsuarios = async (req, res) => {
   });
 
   if (!usuarios || usuarios.length === 0) {
-    res.status(404).json({ mensaje: "No hay usuarios registrados" });
+    res.status(404).json({ mensaje: 'No hay usuarios registrados' });
     return;
   }
 
@@ -27,7 +27,7 @@ export const crearUsuario = async (req, res) => {
   });
 
   if (usuarioExistente) {
-    res.status(409).json({ error: "El correo ya está registrado" });
+    res.status(409).json({ error: 'El correo ya está registrado' });
     return;
   }
 

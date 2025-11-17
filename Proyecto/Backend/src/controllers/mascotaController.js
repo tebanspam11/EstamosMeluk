@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 export const obtenerMascotas = async (req, res) => {
@@ -7,7 +7,7 @@ export const obtenerMascotas = async (req, res) => {
   });
 
   if (!mascotas || mascotas.length === 0) {
-    res.status(404).json({ mensaje: "No hay mascotas registradas" });
+    res.status(404).json({ mensaje: 'No hay mascotas registradas' });
     return;
   }
 
@@ -18,7 +18,7 @@ export const crearMascota = async (req, res) => {
   const datos = req.body;
 
   if (!datos.nombre || !datos.id_usuario) {
-    res.status(400).json({ error: "Faltan datos obligatorios (nombre o id_usuario)" });
+    res.status(400).json({ error: 'Faltan datos obligatorios (nombre o id_usuario)' });
     return;
   }
 
@@ -27,7 +27,7 @@ export const crearMascota = async (req, res) => {
   });
 
   if (!usuario) {
-    res.status(404).json({ error: "Usuario no encontrado" });
+    res.status(404).json({ error: 'Usuario no encontrado' });
     return;
   }
 

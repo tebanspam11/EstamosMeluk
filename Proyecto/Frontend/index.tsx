@@ -38,14 +38,8 @@ function TempHomeScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>¡Bienvenido a PocketVet!👋</Text>
-      <Button
-        title="Ir al Home Principal"
-        onPress={() => navigation.navigate('Home')}
-      />
-      <Button
-        title="Ir al Login"
-        onPress={() => navigation.navigate('Login')}
-      />
+      <Button title="Ir al Home Principal" onPress={() => navigation.navigate('Home')} />
+      <Button title="Ir al Login" onPress={() => navigation.navigate('Login')} />
     </View>
   );
 }
@@ -57,76 +51,56 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
         {/* Pantalla Principal */}
-        <Stack.Screen 
-          name="Home" 
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
-        
+        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+
         {/* Pantallas de Autenticación */}
-        <Stack.Screen 
-          name="Login" 
-          component={LoginScreen}
-          options={{ title: 'Iniciar Sesión' }}
-        />
-        <Stack.Screen 
-          name="Register" 
-          component={RegisterScreen}
-          options={{ title: 'Registro' }}
-        />
-        <Stack.Screen 
-          name="Profile" 
-          component={ProfileScreen}
-          options={{ title: 'Perfil' }}
-        />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
 
         {/* Pantallas Principales */}
-        <Stack.Screen 
-          name="Calendar" 
+        <Stack.Screen
+          name="Calendar"
           component={CalendarScreen}
           options={{ title: 'Calendario' }}
         />
-        <Stack.Screen 
-          name="Notifications" 
+        <Stack.Screen
+          name="Notifications"
           component={NotificationsScreen}
           options={{ title: 'Notificaciones' }}
         />
 
         {/* Pantallas de Mascotas */}
-        <Stack.Screen 
-          name="Carnet" 
+        <Stack.Screen
+          name="Carnet"
           component={CarnetScreen}
           options={{ title: 'Carnet de Vacunas' }}
         />
-        <Stack.Screen 
-          name="ClinicHistory" 
+        <Stack.Screen
+          name="ClinicHistory"
           component={ClinicHistoryScreen}
           options={{ title: 'Historial Clínico' }}
         />
-        <Stack.Screen 
-          name="PetList" 
+        <Stack.Screen
+          name="PetList"
           component={PetListScreen}
           options={{ title: 'Mis Mascotas' }}
         />
-        <Stack.Screen 
-          name="Upload" 
+        <Stack.Screen
+          name="Upload"
           component={UploadScreen}
           options={{ title: 'Registrar Mascota' }}
         />
 
         {/* Otras Pantallas */}
-        <Stack.Screen 
-          name="VeterinarySearch" 
+        <Stack.Screen
+          name="VeterinarySearch"
           component={VeterinarySearchScreen}
           options={{ title: 'Buscar Veterinarias' }}
         />
 
         {/* Pantalla Temporal (opcional) */}
-        <Stack.Screen 
-          name="TempHome" 
-          component={TempHomeScreen}
-          options={{ title: 'Inicio' }}
-        />
+        <Stack.Screen name="TempHome" component={TempHomeScreen} options={{ title: 'Inicio' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

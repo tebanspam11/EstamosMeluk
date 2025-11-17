@@ -1,6 +1,6 @@
 # PocketVet App
 
-Aplicación para reportes y gestión de mascotas. Proyecto con **Frontend en Expo React Native** y **Backend en Node.js/Prisma**.  
+Aplicación para reportes y gestión de mascotas. Proyecto con **Frontend en Expo React Native** y **Backend en Node.js/Prisma**.
 
 ---
 
@@ -8,8 +8,8 @@ Aplicación para reportes y gestión de mascotas. Proyecto con **Frontend en Exp
 
 - **Expo Go**: Instalar la aplicación movil en App Store o Play Store
 
-- Node.js v18+ 
-- npm v9+ 
+- Node.js v18+
+- npm v9+
 
 1. Entrar a la página oficial: https://nodejs.org
 2. Descargar la versión recomendada LTS (Long Term Support).
@@ -17,11 +17,12 @@ Aplicación para reportes y gestión de mascotas. Proyecto con **Frontend en Exp
 ```bash
 node -v
 ```
+
 ```bash
 npm -v
 ```
 
-- Expo CLI (global):  
+- Expo CLI (global):
 
 ```bash
 npm install -g expo-cli
