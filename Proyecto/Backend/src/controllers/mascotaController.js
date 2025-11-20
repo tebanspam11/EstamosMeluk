@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../prisma/client.ts';
 
 export const obtenerMascotas = async (req, res) => {
   const mascotas = await prisma.mascota.findMany({
@@ -17,8 +16,8 @@ export const obtenerMascotas = async (req, res) => {
 export const crearMascota = async (req, res) => {
   const datos = req.body;
 
-  if (!datos.nombre || !datos.id_usuario) {
-    res.status(400).json({ error: 'Faltan datos obligatorios (nombre o id_usuario)' });
+  if (!datos.nombre) {
+    res.status(400).json({ error: 'Faltan datos obligatorios (nombre)' });
     return;
   }
 
