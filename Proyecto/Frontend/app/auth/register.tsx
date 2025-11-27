@@ -123,7 +123,7 @@ export default function RegisterScreen({ navigation }: any) {
         console.warn('Non-JSON response from register:', res.status, text);
         Alert.alert(
           'Error de red',
-          `Respuesta inesperada del servidor (status ${res.status}). Revise el backend.`,
+          `Respuesta inesperada del servidor (status ${res.status}). Revise el backend.`
         );
         return;
       }
