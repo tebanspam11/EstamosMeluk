@@ -7,7 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api/auth", authRoutes);
+app.use('/api/auth', authRoutes);
 app.use('/mascotas', mascotaRoutes);
 
-app.listen(4000, () => console.log('✅ Servidor corriendo en https://pocketvet-db.onrender.com'));
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => console.log(`✅ Servidor corriendo en puerto ${PORT}`));

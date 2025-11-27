@@ -7,7 +7,10 @@ export type PasswordChecklistType = {
   noSpaces: boolean;
 };
 
-export function validatePasswordChecklist(password: string): {checklist: PasswordChecklistType; allValid: boolean, isPasswordOk: boolean} {
+export function validatePasswordChecklist(password: string): {
+  checklist: PasswordChecklistType;
+  valido: boolean;
+} {
   const checklist: PasswordChecklistType = {
     length: password.length >= 8,
     uppercase: /[A-Z]/.test(password),
@@ -17,7 +20,7 @@ export function validatePasswordChecklist(password: string): {checklist: Passwor
     noSpaces: !/\s/.test(password),
   };
 
-  const allValid = Object.values(checklist).every(v => v === true);
-  const isPasswordOk = password.length > 0 && allValid;
-  return { checklist, allValid, isPasswordOk };
+  const isPasswordOk = Object.values(checklist).every((v) => v === true);
+
+  return { checklist: checklist, valido: isPasswordOk };
 }

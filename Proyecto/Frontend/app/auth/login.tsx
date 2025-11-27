@@ -1,7 +1,18 @@
 import LogoImage from '../../assets/images/LogoPocketVet.jpg';
 import { API_URL } from '../../src/config/api.ts';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Image,} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Image,
+} from 'react-native';
 
 export default function LoginScreen({ navigation }: any) {
   const [correo, setEmail] = useState('');
@@ -10,20 +21,20 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     const response = await fetch(`${API_URL}/auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ correo, contraseña }),
-  });
-  
-  const data = await response.json();
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correo, contraseña }),
+    });
 
-  if(data.ok) {
-    Alert.alert("Login exitoso");
-    navigation.navigate("Home");
-  } else {
-    Alert.alert("Error:", data.message);
-  }
-};
+    const data = await response.json();
+
+    if (data.ok) {
+      Alert.alert('Login exitoso');
+      navigation.navigate('Home');
+    } else {
+      Alert.alert('Error:', data.message);
+    }
+  };
 
   const handleGoogleLogin = () => {
     Alert.alert('Google Login', 'Función de Google en desarrollo');
