@@ -1,37 +1,29 @@
 import LogoImage from '../../assets/images/LogoPocketVet.jpg';
+import { API_URL } from '../../src/config/api.ts';
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Image,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView, Image,} from 'react-native';
 
 export default function LoginScreen({ navigation }: any) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [correo, setEmail] = useState('');
+  const [contraseña, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
-      return;
-    }
+    const response = await fetch(`${API_URL}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ correo, contraseña }),
+  });
+  
+  const data = await response.json();
 
-    setLoading(true);
-
-    // Simulación de proceso de login
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert('Éxito', 'Inicio de sesión exitoso');
-    }, 1500);
-  };
+  if(data.ok) {
+    Alert.alert("Login exitoso");
+    navigation.navigate("Home");
+  } else {
+    Alert.alert("Error:", data.message);
+  }
+};
 
   const handleGoogleLogin = () => {
     Alert.alert('Google Login', 'Función de Google en desarrollo');
@@ -68,7 +60,7 @@ export default function LoginScreen({ navigation }: any) {
             style={styles.input}
             placeholder="tu@email.com"
             placeholderTextColor="#999"
-            value={email}
+            value={correo}
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
@@ -79,7 +71,7 @@ export default function LoginScreen({ navigation }: any) {
             style={styles.input}
             placeholder="••••••••"
             placeholderTextColor="#999"
-            value={password}
+            value={contraseña}
             onChangeText={setPassword}
             secureTextEntry
             autoCapitalize="none"
