@@ -1,4 +1,4 @@
-import prisma from '../prisma/client.ts';
+import prisma from '../../prisma/client.ts';
 
 export const obtenerMascotas = async (req, res) => {
   const mascotas = await prisma.mascota.findMany({

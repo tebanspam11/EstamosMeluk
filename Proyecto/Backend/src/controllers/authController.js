@@ -1,4 +1,4 @@
-import prisma from '../prisma/client.ts';
+import prisma from '../../prisma/client.ts';
 import bcrypt from 'bcryptjs';
 
 export const login = async (req, res) => {
