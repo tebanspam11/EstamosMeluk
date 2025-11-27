@@ -10,6 +10,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
   },
-  "include": ["**/*.ts"],
+  "include": ["**/*.ts", "prisma/client.js"],
   "exclude": ["node_modules", "dist"]
 }
