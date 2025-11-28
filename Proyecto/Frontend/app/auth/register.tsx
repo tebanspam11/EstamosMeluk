@@ -71,25 +71,31 @@ export default function RegisterScreen({ navigation }: any) {
   }, [correo]);
 
   useEffect(() => {
-    setPasswordChecklist(validatePasswordChecklist(contraseña).checklist);
-    setPasswordValid(contraseña ? validatePasswordChecklist(contraseña).valido : false);
-  }, [contraseña]);
-
-  useEffect(() => {
-    setConfirmPasswordError(
-      confirmPassword
-        ? validateConfirmPasswordFields(contraseña, confirmPassword).valido
-          ? null
-          : validateConfirmPasswordFields(contraseña, confirmPassword).error
-        : null
-    );
-  }, [contraseña, confirmPassword]);
-
-  useEffect(() => {
     setPhoneError(
       telefono ? (validatePhoneFields(telefono) ? null : 'ⓘ El número no es válido') : null
     );
   }, [telefono]);
+
+  useEffect(() => {
+    if (confirmPassword && contraseña) {
+      setConfirmPasswordError(
+        validateConfirmPasswordFields(contraseña, confirmPassword).valido
+          ? null
+          : validateConfirmPasswordFields(contraseña, confirmPassword).error
+      );
+    } else {
+      setConfirmPasswordError(null);
+    }
+  }, [confirmPassword, contraseña]);
+
+  useEffect(() => {
+    setPasswordChecklist(validatePasswordChecklist(contraseña).checklist)
+    setPasswordValid(
+      contraseña
+      ? validatePasswordChecklist(contraseña).valido
+      : false
+    )
+  }, [contraseña])
 
   const handleRegister = async () => {
     const emailIsValid = correo ? validateEmailFields(correo).valido : false;

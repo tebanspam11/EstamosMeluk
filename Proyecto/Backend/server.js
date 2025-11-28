@@ -8,6 +8,11 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+
+app.get('/', (req, res) => {
+  res.send('API running');
+});
+
 app.use('/mascotas', mascotaRoutes);
 
 const PORT = process.env.PORT || 4000;

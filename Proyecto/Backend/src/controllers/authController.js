@@ -4,10 +4,9 @@ import bcrypt from 'bcryptjs';
 export const login = async (req, res) => {
   const { correo, telefono, contraseña } = req.body;
 
-  const userEmail = await prisma.usuario.findUnique({ where: { correo } });
-  const userPhone = await prisma.usuario.findUnique({ where: { telefono } });
+  const user = await prisma.usuario.findFirst({where: { OR: [{ correo }, { telefono }] }});
 
-  if (!userEmail || !userPhone) return res.status(404).json({ error: 'Usuario no encontrado' });
+  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 
   const match = await bcrypt.compare(contraseña, user.contraseña);
 
@@ -33,7 +32,7 @@ export const register = async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(contraseña, 10);
 
-  const newUser = await prisma.user.create({
+  const newUser = await prisma.usuario.create({
     data: { nombre, correo, telefono, contraseña: hashedPassword },
   });
 
