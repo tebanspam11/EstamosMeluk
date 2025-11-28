@@ -22,8 +22,10 @@ export const register = async (req, res) => {
     return res.status(400).json({ ok: false, message: 'Los campos son obligatorios' });
   }
 
-  const existingEmail = await prisma.usuario.findUnique({ where: { correo } });
-  const existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
+  let existingPhone = null;
+  if (telefono) {
+    existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
+  }
 
   if (existingEmail)
     return res.status(400).json({ ok: false, message: 'Este correo ya está registrado' });
@@ -33,7 +35,11 @@ export const register = async (req, res) => {
   const hashedPassword = await bcrypt.hash(contraseña, 10);
 
   const newUser = await prisma.usuario.create({
-    data: { nombre, correo, telefono, contraseña: hashedPassword },
+    data: { 
+      nombre, 
+      correo, 
+      ...(telefono && { telefono }), 
+      contraseña: hashedPassword },
   });
 
   return res.json({
@@ -43,7 +49,7 @@ export const register = async (req, res) => {
       id: newUser.id,
       nombre: newUser.nombre,
       correo: newUser.correo,
-      telefono: newUser.telefono,
+      telefono: newUser.telefono || null,
     },
   });
 };

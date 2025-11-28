@@ -136,7 +136,7 @@ export default function RegisterScreen({ navigation }: any) {
 
       if (res.ok && data && data.ok) {
         Alert.alert('Registro exitoso');
-        navigation.navigate('Login');
+        navigation.replace('Login');
       } else {
         // If backend returned JSON with error message, display it
         console.warn('Register failed:', res.status, data);
@@ -324,7 +324,7 @@ export default function RegisterScreen({ navigation }: any) {
           {/* Login Link */}
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>¿Ya tienes cuenta? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <TouchableOpacity onPress={() => navigation.replace('Login')}>
               <Text style={styles.loginLink}>Inicia Sesión</Text>
             </TouchableOpacity>
           </View>
