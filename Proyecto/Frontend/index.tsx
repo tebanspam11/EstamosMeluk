@@ -7,17 +7,16 @@ import { View, Text, Button, StyleSheet } from 'react-native';
 import AuthLoading from './app/auth/AuthLoading.tsx';
 import LoginScreen from './app/auth/login.tsx';
 import RegisterScreen from './app/auth/register.tsx';
-import HomeScreen from './app/main/home.tsx';
+import ForgotPasswordScreen from './app/auth/forgot_password.tsx';
 import ProfileScreen from './app/auth/profile.tsx';
+import HomeScreen from './app/main/home.tsx';
 import CalendarScreen from './app/main/calendar.tsx';
 import CarnetScreen from './app/pet/carnet.tsx';
 import ClinicHistoryScreen from './app/pet/clinic_history.tsx';
 import PetListScreen from './app/pet/list.tsx';
 import UploadScreen from './app/pet/upload.tsx';
 import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
-
-
-
+import PetProfileScreen from './app/pet/pet_profile.tsx';
 
 function VeterinarySearchScreen() {
   const navigation = useNavigation();
@@ -58,9 +57,10 @@ function App() {
         {/* Pantalla Principal (Validacion si hay sesion iniciada o no*/}
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 
-        {/* Pantallas de Autenticación */}
+        {/* Pantallas de Autenticación - SOLO UNA VEZ CADA UNA */}
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Contraseña' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
 
         {/* Pantalla Home */}
@@ -99,6 +99,11 @@ function App() {
           component={UploadScreen}
           options={{ title: 'Registrar Mascota' }}
         />
+        <Stack.Screen
+          name="PetProfile"
+          component={PetProfileScreen}
+          options={{ title: 'Perfil de Mascota' }}
+        />
 
         {/* Otras Pantallas */}
         <Stack.Screen
@@ -111,7 +116,6 @@ function App() {
           component={UploadPDFScreen}
           options={{ title: 'Subir PDF' }}
         />
-
 
         {/* Pantalla Temporal (opcional) */}
         <Stack.Screen name="TempHome" component={TempHomeScreen} options={{ title: 'Inicio' }} />

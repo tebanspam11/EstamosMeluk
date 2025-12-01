@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { API_URL } from '@/src/config/api.ts';
-import { validateEmailFields } from '@/src/utils/validateEmail.ts';
-import { validatePasswordChecklist, PasswordChecklistType } from '@/src/utils/validatePassword.ts';
-import { validatePhoneFields } from '@/src/utils/validatePhone.ts';
-import { validateConfirmPasswordFields } from '@/src/utils/validateConfirmPassword.ts';
-import { formatPhoneColombia } from '@/src/utils/formatPhone.ts';
-import { formatName } from '@/src/utils/formatName.ts';
+import { API_URL } from '../../src/config/api.ts';
+import { validateEmailFields } from '../../src/utils/validateEmail.ts';
+import { validatePasswordChecklist, PasswordChecklistType } from '../../src/utils/validatePassword.ts';
+import { validatePhoneFields } from '../../src/utils/validatePhone.ts';
+import { validateConfirmPasswordFields } from '../../src/utils/validateConfirmPassword.ts';
+import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
+import { formatName } from '../../src/utils/formatName.ts';
 import {
   View,
   Text,

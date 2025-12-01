@@ -49,7 +49,7 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const handleForgotPassword = () => {
-    Alert.alert('Recuperar Contraseña', 'Función en desarrollo');
+    navigation.navigate('ForgotPassword');
   };
 
   const handleRegister = () => {
@@ -96,10 +96,9 @@ export default function LoginScreen({ navigation }: any) {
             autoCapitalize="none"
           />
 
-          {/* Forgot Password */}
-          <TouchableOpacity onPress={handleForgotPassword}>
-            <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+          <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text> {/* ← Asegúrate que esté envuelto en Text */}
+        </TouchableOpacity>
 
           {/* Login Button */}
           <TouchableOpacity

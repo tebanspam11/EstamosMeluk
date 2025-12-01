@@ -105,23 +105,43 @@ export default function HomeScreen() {
       <View style={styles.petsSection}>
         <Text style={styles.sectionTitle}>Tus Mascotas</Text>
         <View style={styles.petsGrid}>
-          <TouchableOpacity
-            style={styles.petCard}
-            onPress={() => navigation.navigate('PetList' as never)}
-          >
-            <Text style={styles.petIcon}>🐶</Text>
-            <Text style={styles.petName}>Max</Text>
-            <Text style={styles.petBreed}>Labrador</Text>
-          </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.petCard}
-            onPress={() => navigation.navigate('PetList' as never)}
-          >
-            <Text style={styles.petIcon}>🐱</Text>
-            <Text style={styles.petName}>Luna</Text>
-            <Text style={styles.petBreed}>Siamés</Text>
-          </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.petCard}
+        onPress={() => navigation.navigate('PetProfile' as never, {
+          pet: {
+            name: 'Max',
+            species: 'Perro',
+            breed: 'Labrador',
+            age: '3 años',
+            weight: '25',
+            image: 'https://via.placeholder.com/150x150?text=🐶'
+          }
+        })}
+      >
+        <Text style={styles.petIcon}>🐶</Text>
+        <Text style={styles.petName}>Max</Text>
+        <Text style={styles.petBreed}>Labrador</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.petCard}
+        onPress={() => navigation.navigate('PetProfile' as never, {
+          pet: {
+            name: 'Luna',
+            species: 'Gato',
+            breed: 'Siamés',
+            age: '2 años',
+            weight: '4',
+            image: 'https://via.placeholder.com/150x150?text=🐱'
+          }
+        })}
+      >
+        <Text style={styles.petIcon}>🐱</Text>
+        <Text style={styles.petName}>Luna</Text>
+        <Text style={styles.petBreed}>Siamés</Text>
+      </TouchableOpacity>
+
 
           <TouchableOpacity
             style={[styles.petCard, styles.addPetCard]}

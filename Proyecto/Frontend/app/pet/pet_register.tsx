@@ -14,16 +14,18 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
-// Datos para las especies
+type Pet = {
+  name: string;
+  species: string;
+  breed: string;
+  weight: string;
+  age: string;
+  image: string;
+};
+
 const speciesData = [
   { id: '1', name: 'Perro' },
   { id: '2', name: 'Gato' },
-  { id: '3', name: 'Conejo' },
-  { id: '4', name: 'Ave' },
-  { id: '5', name: 'Hamster' },
-  { id: '6', name: 'Pez' },
-  { id: '7', name: 'Reptil' },
-  { id: '8', name: 'Otro' },
 ];
 
 export default function PetRegister({ navigation }: any) {
@@ -35,7 +37,6 @@ export default function PetRegister({ navigation }: any) {
   const [age, setAge] = useState('');
   const [showSpeciesModal, setShowSpeciesModal] = useState(false);
 
-  // Función para seleccionar imagen
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
@@ -59,7 +60,6 @@ export default function PetRegister({ navigation }: any) {
     }
   };
 
-  // Función para tomar foto
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
@@ -83,22 +83,20 @@ export default function PetRegister({ navigation }: any) {
     setSpecies(speciesName);
     setShowSpeciesModal(false);
   };
+const handleRegister = () => {
+  if (!petImage || !name || !species || !breed || !weight || !age) {
+    Alert.alert('Error', 'Por favor completa todos los campos');
+    return;
+  }
 
-  const handleRegister = () => {
-    if (!petImage || !name || !species || !breed || !weight || !age) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
-      return;
-    }
-
-    // Aquí iría la lógica para guardar la mascota
-    const petData = {
-      name,
-      species,
-      breed,
-      weight,
-      age,
-      image: petImage,
-    };
+  const petData: Pet = { 
+    name,
+    species,
+    breed,
+    weight,
+    age,
+    image: petImage,
+  };
 
     Alert.alert('Éxito', 'Mascota registrada correctamente', [
       { text: 'OK', onPress: () => navigation.goBack() },
