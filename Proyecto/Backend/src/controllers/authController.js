@@ -1,6 +1,6 @@
 import prisma from '../../prisma/client.js';
 import bcrypt from 'bcryptjs';
-const jwt = require("jsonwebtoken");
+import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
   const { correo, telefono, contraseña, keepLogged } = req.body;
