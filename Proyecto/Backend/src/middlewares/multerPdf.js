@@ -1,5 +1,5 @@
-const multer = require('multer');
-const fs = require('fs');
+import multer from 'multer';
+import fs from 'fs';
 
 const uploadPath = 'uploads/usuarios';
 
@@ -19,4 +19,4 @@ const storage = multer.diskStorage({
 
 const uploadPdf = multer({ storage });
 
-module.exports = { uploadPdf };
+export default uploadPdf;
