@@ -22,9 +22,9 @@ import {
 export default function RegisterScreen({ navigation }: any) {
   const [nombre, setName] = useState('');
   const [correo, setEmail] = useState('');
+  const [telefono, setPhone] = useState('');
   const [contraseña, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [telefono, setPhone] = useState('');
 
   const [emailError, setEmailError] = useState<string | null>(null);
   const [phoneError, setPhoneError] = useState<string | null>(null);
@@ -43,19 +43,13 @@ export default function RegisterScreen({ navigation }: any) {
   const [passwordTouched, setPasswordTouched] = useState(false);
 
   const isFormValid = useMemo(() => {
-    const passwordIsValid = passwordValid;
-    const emailIsValid = correo ? validateEmailFields(correo).valido : false;
-    const phoneIsValid = telefono ? validatePhoneFields(telefono) : true;
-    const confirmPasswordIsValid =
-      confirmPassword && contraseña
-        ? validateConfirmPasswordFields(contraseña, confirmPassword).valido
-        : false;
+    const confirmPasswordIsValid = confirmPassword && contraseña ? validateConfirmPasswordFields(contraseña, confirmPassword).valido : false;
 
     return (
       nombre.trim().length > 0 &&
-      emailIsValid &&
-      passwordIsValid &&
-      phoneIsValid &&
+      (correo ? validateEmailFields(correo).valido : false) &&
+      (telefono ? validatePhoneFields(telefono) : true) &&
+      (contraseña ? validatePasswordChecklist(contraseña).valido : false) &&
       confirmPasswordIsValid
     );
   }, [nombre, correo, contraseña, telefono, confirmPassword, passwordValid]);
@@ -98,53 +92,25 @@ export default function RegisterScreen({ navigation }: any) {
   }, [contraseña])
 
   const handleRegister = async () => {
-    const emailIsValid = correo ? validateEmailFields(correo).valido : false;
-    const confirmPasswordIsValid =
-      confirmPassword && contraseña
-        ? validateConfirmPasswordFields(contraseña, confirmPassword).valido
-        : false;
-    const passwordIsStrict =
-      contraseña.length > 0 &&
-      confirmPassword.length > 0 &&
-      validatePasswordChecklist(contraseña).valido;
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nombre, correo, telefono, contraseña }),
+    });
 
-    if (!(nombre.trim().length > 0 && emailIsValid && passwordIsStrict && confirmPasswordIsValid)) {
-      Alert.alert('Formulario inválido', 'Revisa los campos antes de continuar');
-      return;
+    const contentType = res.headers.get('content-type') || '';
+    let data: any = null;
+
+    if (contentType.includes('application/json')) {
+      data = await res.json();
     }
-    try {
-      const res = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, correo, telefono, contraseña }),
-      });
 
-      const contentType = res.headers.get('content-type') || '';
-      let data: any = null;
-
-      if (contentType.includes('application/json')) {
-        data = await res.json();
-      } else {
-        const text = await res.text();
-        console.warn('Non-JSON response from register:', res.status, text);
-        Alert.alert(
-          'Error de red',
-          `Respuesta inesperada del servidor (status ${res.status}). Revise el backend.`
-        );
-        return;
-      }
-
-      if (res.ok && data && data.ok) {
-        Alert.alert('Registro exitoso');
-        navigation.replace('Login');
-      } else {
-        // If backend returned JSON with error message, display it
-        console.warn('Register failed:', res.status, data);
-        Alert.alert('Error en registro', data?.message || JSON.stringify(data));
-      }
-    } catch (err: any) {
-      console.error('Network error during register:', err);
-      Alert.alert('Error de red', err?.message ?? String(err));
+    if (res.ok && data && data.ok) {
+      Alert.alert('Registro exitoso');
+      navigation.replace('Login');
+    } else {
+      console.warn('Register failed:', res.status, data);
+      Alert.alert('Error en registro', data?.message || JSON.stringify(data));
     }
   };
 

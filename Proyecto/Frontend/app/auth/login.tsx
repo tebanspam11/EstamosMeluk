@@ -28,10 +28,11 @@ export default function LoginScreen({ navigation }: any) {
 
     const data = await response.json();
 
-    if (data.ok) {
+    if (data && response.ok && data.ok) {
       Alert.alert('Login exitoso');
       navigation.navigate('Home');
     } else {
+      console.warn('Register failed:', response.status, data);
       Alert.alert('Error:', data.message);
     }
   };

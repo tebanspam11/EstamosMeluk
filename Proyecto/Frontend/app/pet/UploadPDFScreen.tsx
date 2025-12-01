@@ -10,7 +10,6 @@ import {
 import * as DocumentPicker from "expo-document-picker";
 import axios from "axios";
 
-// Tipo del archivo PDF
 interface PDFFile {
   uri: string;
   name: string;

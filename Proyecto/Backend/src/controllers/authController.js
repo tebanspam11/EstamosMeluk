@@ -26,6 +26,7 @@ export const register = async (req, res) => {
   if (telefono) {
     existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
   }
+  existingEmail = await prisma.usuario.findUnique({ where: { correo } });
 
   if (existingEmail)
     return res.status(400).json({ ok: false, message: 'Este correo ya está registrado' });
