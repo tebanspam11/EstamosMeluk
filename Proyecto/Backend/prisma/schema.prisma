@@ -12,102 +12,111 @@ datasource db {
 }
 
 model Usuario {
-  id             Int              @id @default(autoincrement())
-  nombre         String?
-  correo         String           @unique
-  telefono       String?          @unique
-  contraseña     String?
-  cuenta_google  Boolean?         @default(false)
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
+  id            Int      @id @default(autoincrement())
+  nombre        String?
+  correo        String   @unique
+  telefono      String?  @unique
+  contraseña   String?
+  cuenta_google Boolean? @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
-  Mascotas        Mascota[]
-  Notificaciones  Notificacion[]
+  Mascotas       Mascota[]
+  Notificaciones Notificacion[]
+  documentos     DocumentoUsuario[] // ← campo inverso agregado
 }
 
 model Mascota {
-  id              Int              @id @default(autoincrement())
-  id_usuario      Int
-  nombre          String
-  especie         String
-  raza            String?
-  edad            Int?
-  peso            Float?
-  foto            String?
-  alergias        String?
-  enfermedades    String?
-  observaciones   String?
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
+  id            Int      @id @default(autoincrement())
+  id_usuario    Int
+  nombre        String
+  especie       String
+  raza          String?
+  edad          Int?
+  peso          Float?
+  foto          String?
+  alergias      String?
+  enfermedades  String?
+  observaciones String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
 
-  usuario         Usuario          @relation(fields: [id_usuario], references: [id])
-  eventos         Evento[]
-  documentos      Documento_Mascota[]
-  carnet          Carnet_Digital?
+  usuario    Usuario             @relation(fields: [id_usuario], references: [id])
+  eventos    Evento[]
+  documentos Documento_Mascota[]
+  carnet     Carnet_Digital?
 }
 
 model Evento {
-  id              Int              @id @default(autoincrement())
-  id_mascota      Int
-  titulo          String
-  descripcion     String?
-  fecha_inicio    DateTime
-  fecha_fin       DateTime?
-  estado          String
-  repeticion      String?
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
+  id           Int       @id @default(autoincrement())
+  id_mascota   Int
+  titulo       String
+  descripcion  String?
+  fecha_inicio DateTime
+  fecha_fin    DateTime?
+  estado       String
+  repeticion   String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
 
-  mascota         Mascota          @relation(fields: [id_mascota], references: [id])
-  notificacion    Notificacion?
+  mascota      Mascota       @relation(fields: [id_mascota], references: [id])
+  notificacion Notificacion?
 }
 
 model Notificacion {
-  id               Int              @id @default(autoincrement())
+  id               Int      @id @default(autoincrement())
   id_usuario       Int
-  id_evento        Int              @unique
+  id_evento        Int      @unique
   tipo             String
   mensaje          String
   fecha_programada DateTime
   canal            String
-  enviada          Boolean?         @default(false)
-  created_at       DateTime         @default(now())
+  enviada          Boolean? @default(false)
+  created_at       DateTime @default(now())
 
-  usuario          Usuario          @relation(fields: [id_usuario], references: [id])
-  evento           Evento           @relation(fields: [id_evento], references: [id])
+  usuario Usuario @relation(fields: [id_usuario], references: [id])
+  evento  Evento  @relation(fields: [id_evento], references: [id])
 }
 
 model Documento_Mascota {
-  id              Int              @id @default(autoincrement())
-  id_mascota      Int
-  tipo            String
-  titulo          String
-  descripcion     String?
-  archivo_pdf     String
-  created_at      DateTime         @default(now())
-  updated_at      DateTime         @updatedAt
+  id          Int      @id @default(autoincrement())
+  id_mascota  Int
+  tipo        String
+  titulo      String
+  descripcion String?
+  archivo_pdf String
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
-  mascota         Mascota          @relation(fields: [id_mascota], references: [id])
+  mascota Mascota @relation(fields: [id_mascota], references: [id])
 }
 
 model Carnet_Digital {
-  id                     Int              @id @default(autoincrement())
-  id_mascota             Int              @unique
-  tipo_medicamento       String
-  nombre_medicamento     String
-  fecha_aplicacion       DateTime
-  laboratorio            String?
-  id_lote                String
-  fecha_elaboracion      DateTime?
-  fecha_vencimiento      DateTime
-  peso                   Float
-  nombre_veterinaria     String
-  telefono_veterinaria   String?
-  direccion_veterinaria  String
-  proxima_dosis          DateTime?
-  observaciones          String?
-  created_at             DateTime         @default(now())
-  updated_at             DateTime         @updatedAt
+  id                    Int       @id @default(autoincrement())
+  id_mascota            Int       @unique
+  tipo_medicamento      String
+  nombre_medicamento    String
+  fecha_aplicacion      DateTime
+  laboratorio           String?
+  id_lote               String
+  fecha_elaboracion     DateTime?
+  fecha_vencimiento     DateTime
+  peso                  Float
+  nombre_veterinaria    String
+  telefono_veterinaria  String?
+  direccion_veterinaria String
+  proxima_dosis         DateTime?
+  observaciones         String?
+  created_at            DateTime  @default(now())
+  updated_at            DateTime  @updatedAt
 
-  mascota                Mascota          @relation(fields: [id_mascota], references: [id])
+  mascota Mascota @relation(fields: [id_mascota], references: [id])
+}
+
+model DocumentoUsuario {
+  id         Int      @id @default(autoincrement())
+  filename   String
+  user       Usuario  @relation(fields: [userId], references: [id])
+  userId     Int
+  uploadedAt DateTime @default(now())
 }

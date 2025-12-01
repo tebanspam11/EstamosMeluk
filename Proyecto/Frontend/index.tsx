@@ -14,6 +14,10 @@ import CarnetScreen from './app/pet/carnet.tsx';
 import ClinicHistoryScreen from './app/pet/clinic_history.tsx';
 import PetListScreen from './app/pet/list.tsx';
 import UploadScreen from './app/pet/upload.tsx';
+import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
+
+
+
 
 function VeterinarySearchScreen() {
   const navigation = useNavigation();
@@ -50,7 +54,7 @@ const Stack = createStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="AuthLoading">
+      <Stack.Navigator initialRouteName="UploadPDF">
         {/* Pantalla Principal (Validacion si hay sesion iniciada o no*/}
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 
@@ -102,6 +106,12 @@ function App() {
           component={VeterinarySearchScreen}
           options={{ title: 'Buscar Veterinarias' }}
         />
+        <Stack.Screen
+          name="UploadPDF"
+          component={UploadPDFScreen}
+          options={{ title: 'Subir PDF' }}
+        />
+
 
         {/* Pantalla Temporal (opcional) */}
         <Stack.Screen name="TempHome" component={TempHomeScreen} options={{ title: 'Inicio' }} />

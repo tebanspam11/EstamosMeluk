@@ -9,6 +9,6 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true
   },
-  "include": ["tests/**/*.ts", "Backend/src/**/*.ts"],
+  "include": ["tests/**/*.ts", "Backend/src/**/*.ts", "Backend/src/controllers/pdfController.js", "Backend/src/routes/pdfRoutes.js", "Backend/src/middlewares/multerPdf.JS"],
   "exclude": ["node_modules", "dist"]
 }

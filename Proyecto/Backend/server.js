@@ -1,19 +1,26 @@
-import express from 'express';
-import cors from 'cors';
-import mascotaRoutes from './src/routes/mascotaRoutes.js';
-import authRoutes from './src/routes/authRoutes.js';
+const express = require('express');
+const cors = require('cors');
+
+//const mascotaRoutes = require('./src/routes/mascotaRoutes');
+//const authRoutes = require('./src/routes/authRoutes');
+const pdfRoutes = require('./src/routes/pdfRoutes');
 
 const app = express();
+const PORT = process.env.PORT || 4000;
+
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/auth', authRoutes);
+//app.use('/api/auth', authRoutes);
+app.use('/api/documentos', pdfRoutes);
+//app.use('/mascotas', mascotaRoutes);
 
 app.get('/', (req, res) => {
   res.send('API running');
 });
 
-app.use('/mascotas', mascotaRoutes);
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
 
-const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => console.log(`✅ Servidor corriendo en puerto ${PORT}`));
+
