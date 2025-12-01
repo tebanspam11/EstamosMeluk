@@ -1,17 +1,15 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
+    "module": "Preserve",
+    "moduleResolution": "bundler",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
     "strict": true,
-    "paths": {
-      "@/*": ["./*"]
-    },
+    "paths": {"@/*": ["./*"]},
     "types": ["react", "react-native", "expo-router"],
     "jsx": "react"
   },

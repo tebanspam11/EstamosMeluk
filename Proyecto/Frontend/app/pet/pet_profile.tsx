@@ -6,11 +6,11 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  SafeAreaView,
   Alert,
   Modal,
   TextInput,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
 interface Pet {
@@ -100,15 +100,12 @@ export default function PetProfileScreen() {
     switch (tipo.toLowerCase()) {
       case 'perro': return '🐶';
       case 'gato': return '🐱';
-      case 'ave': return '🐦';
-      case 'conejo': return '🐰';
-      case 'hámster': return '🐹';
-      default: return '🐾';
+
     }
   };
 
         const handleEditProfile = () => {
-        navigation.navigate('EditPetProfile' as never, { pet: selectedPet });
+        navigation.navigate('EditPetProfile', { pet: selectedPet });
         };
 
   return (
@@ -121,7 +118,7 @@ export default function PetProfileScreen() {
         <Text style={styles.headerTitle}>Perfil de Mascota</Text>
         <TouchableOpacity 
         style={styles.editButton}
-        onPress={() => navigation.navigate('EditPetProfile' as never, { pet: selectedPet })}
+        onPress={() => navigation.navigate('EditPetProfile', { pet: selectedPet })}
         >
         <Text style={styles.editButtonText}>✏️</Text>
         </TouchableOpacity>
