@@ -12,7 +12,8 @@ export const login = async (req, res) => {
   if (isEmail) {
     user = await prisma.usuario.findFirst({where: { correo: identifier }})
   } else if (isPhone) {
-    user = await prisma.usuario.findFirst({where: { telefono: identifier }})
+    const allUsers = await prisma.usuario.findMany();
+    user = allUsers.find(u => u.telefono && u.telefono.replace(/[\s\-()]/g, '') === identifier);
   }
 
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });

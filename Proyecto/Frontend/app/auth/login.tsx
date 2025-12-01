@@ -1,5 +1,6 @@
 import LogoImage from '../../assets/images/LogoPocketVet.jpg';
 import { API_URL } from '../../src/config/api.ts';
+import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
 import React, { useState } from 'react';
 import {
   View,
@@ -22,16 +23,21 @@ export default function LoginScreen({ navigation }: any) {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    setLoading(true);
+    
+    const normalizedIdentifier = identifier.includes('@') 
+      ? identifier.trim() 
+      : identifier.replace(/[\s\-()]/g, '');
+
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier, contraseña, keepLogged }),
+      body: JSON.stringify({ identifier: normalizedIdentifier, contraseña, keepLogged }),
     });
 
     const data = await response.json();
 
     if (data && response.ok && data.ok) {
-      
       await AsyncStorage.setItem("token", data.token);
       await AsyncStorage.setItem("userId", data.userId.toString());
       await AsyncStorage.setItem("keepLogged", data.keepLogged ? "true" : "false");
@@ -39,9 +45,11 @@ export default function LoginScreen({ navigation }: any) {
       Alert.alert('Login exitoso');
       navigation.replace('Home');
     } else {
-      console.warn('Login failed:', response.status, data);
-      Alert.alert('Error:', data.message);
+      const errorMessage = data?.error || data?.message;
+      Alert.alert('Error de autenticación', errorMessage);
     }
+
+    setLoading(false);
   };
 
   const handleGoogleLogin = () => {
@@ -54,6 +62,19 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleRegister = () => {
     navigation.navigate('Register');
+  };
+
+  const handleIdentifierChange = (text: string) => {
+    if (text.includes('@')) {
+      setIdentifier(text);
+    } else {
+      const hasLetters = /[a-zA-Z]/.test(text);
+      if (hasLetters) {
+        setIdentifier(text);
+      } else {
+        setIdentifier(formatPhoneColombia(text));
+      }
+    }
   };
 
   return (
@@ -80,7 +101,7 @@ export default function LoginScreen({ navigation }: any) {
             placeholder="tu@email.com/345 678 9000"
             placeholderTextColor="#999"
             value={identifier}
-            onChangeText={setIdentifier}
+            onChangeText={handleIdentifierChange}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -96,15 +117,32 @@ export default function LoginScreen({ navigation }: any) {
             autoCapitalize="none"
           />
 
+          {/* Checkbox - Recordar sesión */}
+          <TouchableOpacity 
+            style={styles.checkboxContainer}
+            onPress={() => setKeepLogged(!keepLogged)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkbox, keepLogged && styles.checkboxChecked]}>
+              {keepLogged && (
+                <Text style={styles.checkboxIcon}>✓</Text>
+              )}
+            </View>
+            <Text style={styles.checkboxLabel}>Recordar mi sesión</Text>
+          </TouchableOpacity>
+
         <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
           <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text> {/* ← Asegúrate que esté envuelto en Text */}
         </TouchableOpacity>
 
           {/* Login Button */}
           <TouchableOpacity
-            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            style={[
+              styles.loginButton,
+              (loading || !identifier.trim() || !contraseña.trim()) && styles.loginButtonDisabled
+            ]}
             onPress={handleLogin}
-            disabled={loading}
+            disabled={loading || !identifier.trim() || !contraseña.trim()}
           >
             <Text style={styles.loginButtonText}>
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
@@ -189,6 +227,35 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: 30,
     fontSize: 14,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: '#e1e1e1',
+    borderRadius: 6,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  checkboxChecked: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  checkboxIcon: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    fontSize: 15,
+    color: '#333',
   },
   loginButton: {
     backgroundColor: '#4A90E2',

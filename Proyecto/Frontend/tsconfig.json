@@ -15,6 +15,6 @@
     "types": ["react", "react-native", "expo-router"],
     "jsx": "react"
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "async-storage.d.ts"],
   "extends": "expo/tsconfig.base"
 }
