@@ -8,14 +8,25 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 async function sendEmail({ to, subject, html, text }) {
   const from = process.env.EMAIL_USER;
   
-  const msg = {to, from: { email: from, name: 'PocketVet' }, subject, text,html};
+  if (!from) {
+    console.error('❌ EMAIL_USER no está configurado');
+    return { success: false, error: 'EMAIL_USER no está configurado' };
+  }
+  
+  const msg = {
+    to,
+    from: from, // SendGrid acepta string directo
+    subject,
+    text,
+    html
+  };
   
   try {
     await sgMail.send(msg);
-    console.log(`Email enviado a ${to}`);
+    console.log(`✅ Email enviado a ${to}`);
     return { success: true };
   } catch (error) {
-    console.error('Error al enviar email:', error.response?.body || error.message);
+    console.error('❌ Error al enviar email:', error.response?.body || error.message);
     return { success: false, error: error.message };
   }
 }

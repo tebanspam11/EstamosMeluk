@@ -1,29 +1,35 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../../prisma/client.js';
 
-// Crear una mascota
-export const crearMascota = async (req, res) => {
-  try {
-    const { id_usuario, nombre, especie, raza, edad, peso } = req.body;
+export const obtenerMascotas = async (req, res) => {
+  const mascotas = await prisma.mascota.findMany({
+    include: { usuario: true },
+  });
 
-    if (!id_usuario || !nombre || !especie) {
-      return res.status(400).json({ error: 'id_usuario, nombre y especie son obligatorios' });
-    }
-
-    const mascota = await prisma.mascota.create({
-      data: {
-        id_usuario: parseInt(id_usuario),
-        nombre,
-        especie,
-        raza: raza || null,
-        edad: edad ? parseInt(edad) : null,
-        peso: peso ? parseFloat(peso) : null,
-      },
-    });
-
-    res.status(201).json(mascota);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Error al crear la mascota' });
+  if (!mascotas || mascotas.length === 0) {
+    res.status(404).json({ mensaje: 'No hay mascotas registradas' });
+    return;
   }
+
+  res.json(mascotas);
+};
+
+export const crearMascota = async (req, res) => {
+  const datos = req.body;
+
+  if (!datos.nombre) {
+    res.status(400).json({ error: 'Faltan datos obligatorios (nombre)' });
+    return;
+  }
+
+  const usuario = await prisma.usuario.findUnique({
+    where: { id: datos.id_usuario },
+  });
+
+  if (!usuario) {
+    res.status(404).json({ error: 'Usuario no encontrado' });
+    return;
+  }
+
+  const nueva = await prisma.mascota.create({ data: datos });
+  res.status(201).json(nueva);
 };
