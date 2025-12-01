@@ -131,9 +131,9 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.checkboxLabel}>Recordar mi sesión</Text>
           </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-          <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text> {/* ← Asegúrate que esté envuelto en Text */}
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
+          </TouchableOpacity>
 
           {/* Login Button */}
           <TouchableOpacity

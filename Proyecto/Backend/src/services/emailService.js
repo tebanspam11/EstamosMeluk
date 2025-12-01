@@ -1,12 +1,24 @@
-import nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_APP_PASSWORD,
-  },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+/**
+ * Función helper para enviar emails con SendGrid
+ */
+async function sendEmail({ to, subject, html, text }) {
+  const from = process.env.EMAIL_USER;
+  
+  const msg = {to, from: { email: from, name: 'PocketVet' }, subject, text,html};
+  
+  try {
+    await sgMail.send(msg);
+    console.log(`Email enviado a ${to}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error al enviar email:', error.response?.body || error.message);
+    return { success: false, error: error.message };
+  }
+}
 
 /**
  * Envía un email de bienvenida a un nuevo usuario
@@ -135,22 +147,12 @@ export async function sendWelcomeEmail(correo, nombre) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"PocketVet" <${process.env.EMAIL_USER}>`,
+  return await sendEmail({
     to: correo,
     subject: '🐾 ¡Bienvenido a PocketVet!',
     html: htmlTemplate,
     text: `¡Hola ${nombre}!\n\nNos emociona que te hayas unido a PocketVet, la aplicación que te ayuda a cuidar mejor de tus mascotas.\n\nCon PocketVet puedes:\n- Registrar tus mascotas con toda su información\n- Guardar vacunas y tratamientos en su historial\n- Calendario de eventos y recordatorios\n- Notificaciones automáticas\n- Carnet digital para tus mascotas\n\n¡Comienza ahora y registra tu primera mascota!\n\nGracias por confiar en nosotros 💙\nPocketVet Team`,
-  };
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Email de bienvenida enviado a ${correo}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error('⚠ Error al enviar email de bienvenida:', error);
-    return { success: false, error: error.message };
-  }
+  });
 }
 
 /**
@@ -252,22 +254,12 @@ export async function sendPasswordResetCode(correo, code) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"PocketVet" <${process.env.EMAIL_USER}>`,
+  return await sendEmail({
     to: correo,
     subject: 'Recupera tu contraseña - PocketVet',
     html: htmlTemplate,
     text: `Tu código de recuperación de contraseña es: ${code}\n\nEste código expira en 10 minutos.\n\nSi no solicitaste este cambio, ignora este correo.`,
-  };
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Email enviado a ${correo}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error('⚠ Error al enviar email:', error);
-    return { success: false, error: error.message };
-  }
+  });
 }
 
 /**
@@ -364,20 +356,10 @@ export async function sendPasswordChangedNotification(correo) {
     </html>
   `;
 
-  const mailOptions = {
-    from: `"PocketVet" <${process.env.EMAIL_USER}>`,
+  return await sendEmail({
     to: correo,
-    subject: 'Tu contraseña fue actualizada - PocketVet',
+    subject: '✅ Tu contraseña fue actualizada - PocketVet',
     html: htmlTemplate,
     text: `Tu contraseña de PocketVet ha sido cambiada exitosamente.\n\nFecha del cambio: ${new Date().toLocaleString('es-CO', { timeZone: 'America/Bogota' })}\n\nSi no realizaste este cambio, contacta a soporte inmediatamente.`,
-  };
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log(`Notificación enviada a ${correo}: ${info.messageId}`);
-    return { success: true, messageId: info.messageId };
-  } catch (error) {
-    console.error('⚠Error al enviar notificación:', error);
-    return { success: false, error: error.message };
-  }
+  });
 }
