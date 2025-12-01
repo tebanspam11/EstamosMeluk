@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,35 +10,37 @@ import {
   Image,
   Modal,
   FlatList,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
 
 // Datos para las especies
 const speciesData = [
-  { id: '1', name: 'Perro' },
-  { id: '2', name: 'Gato' },
+  { id: "1", name: "Perro" },
+  { id: "2", name: "Gato" },
+  { id: "3", name: "Conejo" },
+  { id: "4", name: "Ave" },
+  { id: "5", name: "Hamster" },
+  { id: "6", name: "Pez" },
+  { id: "7", name: "Reptil" },
+  { id: "8", name: "Otro" },
 ];
 
-export default function UploadScreen({ navigation }: any) {
-
-  // 🔵 TU BACKEND PARA WEB (USA localhost)
-  const API_URL = "http://localhost:4000";
-
+export default function PetRegister({ navigation }: any) {
   const [petImage, setPetImage] = useState<string | null>(null);
-  const [name, setName] = useState('');
-  const [species, setSpecies] = useState('');
-  const [breed, setBreed] = useState('');
-  const [weight, setWeight] = useState('');
-  const [age, setAge] = useState('');
+  const [name, setName] = useState("");
+  const [species, setSpecies] = useState("");
+  const [breed, setBreed] = useState("");
+  const [weight, setWeight] = useState("");
+  const [age, setAge] = useState("");
   const [showSpeciesModal, setShowSpeciesModal] = useState(false);
 
-  // Función para seleccionar imagen
+  // Seleccionar imagen
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
+    if (status !== "granted") {
       Alert.alert(
-        'Permiso necesario',
-        'Necesitamos acceso a tu galería para seleccionar una foto.'
+        "Permiso necesario",
+        "Necesitamos acceso a tu galería para seleccionar una foto."
       );
       return;
     }
@@ -55,12 +57,14 @@ export default function UploadScreen({ navigation }: any) {
     }
   };
 
-  // Función para tomar foto
+  // Tomar foto
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert('Permiso necesario', 'Necesitamos acceso a tu cámara para tomar una foto.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permiso necesario",
+        "Necesitamos acceso a tu cámara para tomar una foto."
+      );
       return;
     }
 
@@ -80,54 +84,33 @@ export default function UploadScreen({ navigation }: any) {
     setShowSpeciesModal(false);
   };
 
-  // 🔵 FUNCION EDITADA PARA ENVIAR DATOS AL BACKEND
-  const handleRegister = async () => {
-    if (!name || !species || !breed || !weight || !age) {
-      Alert.alert('Error', 'Por favor completa todos los campos obligatorios');
+  const handleRegister = () => {
+    if (!petImage || !name || !species || !breed || !weight || !age) {
+      Alert.alert("Error", "Por favor completa todos los campos");
       return;
     }
 
-    try {
-      console.log("➡️ Enviando datos a:", `${API_URL}/mascotas`);
+    const petData = {
+      name,
+      species,
+      breed,
+      weight,
+      age,
+      image: petImage,
+    };
 
-      const body = {
-        id_usuario: 1, // TEMPORAL
-        nombre: name,
-        especie: species,
-        raza: breed,
-        peso: parseFloat(weight),
-        edad: parseInt(age)
-      };
+    Alert.alert("Éxito", "Mascota registrada correctamente", [
+      { text: "OK", onPress: () => navigation.goBack() },
+    ]);
 
-      const response = await fetch(`${API_URL}/mascotas`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-      console.log("📩 Respuesta backend:", data);
-
-      if (!response.ok) {
-        Alert.alert("Error", "No se pudo registrar la mascota");
-        return;
-      }
-
-      Alert.alert("Éxito", "Mascota registrada correctamente", [
-        { text: "OK", onPress: () => navigation.goBack() }
-      ]);
-
-    } catch (error) {
-      console.log("❌ Error al conectar con backend:", error);
-      Alert.alert("Error", "No se pudo conectar con el servidor");
-    }
+    console.log("Datos de la mascota:", petData);
   };
 
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Registrar Nueva Mascota</Text>
 
-      {/* Sección de Foto */}
+      {/* Foto */}
       <View style={styles.imageSection}>
         <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
           {petImage ? (
@@ -143,6 +126,7 @@ export default function UploadScreen({ navigation }: any) {
           <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
             <Text style={styles.cameraButtonText}>Galería</Text>
           </TouchableOpacity>
+
           <TouchableOpacity style={styles.cameraButton} onPress={takePhoto}>
             <Text style={styles.cameraButtonText}>Cámara</Text>
           </TouchableOpacity>
@@ -160,9 +144,16 @@ export default function UploadScreen({ navigation }: any) {
         />
 
         <Text style={styles.label}>Especie *</Text>
-        <TouchableOpacity style={styles.dropdownButton} onPress={() => setShowSpeciesModal(true)}>
-          <Text style={species ? styles.dropdownTextSelected : styles.dropdownTextPlaceholder}>
-            {species || 'Selecciona una especie'}
+        <TouchableOpacity
+          style={styles.dropdownButton}
+          onPress={() => setShowSpeciesModal(true)}
+        >
+          <Text
+            style={
+              species ? styles.dropdownTextSelected : styles.dropdownTextPlaceholder
+            }
+          >
+            {species || "Selecciona una especie"}
           </Text>
         </TouchableOpacity>
 
@@ -186,10 +177,9 @@ export default function UploadScreen({ navigation }: any) {
         <Text style={styles.label}>Edad *</Text>
         <TextInput
           style={styles.input}
-          placeholder="Ej: 2"
+          placeholder="Ej: 2 años, 6 meses"
           value={age}
           onChangeText={setAge}
-          keyboardType="number-pad"
         />
 
         <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
@@ -197,7 +187,7 @@ export default function UploadScreen({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
-      {/* Modal */}
+      {/* Modal especie */}
       <Modal
         visible={showSpeciesModal}
         animationType="slide"
@@ -207,6 +197,7 @@ export default function UploadScreen({ navigation }: any) {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Selecciona la Especie</Text>
+
             <FlatList
               data={speciesData}
               keyExtractor={(item) => item.id}
@@ -219,6 +210,7 @@ export default function UploadScreen({ navigation }: any) {
                 </TouchableOpacity>
               )}
             />
+
             <TouchableOpacity
               style={styles.modalCloseButton}
               onPress={() => setShowSpeciesModal(false)}
@@ -232,6 +224,154 @@ export default function UploadScreen({ navigation }: any) {
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
-  // (estilos igual que los tuyos, no se tocaron)
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#4A90E2",
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  imageSection: {
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  imageContainer: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: "#f8f8f8",
+    borderWidth: 2,
+    borderColor: "#e1e1e1",
+    borderStyle: "dashed",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  petImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 75,
+  },
+  imagePlaceholder: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  imagePlaceholderText: {
+    color: "#666",
+    fontSize: 16,
+  },
+  cameraButtons: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 15,
+  },
+  cameraButton: {
+    backgroundColor: "#4A90E2",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  cameraButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  form: {
+    marginBottom: 30,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 8,
+  },
+  input: {
+    backgroundColor: "#f8f8f8",
+    borderWidth: 1,
+    borderColor: "#e1e1e1",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    marginBottom: 20,
+    color: "#333",
+  },
+  dropdownButton: {
+    backgroundColor: "#f8f8f8",
+    borderWidth: 1,
+    borderColor: "#e1e1e1",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 20,
+    justifyContent: "center",
+  },
+  dropdownTextSelected: {
+    fontSize: 16,
+    color: "#333",
+  },
+  dropdownTextPlaceholder: {
+    fontSize: 16,
+    color: "#999",
+  },
+  registerButton: {
+    backgroundColor: "#4A90E2",
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  registerButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+    width: "80%",
+    maxHeight: "60%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+    color: "#333",
+  },
+  speciesItem: {
+    paddingVertical: 15,
+    paddingHorizontal: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0f0f0",
+  },
+  speciesText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  modalCloseButton: {
+    marginTop: 15,
+    paddingVertical: 12,
+    alignItems: "center",
+    backgroundColor: "#f8f8f8",
+    borderRadius: 10,
+  },
+  modalCloseText: {
+    color: "#666",
+    fontSize: 16,
+  },
 });
