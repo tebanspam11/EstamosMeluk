@@ -6,8 +6,8 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
@@ -62,7 +62,7 @@ export default function HomeScreen() {
         </View>
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => navigation.navigate('Profile' as never)}
+          onPress={() => navigation.navigate('Profile')}
         >
           <Image
             source={{ uri: 'https://via.placeholder.com/40x40?text=👤' }}
@@ -75,7 +75,7 @@ export default function HomeScreen() {
       <View style={styles.remindersSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Próximos Recordatorios</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Calendar' as never)}>
+          <TouchableOpacity onPress={() => navigation.navigate('Calendar')}>
             <Text style={styles.seeAllText}>Ver todos</Text>
           </TouchableOpacity>
         </View>
@@ -108,7 +108,7 @@ export default function HomeScreen() {
 
       <TouchableOpacity
         style={styles.petCard}
-        onPress={() => navigation.navigate('PetProfile' as never, {
+        onPress={() => navigation.navigate('PetProfile', {
           pet: {
             name: 'Max',
             species: 'Perro',
@@ -126,7 +126,7 @@ export default function HomeScreen() {
 
       <TouchableOpacity
         style={styles.petCard}
-        onPress={() => navigation.navigate('PetProfile' as never, {
+        onPress={() => navigation.navigate('PetProfile', {
           pet: {
             name: 'Luna',
             species: 'Gato',
@@ -145,7 +145,7 @@ export default function HomeScreen() {
 
           <TouchableOpacity
             style={[styles.petCard, styles.addPetCard]}
-            onPress={() => navigation.navigate('Upload' as never)}
+            onPress={() => navigation.navigate('Upload')}
           >
             <Text style={styles.addPetIcon}>+</Text>
             <Text style={styles.addPetText}>Agregar Mascota</Text>
@@ -157,7 +157,7 @@ export default function HomeScreen() {
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('Calendar' as never)}
+          onPress={() => navigation.navigate('Calendar')}
         >
           <Text style={styles.navIcon}>📅</Text>
           <Text style={styles.navText}>Calendario</Text>
@@ -165,7 +165,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('VeterinarySearch' as never)}
+          onPress={() => navigation.navigate('VeterinarySearch')}
         >
           <Text style={styles.navIcon}>🏥</Text>
           <Text style={styles.navText}>Veterinarias</Text>
@@ -173,7 +173,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('Carnet' as never)}
+          onPress={() => navigation.navigate('Carnet')}
         >
           <Text style={styles.navIcon}>📄</Text>
           <Text style={styles.navText}>Carnet</Text>
@@ -181,7 +181,7 @@ export default function HomeScreen() {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.navigate('ClinicHistory' as never)}
+          onPress={() => navigation.navigate('ClinicHistory')}
         >
           <Text style={styles.navIcon}>🏥</Text>
           <Text style={styles.navText}>Historial</Text>

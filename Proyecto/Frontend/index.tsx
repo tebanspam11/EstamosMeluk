@@ -17,6 +17,7 @@ import PetListScreen from './app/pet/list.tsx';
 import UploadScreen from './app/pet/upload.tsx';
 import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
 import PetProfileScreen from './app/pet/pet_profile.tsx';
+import EditPetProfileScreen from './app/pet/edit_pet_profile.tsx';
 
 function VeterinarySearchScreen() {
   const navigation = useNavigation();
@@ -53,11 +54,11 @@ const Stack = createStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="AuthLoading">
+      <Stack.Navigator initialRouteName="Home">
         {/* Pantalla Principal (Validacion si hay sesion iniciada o no*/}
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 
-        {/* Pantallas de Autenticación - SOLO UNA VEZ CADA UNA */}
+        {/* Pantallas de Autenticación */}
         <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Contraseña' }} />
@@ -103,6 +104,11 @@ function App() {
           name="PetProfile"
           component={PetProfileScreen}
           options={{ title: 'Perfil de Mascota' }}
+        />
+        <Stack.Screen
+          name="EditPetProfile"
+          component={EditPetProfileScreen}
+          options={{ title: 'Editar Mascota' }}
         />
 
         {/* Otras Pantallas */}

@@ -8,11 +8,11 @@ import {
   StyleSheet,
   ScrollView,
   Image,
-  SafeAreaView,
   Alert,
   Modal,
   FlatList,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -36,10 +36,10 @@ const speciesData: Species[] = [
 ];
 
 export default function EditPetProfileScreen() {
-  const route = useRoute();
+  const route = useRoute() as { params?: { pet?: Pet } };
   const navigation = useNavigation();
   
-  const initialPet = route.params?.pet as Pet || {
+  const initialPet = (route.params?.pet as Pet) || {
     name: '',
     species: '',
     breed: '',
@@ -124,7 +124,7 @@ export default function EditPetProfileScreen() {
       {
         text: 'OK',
         onPress: () => {
-          navigation.navigate('PetProfile' as never, { pet: updatedPet });
+          navigation.navigate('PetProfile', { pet: updatedPet });
         },
       },
     ]);
