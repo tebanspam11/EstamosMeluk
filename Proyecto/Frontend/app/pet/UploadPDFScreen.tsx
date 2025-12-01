@@ -1,85 +1,60 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  ActivityIndicator,
-} from "react-native";
-import * as DocumentPicker from "expo-document-picker";
-import axios from "axios";
+import React, { useState, useRef } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from "react-native";
 
-interface PDFFile {
-  uri: string;
-  name: string;
-  type: string;
-}
-
-export default function UploadPDFScreen({ navigation }: any) {
-  const [pdfFile, setPdfFile] = useState<PDFFile | null>(null);
+export default function UploadPDFScreen({ navigation, route }: any) {
+  const { id_mascota } = route.params; 
   const [uploading, setUploading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const pickPDF = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: "application/pdf",
-      });
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const file = result.assets[0];
 
-        setPdfFile({
-          uri: file.uri,
-          name: file.name ?? "documento.pdf",
-          type: file.mimeType ?? "application/pdf",
-        });
-      }
-    } catch (err) {
-      console.log(err);
-      Alert.alert("Error", "No se pudo seleccionar el archivo");
-    }
-  };
-
-  const uploadPDF = async () => {
-    if (!pdfFile) {
-      Alert.alert("Error", "Selecciona un archivo PDF antes de subirlo");
+  const handleFileChangeWeb = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== "application/pdf") {
+      Alert.alert("Error", "Solo se permiten archivos PDF");
       return;
     }
+    setSelectedFile(file);
+  };
 
-    const formData = new FormData();
-    formData.append("file", {
-      uri: pdfFile.uri,
-      name: pdfFile.name,
-      type: pdfFile.type,
-    } as any);
 
-    formData.append("id", "1");
-    formData.append("mascotaId", "1");
-    formData.append("tipo", "documento");
-    formData.append("titulo", pdfFile.name);
-    formData.append("descripcion", "Documento subido desde la app");
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      Alert.alert("Error", "Selecciona un archivo primero");
+      return;
+    }
 
     setUploading(true);
 
     try {
-      await axios.post(
-        "http://localhost:4000/api/documentos/uploads",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+      formData.append("id_mascota", id_mascota); 
+      formData.append("tipo", "documento");
+      formData.append("titulo", selectedFile.name);
+      formData.append("descripcion", "PDF subido desde web");
 
-      setUploading(false);
+      const response = await fetch("http://localhost:4000/api/documentos/uploads", {
+        method: "POST",
+        body: formData, 
+      });
+
+      if (!response.ok) {
+        const text = await response.text();
+        throw new Error(text || "Error desconocido");
+      }
+
+      await response.json().catch(() => ({}));
+
       Alert.alert("Éxito", "PDF subido correctamente");
+      setSelectedFile(null);
       navigation.goBack();
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "No se pudo subir el archivo");
+    } finally {
       setUploading(false);
-      Alert.alert("Error", "No se pudo subir el archivo");
     }
   };
 
@@ -87,47 +62,44 @@ export default function UploadPDFScreen({ navigation }: any) {
     <View style={styles.container}>
       <Text style={styles.title}>Subir PDF</Text>
 
-      <TouchableOpacity style={styles.pickBtn} onPress={pickPDF}>
-        <Text style={styles.pickText}>
-          {pdfFile ? pdfFile.name : "Seleccionar PDF"}
+      {/* Input oculto */}
+      <input
+        type="file"
+        accept="application/pdf"
+        ref={fileInputRef}
+        style={{ display: "none" }}
+        onChange={handleFileChangeWeb}
+      />
+
+      {/* Botón de selección */}
+      <TouchableOpacity
+        style={styles.selectBtn}
+        onPress={() => fileInputRef.current?.click()}
+      >
+        <Text style={styles.selectText}>
+          {selectedFile ? "Cambiar archivo" : "Seleccionar PDF"}
         </Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.uploadBtn} onPress={uploadPDF}>
-        {uploading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.uploadText}>Subir PDF</Text>
-        )}
+      {selectedFile && <Text style={{ marginBottom: 10 }}>📄 {selectedFile.name}</Text>}
+
+      {/* Botón de subida */}
+      <TouchableOpacity
+        style={[styles.uploadBtn, (!selectedFile || uploading) && { backgroundColor: "#ccc" }]}
+        disabled={!selectedFile || uploading}
+        onPress={handleUpload}
+      >
+        {uploading ? <ActivityIndicator color="#fff" /> : <Text style={styles.uploadText}>Subir PDF</Text>}
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, justifyContent: "center" },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 30,
-  },
-  pickBtn: {
-    padding: 15,
-    backgroundColor: "#EEE",
-    borderRadius: 10,
-    marginBottom: 20,
-  },
-  pickText: { textAlign: "center", fontSize: 16 },
-  uploadBtn: {
-    padding: 15,
-    backgroundColor: "#4A90E2",
-    borderRadius: 10,
-  },
-  uploadText: {
-    textAlign: "center",
-    fontSize: 18,
-    color: "#fff",
-    fontWeight: "600",
-  },
+  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
+  title: { fontSize: 24, fontWeight: "bold", marginBottom: 30 },
+  selectBtn: { padding: 15, backgroundColor: "#6c757d", borderRadius: 10, marginBottom: 20, minWidth: 200 },
+  selectText: { color: "#fff", textAlign: "center", fontWeight: "600" },
+  uploadBtn: { padding: 15, backgroundColor: "#4A90E2", borderRadius: 10, minWidth: 200 },
+  uploadText: { color: "#fff", textAlign: "center", fontWeight: "600", fontSize: 16 },
 });

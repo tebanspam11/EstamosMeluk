@@ -1,24 +1,25 @@
-import prisma from '../../prisma/client.js';
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
 
-export const uploadDocumentoUsuario = async (req, res) => {
-  const { id_mascota, tipo, titulo, descripcion } = req.body;
+export const uploadDocumentoMascota = async (req, res) => {
+  try {
+    const { id_mascota, tipo, titulo, descripcion } = req.body;
 
-  if (!req.file) return res.status(400).json({ error: 'Archivo no encontrado' });
+    if (!req.file) return res.status(400).json({ error: 'Archivo no encontrado' });
 
-  const mascota = await prisma.mascota.findUnique({where: { id: parseInt(id_mascota) }});
+    const documento = await prisma.documento_Mascota.create({
+      data: {
+        id_mascota: parseInt(id_mascota),
+        tipo: tipo || 'documento',
+        titulo: titulo || req.file.originalname,
+        descripcion: descripcion || '',
+        archivo_pdf: req.file.filename, 
+      },
+    });
 
-  if (!mascota) return res.status(404).json({ ok: false, message: 'Mascota no encontrada' });
-
-  const documento = await prisma.documento_Mascota.create({
-    data: {
-      id_mascota: parseInt(id_mascota),
-      tipo, 
-      titulo, 
-      filename: req.file.filename, 
-      descripcion: descripcion || null,
-    },
-  });
-
-  res.status(201).json({ message: 'PDF subido correctamente', documento });
+    res.status(200).json({ message: 'PDF de mascota subido correctamente', documento });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al subir el PDF de la mascota' });
+  }
 };
-

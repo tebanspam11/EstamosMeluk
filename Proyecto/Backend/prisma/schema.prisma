@@ -83,10 +83,12 @@ model Documento_Mascota {
   tipo        String
   titulo      String
   descripcion String?
-  uploadedAt DateTime @default(now())
+  archivo_pdf String   // <-- agregar esto
+  uploadedAt  DateTime @default(now())
 
   mascota Mascota @relation(fields: [id_mascota], references: [id])
 }
+
 
 model Carnet_Digital {
   id                    Int       @id @default(autoincrement())
