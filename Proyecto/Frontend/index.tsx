@@ -54,7 +54,7 @@ const Stack = createStackNavigator();
 function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="UploadPDF">
+      <Stack.Navigator initialRouteName="AuthLoading">
         {/* Pantalla Principal (Validacion si hay sesion iniciada o no*/}
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 

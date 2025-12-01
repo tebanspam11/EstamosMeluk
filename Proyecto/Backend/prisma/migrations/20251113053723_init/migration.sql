@@ -63,7 +63,7 @@ CREATE TABLE "Notificacion" (
 );
 
 -- CreateTable
-CREATE TABLE "DocumentoMascota" (
+CREATE TABLE "Documento_Mascota" (
     "id" SERIAL NOT NULL,
     "id_mascota" INTEGER NOT NULL,
     "tipo" TEXT NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE "DocumentoMascota" (
     "descripcion" TEXT,
     "uploadedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    CONSTRAINT "DocumentoMascota_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Documento_Mascota_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -122,7 +122,7 @@ ALTER TABLE "Notificacion" ADD CONSTRAINT "Notificacion_id_usuario_fkey" FOREIGN
 ALTER TABLE "Notificacion" ADD CONSTRAINT "Notificacion_id_evento_fkey" FOREIGN KEY ("id_evento") REFERENCES "Evento"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "DocumentoMascota" ADD CONSTRAINT "DocumentoMascota_id_mascota_fkey" FOREIGN KEY ("id_mascota") REFERENCES "Mascota"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Documento_Mascota" ADD CONSTRAINT "Documento_Mascota_id_mascota_fkey" FOREIGN KEY ("id_mascota") REFERENCES "Mascota"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Carnet_Digital" ADD CONSTRAINT "Carnet_Digital_id_mascota_fkey" FOREIGN KEY ("id_mascota") REFERENCES "Mascota"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

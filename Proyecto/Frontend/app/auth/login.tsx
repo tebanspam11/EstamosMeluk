@@ -13,9 +13,12 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }: any) {
   const [correo, setEmail] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [keepLogged, setKeepLogged] = useState(false);
   const [contraseña, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,16 +26,21 @@ export default function LoginScreen({ navigation }: any) {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo, contraseña }),
+      body: JSON.stringify({ correo, telefono, contraseña, keepLogged }),
     });
 
     const data = await response.json();
 
     if (data && response.ok && data.ok) {
+      
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("userId", data.userId.toString());
+      await AsyncStorage.setItem("keepLogged", data.keepLogged ? "true" : "false");
+
       Alert.alert('Login exitoso');
-      navigation.navigate('Home');
+      navigation.replace('Home');
     } else {
-      console.warn('Register failed:', response.status, data);
+      console.warn('Login failed:', response.status, data);
       Alert.alert('Error:', data.message);
     }
   };

@@ -1,8 +1,9 @@
 import prisma from '../../prisma/client.js';
 import bcrypt from 'bcryptjs';
+const jwt = require("jsonwebtoken");
 
 export const login = async (req, res) => {
-  const { correo, telefono, contraseña } = req.body;
+  const { correo, telefono, contraseña, keepLogged } = req.body;
 
   const user = await prisma.usuario.findFirst({where: { OR: [{ correo }, { telefono }] }});
 
@@ -12,7 +13,11 @@ export const login = async (req, res) => {
 
   if (!match) return res.status(401).json({ error: 'Contraseña incorrecta' });
 
-  return res.json({ ok: true, userId: user.id });
+  const expiresIn = keepLogged ? "3650d" : "30d";
+
+  const token = jwt.sign({id_usuario: user.id}, process.env.JWT_SECRET, {expiresIn});
+
+  return res.json({ ok: true, userId: user.id, correo: correo, token, keepLogged});
 };
 
 export const register = async (req, res) => {

@@ -23,7 +23,6 @@ model Usuario {
 
   Mascotas       Mascota[]
   Notificaciones Notificacion[]
-  Documentos     DocumentoMascota[] 
 }
 
 model Mascota {
@@ -43,7 +42,7 @@ model Mascota {
 
   usuario    Usuario             @relation(fields: [id_usuario], references: [id])
   eventos    Evento[]
-  documentos DocumentoMascota[]
+  documentos Documento_Mascota[]
   carnet     Carnet_Digital?
 }
 
@@ -78,16 +77,14 @@ model Notificacion {
   evento  Evento  @relation(fields: [id_evento], references: [id])
 }
 
-model DocumentoMascota {
+model Documento_Mascota {
   id          Int      @id @default(autoincrement())
   id_mascota  Int
-  id_usuario  Int
   tipo        String
   titulo      String
   descripcion String?
   uploadedAt DateTime @default(now())
 
-  usuario Usuario @relation(fields: [id_usuario], references: [id])
   mascota Mascota @relation(fields: [id_mascota], references: [id])
 }
 
