@@ -4,10 +4,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 
-import AuthLoading from './app/auth/AuthLoading.tsx';
+import AuthLoading from './app/auth/authLoading.tsx';
 import LoginScreen from './app/auth/login.tsx';
 import RegisterScreen from './app/auth/register.tsx';
-import ForgotPasswordScreen from './app/auth/forgot_password.tsx';
+import ForgotPasswordScreen from './app/auth/forgotPassword.tsx';
 import ProfileScreen from './app/auth/profile.tsx';
 import HomeScreen from './app/main/home.tsx';
 import CalendarScreen from './app/main/calendar.tsx';

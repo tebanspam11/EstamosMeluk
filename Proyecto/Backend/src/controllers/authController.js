@@ -1,6 +1,7 @@
 import prisma from '../../prisma/client.js';
 import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
+import { sendWelcomeEmail } from '../services/emailService.js';
 
 export const login = async (req, res) => {
   const { identifier, contraseña, keepLogged } = req.body;
@@ -56,6 +57,10 @@ export const register = async (req, res) => {
       correo, 
       ...(telefono && { telefono }), 
       contraseña: hashedPassword },
+  });
+
+  sendWelcomeEmail(correo, nombre).catch(err => {
+    console.error('⚠ No se pudo enviar email de bienvenida:', err);
   });
 
   return res.json({
