@@ -7,7 +7,6 @@ dotenv.config();
 import authRoutes from "./src/routes/authRoutes.js";
 import pdfRoutes from "./src/routes/pdfRoutes.js";
 import passwordResetRoutes from "./src/routes/passwordResetRoutes.js";
-
 import mascotaRoutes from './src/routes/mascotaRoutes.js';
 
 
@@ -29,5 +28,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
-

@@ -18,6 +18,7 @@ export default function UploadPDFScreen({ navigation, route }: any) {
     setSelectedFile(file);
   };
 
+
   const handleUpload = async () => {
     if (!selectedFile) {
       Alert.alert("Error", "Selecciona un archivo primero");

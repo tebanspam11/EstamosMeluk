@@ -5,7 +5,6 @@ export const uploadDocumentoMascota = async (req, res) => {
   try {
     const { id_mascota, tipo, titulo, descripcion } = req.body;
 
-
     if (!req.file) return res.status(400).json({ error: 'Archivo no encontrado' });
 
     const documento = await prisma.documento_Mascota.create({
