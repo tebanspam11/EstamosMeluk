@@ -2,14 +2,13 @@ import prisma from '../../prisma/client.js';
 
 const uploadDocumentoUsuario = async (req, res) => {
   try {
-    const { id } = req.body; // id del usuario
+    const { id } = req.body;
 
     if (!req.file) {
       return res.status(400).json({ error: 'Archivo no encontrado' });
     }
 
-    // Crear registro en la tabla DocumentoUsuario
-    const documento = await prisma.documentoUsuario.create({
+    const documento = await prisma.documento_Mascota.create({
       data: {
         filename: req.file.filename,
         userId: parseInt(id),
