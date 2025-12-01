@@ -3,9 +3,16 @@ import bcrypt from 'bcryptjs';
 import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
-  const { correo, telefono, contraseña, keepLogged } = req.body;
+  const { identifier, contraseña, keepLogged } = req.body;
 
-  const user = await prisma.usuario.findFirst({where: { OR: [{ correo }, { telefono }] }});
+  const isEmail = identifier.includes("@");
+  const isPhone = /^\d+$/.test(identifier);
+
+  if (isEmail) {
+    user = await prisma.usuario.findFirst({where: { correo: identifier }})
+  } else if (isPhone) {
+    user = await prisma.usuario.findFirst({where: { telefono: identifier }})
+  }
 
   if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
 

@@ -16,8 +16,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }: any) {
-  const [correo, setEmail] = useState('');
-  const [telefono, setTelefono] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [keepLogged, setKeepLogged] = useState(false);
   const [contraseña, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +25,7 @@ export default function LoginScreen({ navigation }: any) {
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo, telefono, contraseña, keepLogged }),
+      body: JSON.stringify({ identifier, contraseña, keepLogged }),
     });
 
     const data = await response.json();
@@ -75,13 +74,13 @@ export default function LoginScreen({ navigation }: any) {
 
         {/* Form */}
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Email/Telefono</Text>
           <TextInput
             style={styles.input}
-            placeholder="tu@email.com"
+            placeholder="tu@email.com/345 678 9000"
             placeholderTextColor="#999"
-            value={correo}
-            onChangeText={setEmail}
+            value={identifier}
+            onChangeText={setIdentifier}
             keyboardType="email-address"
             autoCapitalize="none"
           />
