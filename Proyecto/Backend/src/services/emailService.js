@@ -136,8 +136,7 @@ export async function sendWelcomeEmail(correo, nombre) {
   `;
 
   const mailOptions = {
-    from: `"PocketVet" <noreply.pocketvet@gmail.com>`,
-    replyTo: process.env.EMAIL_USER,
+    from: `"PocketVet" <${process.env.EMAIL_USER}>`,
     to: correo,
     subject: '🐾 ¡Bienvenido a PocketVet!',
     html: htmlTemplate,
@@ -254,8 +253,7 @@ export async function sendPasswordResetCode(correo, code) {
   `;
 
   const mailOptions = {
-    from: `"PocketVet" <noreply.pocketvet@gmail.com>`,
-    replyTo: process.env.EMAIL_USER,
+    from: `"PocketVet" <${process.env.EMAIL_USER}>`,
     to: correo,
     subject: 'Recupera tu contraseña - PocketVet',
     html: htmlTemplate,
@@ -367,8 +365,7 @@ export async function sendPasswordChangedNotification(correo) {
   `;
 
   const mailOptions = {
-    from: `"PocketVet" <noreply.pocketvet@gmail.com>`,
-    replyTo: process.env.EMAIL_USER,
+    from: `"PocketVet" <${process.env.EMAIL_USER}>`,
     to: correo,
     subject: 'Tu contraseña fue actualizada - PocketVet',
     html: htmlTemplate,

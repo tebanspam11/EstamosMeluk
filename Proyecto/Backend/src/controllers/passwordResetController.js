@@ -6,9 +6,6 @@ const resetCodes = new Map();
 
 export const requestPasswordReset = async (req, res) => {
   const { correo } = req.body;
-
-  if (!correo) return res.status(400).json({ error: '⚠ El correo es requerido' });
-
   const user = await prisma.usuario.findUnique({ where: { correo } });
 
   if (!user) return res.status(404).json({ error: '⚠ No existe una cuenta con este correo' });
@@ -27,7 +24,7 @@ export const requestPasswordReset = async (req, res) => {
   
   if (!emailResult.success) {
     console.error('⚠ Error al enviar email:', emailResult.error);
-    return res.status(500).json({ error: '⚠No se pudo enviar el email. Intenta de nuevo' });
+    return res.status(500).json({ error: '⚠ No se pudo enviar el email. Intenta de nuevo' });
   }
 
   // En desarrollo, mostrar el código en consola
