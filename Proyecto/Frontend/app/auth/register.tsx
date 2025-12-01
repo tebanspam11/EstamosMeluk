@@ -19,6 +19,7 @@ import {
   Image,
 } from 'react-native';
 
+
 export default function RegisterScreen({ navigation }: any) {
   const [nombre, setName] = useState('');
   const [correo, setEmail] = useState('');

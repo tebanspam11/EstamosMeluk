@@ -8,6 +8,7 @@ export const login = async (req, res) => {
   const isEmail = identifier.includes("@");
   const isPhone = /^\d+$/.test(identifier);
 
+  let user = null;
   if (isEmail) {
     user = await prisma.usuario.findFirst({where: { correo: identifier }})
   } else if (isPhone) {
@@ -24,7 +25,7 @@ export const login = async (req, res) => {
 
   const token = jwt.sign({id_usuario: user.id}, process.env.JWT_SECRET, {expiresIn});
 
-  return res.json({ ok: true, userId: user.id, correo: correo, token, keepLogged});
+  return res.json({ ok: true, userId: user.id, correo: user.correo, token, keepLogged});
 };
 
 export const register = async (req, res) => {
@@ -38,7 +39,8 @@ export const register = async (req, res) => {
   if (telefono) {
     existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
   }
-  existingEmail = await prisma.usuario.findUnique({ where: { correo } });
+
+  const existingEmail = await prisma.usuario.findUnique({ where: { correo } });
 
   if (existingEmail)
     return res.status(400).json({ ok: false, message: 'Este correo ya está registrado' });
