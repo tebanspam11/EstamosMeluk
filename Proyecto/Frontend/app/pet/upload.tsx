@@ -13,16 +13,9 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
-// Datos para las especies
 const speciesData = [
   { id: "1", name: "Perro" },
   { id: "2", name: "Gato" },
-  { id: "3", name: "Conejo" },
-  { id: "4", name: "Ave" },
-  { id: "5", name: "Hamster" },
-  { id: "6", name: "Pez" },
-  { id: "7", name: "Reptil" },
-  { id: "8", name: "Otro" },
 ];
 
 export default function PetRegister({ navigation }: any) {
