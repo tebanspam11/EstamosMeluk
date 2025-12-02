@@ -14,9 +14,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sharing from 'expo-sharing';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_URL } from '../../src/config/api';
 import { formatName } from '../../src/utils/formatName';
@@ -163,80 +164,30 @@ export default function ClinicHistoryScreen({ navigation }: any) {
     setUploading(false);
   };
   const viewDocument = async (documento: Documento) => {
-    // Construir rutas candidatas (sin /api y con /api) y aceptar URL absoluta
-    const baseNoApi = API_URL.replace('/api', '');
-    const rel = `/uploads/pdfs/${documento.archivo_pdf}`;
-    const candidates: string[] = [];
-
-    // Preferir endpoint del API que sirve archivos si existe
-    candidates.push(`${API_URL}/documentos/file/${documento.archivo_pdf}`);
-
-    if (documento.archivo_pdf && documento.archivo_pdf.startsWith('http')) {
-      candidates.push(documento.archivo_pdf);
-    } else {
-      candidates.push(`${baseNoApi}${rel}`);
-      candidates.push(`${API_URL}${rel}`);
-    }
-
-    // Preparar headers si el archivo requiere autorización
-    const token = await AsyncStorage.getItem('token');
-    const authHeaders: any = token ? { Authorization: `Bearer ${token}` } : {};
-
-    let workingUrl: string | null = null;
-
-    // Probar HEAD/GET para encontrar una URL válida que entregue PDF
-    for (const url of candidates) {
-      try {
-        const head = await fetch(url, { method: 'HEAD', headers: authHeaders });
-        if (head.ok) {
-          const ct = head.headers.get('content-type') || '';
-          if (ct.includes('pdf') || url.endsWith('.pdf')) {
-            workingUrl = url;
-            break;
-          }
-        }
-      } catch (e) {
-        // probar GET si HEAD no funciona
-        try {
-          const getRes = await fetch(url, { method: 'GET', headers: authHeaders });
-          if (getRes.ok) {
-            const ct = getRes.headers.get('content-type') || '';
-            if (ct.includes('pdf') || url.endsWith('.pdf')) {
-              workingUrl = url;
-              break;
-            }
-          }
-        } catch (e2) {
-          // continuar con siguiente candidato
-        }
-      }
-    }
-
-    if (!workingUrl) {
-      Alert.alert('Error', 'No se encontró una URL válida para el PDF (posible problema en el servidor).');
-      return;
-    }
-
-    setRemotePdfUrl(workingUrl);
-
-    // Intentar descargar al caché y abrir localmente (mejora compatibilidad en WebView/Expo Go)
     try {
+      const baseNoApi = API_URL.replace('/api', '');
+      const rel = `/uploads/pdfs/${documento.archivo_pdf}`;
+      const url = documento.archivo_pdf && documento.archivo_pdf.startsWith('http')
+        ? documento.archivo_pdf
+        : `${baseNoApi}${rel}`;
+
       const filename = documento.archivo_pdf || `doc_${documento.id}.pdf`;
       const cacheDir = (FileSystem as any).cacheDirectory || '';
       const localUri = `${cacheDir}${filename}`;
 
-      const info = await FileSystem.getInfoAsync(localUri);
-      if (!info.exists) {
-        await FileSystem.downloadAsync(workingUrl, localUri, { headers: authHeaders });
-      }
+      await FileSystem.downloadAsync(url, localUri);
 
-      setCurrentPdfUrl(localUri);
-      setShowPdfModal(true);
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(localUri, {
+          mimeType: 'application/pdf',
+          dialogTitle: documento.titulo || `Documento_${documento.id}.pdf`,
+        });
+      } else {
+        Alert.alert('Descargado', `PDF guardado en: ${localUri}`);
+      }
     } catch (err) {
-      // Si falla la descarga, abrir la URL remota en WebView
-      console.warn('Descarga PDF fallida, usando remoto:', err);
-      setCurrentPdfUrl(workingUrl);
-      setShowPdfModal(true);
+      console.error('Error descargando/compartiendo PDF:', err);
+      Alert.alert('Error', 'No se pudo descargar o abrir el PDF.');
     }
   };
 
