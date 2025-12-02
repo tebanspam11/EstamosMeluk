@@ -38,3 +38,4 @@ export const eliminarDocumento = async (req, res) => {
   res.status(200).json({ message: 'Documento eliminado correctamente' });
 };
 
+

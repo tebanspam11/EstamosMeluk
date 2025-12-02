@@ -4,7 +4,14 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 async function sendEmail({ to, subject, html, text }) {
   const from = process.env.EMAIL_USER;
-  const msg = {to, from: from, subject, text, html};
+  const msg = { to, from: from, subject, text, html };
+  try {
+    const result = await sgMail.send(msg);
+    return { success: true, result };
+  } catch (err) {
+    console.error('Error sending email:', err?.response || err);
+    return { success: false, error: err?.message || err };
+  }
 }
 
 /**

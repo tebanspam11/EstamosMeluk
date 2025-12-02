@@ -13,6 +13,8 @@ import {
   Linking
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { WebView } from 'react-native-webview';
+import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
@@ -42,6 +44,9 @@ export default function ClinicHistoryScreen({ navigation }: any) {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPdfModal, setShowPdfModal] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState('');
+  const [remotePdfUrl, setRemotePdfUrl] = useState('');
   
   const [newDoc, setNewDoc] = useState({
     tipo: 'consulta',
@@ -157,16 +162,81 @@ export default function ClinicHistoryScreen({ navigation }: any) {
       }
     setUploading(false);
   };
-
   const viewDocument = async (documento: Documento) => {
-    const baseUrl = API_URL.replace('/api', '');
-    const pdfUrl = `${baseUrl}/uploads/pdfs/${documento.archivo_pdf}`;
-    
-    const canOpen = await Linking.canOpenURL(pdfUrl);
-    if (canOpen) {
-      await Linking.openURL(pdfUrl);
+    // Construir rutas candidatas (sin /api y con /api) y aceptar URL absoluta
+    const baseNoApi = API_URL.replace('/api', '');
+    const rel = `/uploads/pdfs/${documento.archivo_pdf}`;
+    const candidates: string[] = [];
+
+    // Preferir endpoint del API que sirve archivos si existe
+    candidates.push(`${API_URL}/documentos/file/${documento.archivo_pdf}`);
+
+    if (documento.archivo_pdf && documento.archivo_pdf.startsWith('http')) {
+      candidates.push(documento.archivo_pdf);
     } else {
-      Alert.alert('Error', 'No se puede abrir el documento');
+      candidates.push(`${baseNoApi}${rel}`);
+      candidates.push(`${API_URL}${rel}`);
+    }
+
+    // Preparar headers si el archivo requiere autorización
+    const token = await AsyncStorage.getItem('token');
+    const authHeaders: any = token ? { Authorization: `Bearer ${token}` } : {};
+
+    let workingUrl: string | null = null;
+
+    // Probar HEAD/GET para encontrar una URL válida que entregue PDF
+    for (const url of candidates) {
+      try {
+        const head = await fetch(url, { method: 'HEAD', headers: authHeaders });
+        if (head.ok) {
+          const ct = head.headers.get('content-type') || '';
+          if (ct.includes('pdf') || url.endsWith('.pdf')) {
+            workingUrl = url;
+            break;
+          }
+        }
+      } catch (e) {
+        // probar GET si HEAD no funciona
+        try {
+          const getRes = await fetch(url, { method: 'GET', headers: authHeaders });
+          if (getRes.ok) {
+            const ct = getRes.headers.get('content-type') || '';
+            if (ct.includes('pdf') || url.endsWith('.pdf')) {
+              workingUrl = url;
+              break;
+            }
+          }
+        } catch (e2) {
+          // continuar con siguiente candidato
+        }
+      }
+    }
+
+    if (!workingUrl) {
+      Alert.alert('Error', 'No se encontró una URL válida para el PDF (posible problema en el servidor).');
+      return;
+    }
+
+    setRemotePdfUrl(workingUrl);
+
+    // Intentar descargar al caché y abrir localmente (mejora compatibilidad en WebView/Expo Go)
+    try {
+      const filename = documento.archivo_pdf || `doc_${documento.id}.pdf`;
+      const cacheDir = (FileSystem as any).cacheDirectory || '';
+      const localUri = `${cacheDir}${filename}`;
+
+      const info = await FileSystem.getInfoAsync(localUri);
+      if (!info.exists) {
+        await FileSystem.downloadAsync(workingUrl, localUri, { headers: authHeaders });
+      }
+
+      setCurrentPdfUrl(localUri);
+      setShowPdfModal(true);
+    } catch (err) {
+      // Si falla la descarga, abrir la URL remota en WebView
+      console.warn('Descarga PDF fallida, usando remoto:', err);
+      setCurrentPdfUrl(workingUrl);
+      setShowPdfModal(true);
     }
   };
 
@@ -390,6 +460,47 @@ export default function ClinicHistoryScreen({ navigation }: any) {
             </View>
           </View>
         </View>
+      </Modal>
+
+      {/* Modal para Ver PDF */}
+      <Modal
+        visible={showPdfModal}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowPdfModal(false)}
+      >
+        <SafeAreaView style={styles.pdfModalContainer}>
+          <View style={styles.pdfHeader}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowPdfModal(false)}
+            >
+              <Text style={styles.closeButtonText}>✕ Cerrar</Text>
+            </TouchableOpacity>
+            <Text style={styles.pdfTitle}>Documento PDF</Text>
+            <TouchableOpacity
+              style={styles.openBrowserButton}
+              onPress={() => {
+                const urlToOpen = remotePdfUrl || currentPdfUrl;
+                if (urlToOpen) Linking.openURL(urlToOpen);
+                else Alert.alert('Error', 'No hay URL disponible para abrir');
+              }}
+            >
+              <Text style={styles.openBrowserText}>Abrir</Text>
+            </TouchableOpacity>
+          </View>
+          <WebView
+            source={{ uri: currentPdfUrl }}
+            style={styles.pdfViewer}
+            startInLoadingState={true}
+            renderLoading={() => (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#4A90E2" />
+                <Text style={styles.loadingText}>Cargando PDF...</Text>
+              </View>
+            )}
+          />
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -653,12 +764,54 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     fontWeight: '600',
   },
+  pdfModalContainer: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  pdfHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e1e1e1',
+  },
+  closeButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  closeButtonText: {
+    fontSize: 16,
+    color: '#4A90E2',
+    fontWeight: '600',
+  },
+  pdfTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    flex: 1,
+    textAlign: 'center',
+    marginRight: 60,
+  },
+  pdfViewer: {
+    flex: 1,
+  },
   modalButtons: {
     flexDirection: 'row',
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#e1e1e1',
     gap: 10,
+  },
+  openBrowserButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  openBrowserText: {
+    color: '#4A90E2',
+    fontWeight: '600',
   },
   modalButton: {
     flex: 1,

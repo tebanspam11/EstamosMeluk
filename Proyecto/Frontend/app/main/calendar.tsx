@@ -340,7 +340,9 @@ export default function CalendarScreen() {
     const lastDay = new Date(year, month + 1, 0);
     const days: Array<{ date: Date; isCurrentMonth: boolean }> = [];
 
-    for (let i = firstDay.getDay() - 1; i >= 0; i--) {
+    const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+    
+    for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const prevDate = new Date(year, month, -i);
       days.push({ date: prevDate, isCurrentMonth: false });
     }
