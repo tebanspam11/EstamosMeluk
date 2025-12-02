@@ -5,7 +5,9 @@ CREATE TABLE "Usuario" (
     "correo" TEXT NOT NULL,
     "telefono" TEXT,
     "contraseña" TEXT,
+    "foto" TEXT,
     "cuenta_google" BOOLEAN DEFAULT false,
+    "googleId" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
@@ -19,7 +21,9 @@ CREATE TABLE "Mascota" (
     "nombre" TEXT NOT NULL,
     "especie" TEXT NOT NULL,
     "raza" TEXT,
-    "edad" INTEGER,
+    "fecha_nacimiento" TIMESTAMP(3) NOT NULL,
+    "sexo" TEXT NOT NULL,
+    "color" TEXT,
     "peso" DOUBLE PRECISION,
     "foto" TEXT,
     "alergias" TEXT,
@@ -69,6 +73,7 @@ CREATE TABLE "Documento_Mascota" (
     "tipo" TEXT NOT NULL,
     "titulo" TEXT NOT NULL,
     "descripcion" TEXT,
+    "archivo_pdf" TEXT NOT NULL,
     "uploadedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Documento_Mascota_pkey" PRIMARY KEY ("id")
@@ -104,6 +109,9 @@ CREATE UNIQUE INDEX "Usuario_correo_key" ON "Usuario"("correo");
 CREATE UNIQUE INDEX "Usuario_telefono_key" ON "Usuario"("telefono");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Usuario_googleId_key" ON "Usuario"("googleId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Notificacion_id_evento_key" ON "Notificacion"("id_evento");
 
 -- CreateIndex
@@ -116,13 +124,14 @@ ALTER TABLE "Mascota" ADD CONSTRAINT "Mascota_id_usuario_fkey" FOREIGN KEY ("id_
 ALTER TABLE "Evento" ADD CONSTRAINT "Evento_id_mascota_fkey" FOREIGN KEY ("id_mascota") REFERENCES "Mascota"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Notificacion" ADD CONSTRAINT "Notificacion_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Notificacion" ADD CONSTRAINT "Notificacion_id_evento_fkey" FOREIGN KEY ("id_evento") REFERENCES "Evento"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Notificacion" ADD CONSTRAINT "Notificacion_id_evento_fkey" FOREIGN KEY ("id_evento") REFERENCES "Evento"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Notificacion" ADD CONSTRAINT "Notificacion_id_usuario_fkey" FOREIGN KEY ("id_usuario") REFERENCES "Usuario"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Documento_Mascota" ADD CONSTRAINT "Documento_Mascota_id_mascota_fkey" FOREIGN KEY ("id_mascota") REFERENCES "Mascota"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Carnet_Digital" ADD CONSTRAINT "Carnet_Digital_id_mascota_fkey" FOREIGN KEY ("id_mascota") REFERENCES "Mascota"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+

@@ -113,7 +113,7 @@ export default function ProfileScreen({ navigation }: any) {
     setUploadingPhoto(true);
     const token = await AsyncStorage.getItem('token');
 
-    const response = await fetch(`${API_URL}/usuarios/perfil`, {
+    const response = await fetch(`${API_URL}/usuarios`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,

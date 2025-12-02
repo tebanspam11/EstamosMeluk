@@ -110,7 +110,7 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.headerButtons}>
             <TouchableOpacity 
               style={styles.addEventButton}
-              onPress={() => navigation.navigate('CreateEvent')}
+              onPress={() => navigation.navigate('Calendar')}
             >
               <Text style={styles.addEventText}>+</Text>
             </TouchableOpacity>
@@ -152,9 +152,6 @@ export default function HomeScreen({ navigation }: any) {
       <View style={styles.petsSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Tus Mascotas</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('List')}>
-            <Text style={styles.seeAllText}>Ver todos</Text>
-          </TouchableOpacity>
         </View>
 
         {mascotas.length === 0 ? (
@@ -169,8 +166,12 @@ export default function HomeScreen({ navigation }: any) {
             </TouchableOpacity>
           </View>
         ) : (
-          <View style={styles.petsGrid}>
-            {mascotas.slice(0, 2).map((mascota) => (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.petsScroll}
+          >
+            {mascotas.map((mascota) => (
               <TouchableOpacity
                 key={mascota.id}
                 style={styles.petCard}
@@ -192,7 +193,7 @@ export default function HomeScreen({ navigation }: any) {
               <Text style={styles.addPetIcon}>+</Text>
               <Text style={styles.addPetText}>Agregar Mascota</Text>
             </TouchableOpacity>
-          </View>
+          </ScrollView>
         )}
       </View>
 
@@ -376,6 +377,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 100,
   },
+  petsScroll: {
+    paddingVertical: 5,
+  },
   petsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -385,7 +389,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 16,
     padding: 16,
-    width: '31%',
+    width: 120,
+    marginRight: 12,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },

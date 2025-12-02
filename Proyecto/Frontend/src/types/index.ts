@@ -17,7 +17,9 @@ export interface Mascota {
   nombre: string;
   especie: string;
   raza: string | null;
-  edad: number | null;
+  fecha_nacimiento: Date;
+  sexo: string;
+  color: string | null;
   peso: string | null;
   foto: string | null;
   alergias: string | null;
@@ -94,7 +96,9 @@ export interface PetFormData {
   nombre: string;
   especie: string;
   raza?: string;
-  edad?: number;
+  fecha_nacimiento: string;
+  sexo: string;
+  color?: string;
   peso?: number;
   foto?: string;
   alergias?: string;

@@ -1,293 +1,301 @@
-// app/pet/edit_pet_profile.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   ScrollView,
   Image,
   Alert,
   Modal,
-  FlatList,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
 
 interface Pet {
-  name: string;
-  species: string;
-  breed: string;
-  weight: string;
-  age: string;
-  image: string | null;
+  id: number;
+  nombre: string;
+  especie: string;
+  raza: string;
+  fecha_nacimiento: Date;
+  color: string;
+  sexo: 'Macho' | 'Hembra';
+  foto: string;
+  peso_actual?: number;
+  microchip?: string;
+  notas_adicionales?: string;
 }
 
-interface Species {
-  id: string;
-  name: string;
-}
-
-const speciesData: Species[] = [
-  { id: '1', name: 'Perro' },
-  { id: '2', name: 'Gato' },
-];
-
-export default function EditPetProfileScreen() {
-  const route = useRoute() as { params?: { pet?: Pet } };
+export default function PetProfileScreen({ route }: any) {
   const navigation = useNavigation();
-  
-  const initialPet = (route.params?.pet as Pet) || {
-    name: '',
-    species: '',
-    breed: '',
-    weight: '',
-    age: '',
-    image: null,
+  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
+  const [pets, setPets] = useState<Pet[]>([]);
+  const [showPetsModal, setShowPetsModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  useEffect(() => {
+    if (route?.params?.pet) {
+      setSelectedPet(route.params.pet);
+    }
+  }, [route?.params?.pet]);
+
+  const calculateAge = (birthDate: Date) => {
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let years = today.getFullYear() - birth.getFullYear();
+    let months = today.getMonth() - birth.getMonth();
+    
+    if (months < 0) {
+      years--;
+      months += 12;
+    }
+    
+    if (years === 0) {
+      return `${months} ${months === 1 ? 'mes' : 'meses'}`;
+    } else if (months === 0) {
+      return `${years} ${years === 1 ? 'año' : 'años'}`;
+    } else {
+      return `${years} ${years === 1 ? 'año' : 'años'} y ${months} ${months === 1 ? 'mes' : 'meses'}`;
+    }
   };
 
-  const [petImage, setPetImage] = useState<string | null>(initialPet.image);
-  const [name, setName] = useState(initialPet.name);
-  const [species, setSpecies] = useState(initialPet.species);
-  const [breed, setBreed] = useState(initialPet.breed);
-  const [weight, setWeight] = useState(initialPet.weight);
-  const [age, setAge] = useState(initialPet.age);
-  
-  const [showSpeciesModal, setShowSpeciesModal] = useState(false);
-
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permiso necesario',
-        'Necesitamos acceso a tu galería para seleccionar una foto.'
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
-
-    if (!result.canceled) {
-      setPetImage(result.assets[0].uri);
-    }
   };
 
-  const takePhoto = async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert('Permiso necesario', 'Necesitamos acceso a tu cámara para tomar una foto.');
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-
-    if (!result.canceled) {
-      setPetImage(result.assets[0].uri);
-    }
-  };
-
-  const handleSpeciesSelect = (speciesName: string) => {
-    setSpecies(speciesName);
-    setShowSpeciesModal(false);
-  };
-
-  const handleSave = () => {
-    if (!name || !species || !breed || !weight || !age) {
-      Alert.alert('Error', 'Por favor completa todos los campos obligatorios');
-      return;
-    }
-
-    const updatedPet: Pet = {
-      ...initialPet,
-      name,
-      species,
-      breed,
-      weight,
-      age,
-      image: petImage,
-    };
-
-    Alert.alert('¡Éxito!', 'Información de la mascota actualizada', [
-      {
-        text: 'OK',
-        onPress: () => {
-          navigation.navigate('PetProfile', { pet: updatedPet });
-        },
-      },
-    ]);
-
-    console.log('Datos actualizados:', updatedPet);
-  };
-
-  const handleCancel = () => {
-    Alert.alert(
-      'Cancelar edición',
-      '¿Estás seguro de que quieres cancelar? Los cambios no guardados se perderán.',
-      [
-        { text: 'No', style: 'cancel' },
-        { text: 'Sí', onPress: () => navigation.goBack() },
-      ]
-    );
-  };
-
-  const getPetIcon = (speciesName: string) => {
-    switch (speciesName.toLowerCase()) {
+  const getPetIcon = (tipo: string) => {
+    if (!tipo) return '🐾';
+    switch (tipo.toLowerCase()) {
       case 'perro': return '🐶';
       case 'gato': return '🐱';
-      case 'conejo': return '🐰';
-      case 'ave': return '🐦';
-      case 'hamster': return '🐹';
-      case 'pez': return '🐠';
-      case 'reptil': return '🦎';
       default: return '🐾';
     }
   };
 
+        const handleEditProfile = () => {
+        navigation.navigate('EditPetProfile', { pet: selectedPet });
+        };
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={handleCancel}>
-            <Text style={styles.backButton}>← Cancelar</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Editar Mascota</Text>
-          <TouchableOpacity onPress={handleSave}>
-            <Text style={styles.saveButton}>Guardar</Text>
-          </TouchableOpacity>
-        </View>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text style={styles.backButton}>←</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Perfil de Mascota</Text>
+        <TouchableOpacity 
+        style={styles.editButton}
+        onPress={() => navigation.navigate('EditPetProfile', { pet: selectedPet })}
+        >
+        <Text style={styles.editButtonText}>✏️</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Sección de Foto */}
-        <View style={styles.imageSection}>
-          <TouchableOpacity style={styles.imageContainer} onPress={pickImage}>
-            {petImage ? (
-              <Image source={{ uri: petImage }} style={styles.petImage} />
-            ) : (
-              <View style={styles.imagePlaceholder}>
-                <Text style={styles.imagePlaceholderIcon}>
-                  {species ? getPetIcon(species) : '🐾'}
-                </Text>
-                <Text style={styles.imagePlaceholderText}>Cambiar Foto</Text>
+      {/* Selector de Mascota */}
+      <TouchableOpacity 
+        style={styles.petSelector}
+        onPress={() => setShowPetsModal(true)}
+      >
+        <Image 
+          source={{ uri: selectedPet?.foto }} 
+          style={styles.petSelectorImage}
+        />
+        <View style={styles.petSelectorInfo}>
+          <Text style={styles.petSelectorName}>
+            {selectedPet ? selectedPet.nombre : 'Seleccionar mascota'}
+          </Text>
+          <Text style={styles.petSelectorDetails}>
+            {selectedPet ? 
+              `${getPetIcon(selectedPet.especie)} ${selectedPet.raza} • ${selectedPet.sexo}` : 
+              'Toca para seleccionar'
+            }
+          </Text>
+        </View>
+        <Text style={styles.selectorArrow}>▼</Text>
+      </TouchableOpacity>
+
+      {selectedPet && (
+        <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
+          {/* Foto y Información Principal */}
+          <View style={styles.profileHeader}>
+            <Image 
+              source={{ uri: selectedPet.foto }} 
+              style={styles.profileImage}
+            />
+            <View style={styles.profileBasicInfo}>
+              <Text style={styles.petName}>{selectedPet.nombre}</Text>
+              <Text style={styles.petBreed}>
+                {getPetIcon(selectedPet.especie)} {selectedPet.raza}
+              </Text>
+              <Text style={styles.petAge}>
+                {calculateAge(selectedPet.fecha_nacimiento)}
+              </Text>
+            </View>
+          </View>
+
+          {/* Estadísticas Rápidas */}
+          <View style={styles.statsContainer}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>
+                {selectedPet.peso_actual ? `${selectedPet.peso_actual} kg` : 'N/A'}
+              </Text>
+              <Text style={styles.statLabel}>Peso Actual</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{selectedPet.sexo}</Text>
+              <Text style={styles.statLabel}>Sexo</Text>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{selectedPet.color}</Text>
+              <Text style={styles.statLabel}>Color</Text>
+            </View>
+          </View>
+
+          {/* Información Detallada */}
+          <View style={styles.infoSection}>
+            <Text style={styles.sectionTitle}>📋 Información General</Text>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Nombre:</Text>
+              <Text style={styles.infoValue}>{selectedPet.nombre}</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Especie:</Text>
+              <Text style={styles.infoValue}>{selectedPet.especie}</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Raza:</Text>
+              <Text style={styles.infoValue}>{selectedPet.raza}</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Fecha de Nacimiento:</Text>
+              <Text style={styles.infoValue}>{formatDate(selectedPet.fecha_nacimiento)}</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Edad:</Text>
+              <Text style={styles.infoValue}>{calculateAge(selectedPet.fecha_nacimiento)}</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Sexo:</Text>
+              <Text style={styles.infoValue}>{selectedPet.sexo}</Text>
+            </View>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Color:</Text>
+              <Text style={styles.infoValue}>{selectedPet.color}</Text>
+            </View>
+
+            {selectedPet.peso_actual && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Peso Actual:</Text>
+                <Text style={styles.infoValue}>{selectedPet.peso_actual} kg</Text>
               </View>
             )}
-          </TouchableOpacity>
 
-          <View style={styles.cameraButtons}>
-            <TouchableOpacity style={styles.cameraButton} onPress={pickImage}>
-              <Text style={styles.cameraButtonText}>Galería</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.cameraButton} onPress={takePhoto}>
-              <Text style={styles.cameraButtonText}>Cámara</Text>
-            </TouchableOpacity>
+            {selectedPet.microchip && (
+              <View style={styles.infoRow}>
+                <Text style={styles.infoLabel}>Microchip:</Text>
+                <Text style={styles.infoValue}>{selectedPet.microchip}</Text>
+              </View>
+            )}
           </View>
-        </View>
 
-        {/* Formulario */}
-        <View style={styles.form}>
-          {/* Nombre */}
-          <Text style={styles.label}>Nombre de la Mascota *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: Max, Luna, etc."
-            value={name}
-            onChangeText={setName}
-          />
+          {/* Notas Adicionales */}
+          {selectedPet.notas_adicionales && (
+            <View style={styles.infoSection}>
+              <Text style={styles.sectionTitle}>📝 Notas Adicionales</Text>
+              <Text style={styles.notesText}>{selectedPet.notas_adicionales}</Text>
+            </View>
+          )}
 
-          {/* Especie */}
-          <Text style={styles.label}>Especie *</Text>
-          <TouchableOpacity style={styles.dropdownButton} onPress={() => setShowSpeciesModal(true)}>
-            <Text style={species ? styles.dropdownTextSelected : styles.dropdownTextPlaceholder}>
-              {species ? `${getPetIcon(species)} ${species}` : 'Selecciona una especie'}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Raza */}
-          <Text style={styles.label}>Raza *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: Labrador, Siames, etc."
-            value={breed}
-            onChangeText={setBreed}
-          />
-
-          {/* Peso */}
-          <Text style={styles.label}>Peso (kg) *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: 5.5"
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="decimal-pad"
-          />
-
-          {/* Edad */}
-          <Text style={styles.label}>Edad *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: 2 años, 6 meses"
-            value={age}
-            onChangeText={setAge}
-          />
-
-          {/* Botones de acción */}
-          <View style={styles.actionButtons}>
-            <TouchableOpacity style={styles.saveButtonLarge} onPress={handleSave}>
-              <Text style={styles.saveButtonLargeText}>Guardar Cambios</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.cancelButtonLarge} onPress={handleCancel}>
-              <Text style={styles.cancelButtonLargeText}>Cancelar</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Modal para seleccionar especie */}
-        <Modal
-          visible={showSpeciesModal}
-          animationType="slide"
-          transparent={true}
-          onRequestClose={() => setShowSpeciesModal(false)}
-        >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>Selecciona la Especie</Text>
-              <FlatList
-                data={speciesData}
-                keyExtractor={(item) => item.id}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.speciesItem}
-                    onPress={() => handleSpeciesSelect(item.name)}
-                  >
-                    <Text style={styles.speciesText}>
-                      {getPetIcon(item.name)} {item.name}
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              />
-              <TouchableOpacity
-                style={styles.modalCloseButton}
-                onPress={() => setShowSpeciesModal(false)}
+          {/* Acciones Rápidas */}
+          <View style={styles.actionsSection}>
+            <Text style={styles.sectionTitle}>🚀 Acciones Rápidas</Text>
+            <View style={styles.actionsGrid}>
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Carnet')}
               >
-                <Text style={styles.modalCloseText}>Cancelar</Text>
+                <Text style={styles.actionIcon}>💉</Text>
+                <Text style={styles.actionText}>Carnet</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('ClinicHistory')}
+              >
+                <Text style={styles.actionIcon}>🏥</Text>
+                <Text style={styles.actionText}>Historial</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={() => navigation.navigate('Calendar')}
+              >
+                <Text style={styles.actionIcon}>📅</Text>
+                <Text style={styles.actionText}>Recordatorios</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.actionButton}
+                onPress={handleEditProfile}
+              >
+                <Text style={styles.actionIcon}>✏️</Text>
+                <Text style={styles.actionText}>Editar</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </ScrollView>
+        </ScrollView>
+      )}
+
+      {/* Modal Seleccionar Mascota */}
+      <Modal visible={showPetsModal} animationType="slide" transparent={true}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Seleccionar Mascota</Text>
+            <ScrollView style={styles.petsList}>
+              {pets.map(pet => (
+                <TouchableOpacity
+                  key={pet.id}
+                  style={styles.petOption}
+                  onPress={() => {
+                    setSelectedPet(pet);
+                    setShowPetsModal(false);
+                  }}
+                >
+                  <Image source={{ uri: pet.foto }} style={styles.petOptionImage} />
+                  <View style={styles.petOptionInfo}>
+                    <Text style={styles.petOptionName}>{pet.nombre}</Text>
+                    <Text style={styles.petOptionDetails}>
+                      {getPetIcon(pet.especie)} {pet.raza} • {pet.sexo}
+                    </Text>
+                    <Text style={styles.petOptionAge}>
+                      {calculateAge(pet.fecha_nacimiento)}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+            <TouchableOpacity 
+              style={styles.cancelButton}
+              onPress={() => setShowPetsModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -295,7 +303,7 @@ export default function EditPetProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#f8f9fa',
   },
   header: {
     flexDirection: 'row',
@@ -304,197 +312,273 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    backgroundColor: '#fff',
   },
   backButton: {
-    fontSize: 16,
-    color: '#666',
-    fontWeight: '600',
+    fontSize: 24,
+    color: '#4A90E2',
+    fontWeight: 'bold',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#333',
   },
-  saveButton: {
+  editButton: {
+    padding: 8,
+  },
+  editButtonText: {
+    fontSize: 18,
+  },
+  petSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    margin: 20,
+    padding: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  petSelectorImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  petSelectorInfo: {
+    flex: 1,
+  },
+  petSelectorName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  petSelectorDetails: {
+    fontSize: 14,
+    color: '#666',
+  },
+  selectorArrow: {
     fontSize: 16,
+    color: '#666',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
+  profileHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginRight: 20,
+  },
+  profileBasicInfo: {
+    flex: 1,
+  },
+  petName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 4,
+  },
+  petBreed: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 4,
+  },
+  petAge: {
+    fontSize: 14,
     color: '#4A90E2',
     fontWeight: '600',
   },
-  imageSection: {
-    alignItems: 'center',
-    paddingVertical: 30,
-    backgroundColor: '#f8f9fa',
+  statsContainer: {
+    flexDirection: 'row',
+    marginBottom: 20,
   },
-  imageContainer: {
-    width: 150,
-    height: 150,
-    borderRadius: 75,
+  statCard: {
+    flex: 1,
     backgroundColor: '#fff',
-    borderWidth: 3,
-    borderColor: '#e1e1e1',
-    justifyContent: 'center',
+    padding: 16,
+    marginHorizontal: 5,
+    borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  petImage: {
-    width: '100%',
-    height: '100%',
-    borderRadius: 75,
+  statNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    marginBottom: 4,
   },
-  imagePlaceholder: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  imagePlaceholderIcon: {
-    fontSize: 48,
-    marginBottom: 10,
-  },
-  imagePlaceholderText: {
+  statLabel: {
+    fontSize: 12,
     color: '#666',
-    fontSize: 14,
-    fontWeight: '500',
+    textAlign: 'center',
   },
-  cameraButtons: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 15,
-  },
-  cameraButton: {
-    backgroundColor: '#4A90E2',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
+  infoSection: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  cameraButtonText: {
-    color: '#fff',
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
+  },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  infoLabel: {
     fontSize: 14,
     fontWeight: '600',
+    color: '#666',
+    flex: 1,
   },
-  form: {
-    paddingHorizontal: 20,
-    paddingVertical: 30,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
+  infoValue: {
+    fontSize: 14,
     color: '#333',
+    flex: 1,
+    textAlign: 'right',
+  },
+  notesText: {
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  actionsSection: {
+    backgroundColor: '#fff',
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  actionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    width: '48%',
+    backgroundColor: '#f8f9fa',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+  },
+  actionIcon: {
+    fontSize: 24,
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#e1e1e1',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    marginBottom: 20,
-    color: '#333',
-  },
-  dropdownButton: {
-    backgroundColor: '#f8f8f8',
-    borderWidth: 1,
-    borderColor: '#e1e1e1',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    marginBottom: 20,
-    justifyContent: 'center',
-  },
-  dropdownTextSelected: {
-    fontSize: 16,
-    color: '#333',
-  },
-  dropdownTextPlaceholder: {
-    fontSize: 16,
-    color: '#999',
-  },
-  actionButtons: {
-    marginTop: 20,
-    marginBottom: 40,
-  },
-  saveButtonLarge: {
-    backgroundColor: '#4A90E2',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  saveButtonLargeText: {
-    color: '#fff',
-    fontSize: 16,
+  actionText: {
+    fontSize: 12,
     fontWeight: '600',
+    color: '#333',
+    textAlign: 'center',
   },
-  cancelButtonLarge: {
-    backgroundColor: '#f8f8f8',
-    borderRadius: 12,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#e1e1e1',
-  },
-  cancelButtonLargeText: {
-    color: '#666',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
     backgroundColor: '#fff',
     borderRadius: 20,
     padding: 20,
-    width: '80%',
-    maxHeight: '60%',
+    width: '90%',
+    maxHeight: '80%',
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 15,
-    textAlign: 'center',
     color: '#333',
+    textAlign: 'center',
+    marginBottom: 20,
   },
-  speciesItem: {
-    paddingVertical: 15,
-    paddingHorizontal: 10,
+  petsList: {
+    maxHeight: 400,
+  },
+  petOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: '#f0f0f0',
   },
-  speciesText: {
+  petOptionImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  petOptionInfo: {
+    flex: 1,
+  },
+  petOptionName: {
     fontSize: 16,
+    fontWeight: '600',
     color: '#333',
   },
-  modalCloseButton: {
-    marginTop: 15,
-    paddingVertical: 12,
-    alignItems: 'center',
-    backgroundColor: '#f8f8f8',
-    borderRadius: 10,
+  petOptionDetails: {
+    fontSize: 14,
+    color: '#666',
   },
-  modalCloseText: {
+  petOptionAge: {
+    fontSize: 12,
+    color: '#999',
+  },
+  cancelButton: {
+    backgroundColor: '#f8f8f8',
+    padding: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#e1e1e1',
+  },
+  cancelButtonText: {
     color: '#666',
     fontSize: 16,
+    fontWeight: '600',
   },
 });

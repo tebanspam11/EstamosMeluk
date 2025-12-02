@@ -2,7 +2,7 @@ import { registerRootComponent } from 'expo';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import { View, Text, Button, StyleSheet, Image } from 'react-native';
 
 import AuthLoading from './app/user/authLoading.tsx';
 import LoginScreen from './app/user/userLogin.tsx';
@@ -14,12 +14,23 @@ import HomeScreen from './app/main/home.tsx';
 import CalendarScreen from './app/main/calendar.tsx';
 import CarnetScreen from './app/pet/carnet.tsx';
 import ClinicHistoryScreen from './app/pet/clinic_history.tsx';
-import PetListScreen from './app/pet/list.tsx';
 
 import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
-import PetProfileScreen from './app/pet/pet_profile.tsx';
-import EditPetProfileScreen from './app/pet/petProfile.tsx';
+import PetProfileScreen from './app/pet/petProfile.tsx';
+import EditPetProfileScreen from './app/pet/petEdit.tsx';
 import PetRegisterScreen from './app/pet/petRegister.tsx';
+
+function LogoHeader() {
+  return (
+    <View style={styles.logoContainer}>
+      <Image
+        source={require('./assets/images/LogoPocketVet.jpg')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
+    </View>
+  );
+}
 
 function VeterinarySearchScreen() {
   const navigation = useNavigation();
@@ -62,11 +73,11 @@ function App() {
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 
         {/* Pantallas de Autenticación */}
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
-        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Contraseña' }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
-        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Editar Perfil' }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerTitle: () => <LogoHeader /> }} />
 
         {/* Pantalla Home */}
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -75,44 +86,34 @@ function App() {
         <Stack.Screen
           name="Calendar"
           component={CalendarScreen}
-          options={{ title: 'Calendario' }}
-        />
-        <Stack.Screen
-          name="Notifications"
-          component={NotificationsScreen}
-          options={{ title: 'Notificaciones' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
 
         {/* Pantallas de Mascotas */}
         <Stack.Screen
           name="Carnet"
           component={CarnetScreen}
-          options={{ title: 'Carnet de Vacunas' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
           name="ClinicHistory"
           component={ClinicHistoryScreen}
-          options={{ title: 'Historial Clínico' }}
-        />
-        <Stack.Screen
-          name="PetList"
-          component={PetListScreen}
-          options={{ title: 'Mis Mascotas' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
           name="PetRegister"
           component={PetRegisterScreen}
-          options={{ title: 'Registrar Mascota' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
           name="PetProfile"
           component={PetProfileScreen}
-          options={{ title: 'Perfil de Mascota' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
           name="EditPetProfile"
           component={EditPetProfileScreen}
-          options={{ title: 'Editar Mascota' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
 
         {/* Otras Pantallas */}
@@ -144,6 +145,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 40,
   },
 });
 

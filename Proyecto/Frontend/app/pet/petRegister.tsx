@@ -25,15 +25,18 @@ export default function PetRegisterScreen({ navigation }: any) {
   const [nombre, setNombre] = useState('');
   const [especie, setEspecie] = useState('');
   const [raza, setRaza] = useState('');
+  const [sexo, setSexo] = useState('');
+  const [color, setColor] = useState('');
+  const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [peso, setPeso] = useState('');
-  const [edad, setEdad] = useState('');
   const [alergias, setAlergias] = useState('');
   const [enfermedades, setEnfermedades] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [showSpeciesModal, setShowSpeciesModal] = useState(false);
+  const [showSexModal, setShowSexModal] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const isFormValid = nombre.trim() !== '' && especie.trim() !== '' && raza.trim() !== '';
+  const isFormValid = nombre.trim() !== '' && especie.trim() !== '' && raza.trim() !== '' && sexo.trim() !== '' && fechaNacimiento.trim() !== '';
 
   useFocusEffect(
     React.useCallback(() => {
@@ -102,8 +105,10 @@ export default function PetRegisterScreen({ navigation }: any) {
       nombre,
       especie,
       raza,
+      sexo,
+      fecha_nacimiento: new Date(fechaNacimiento).toISOString(),
+      color: color || null,
       peso: peso ? parseFloat(peso) : null,
-      edad: edad ? parseInt(edad) : null,
       foto: petImage,
       alergias: alergias || null,
       enfermedades: enfermedades || null,
@@ -198,6 +203,35 @@ export default function PetRegisterScreen({ navigation }: any) {
             autoCapitalize="words"
           />
 
+          {/* Sexo */}
+          <Text style={styles.label}>Sexo *</Text>
+          <TouchableOpacity style={styles.dropdownButton} onPress={() => setShowSexModal(true)}>
+            <Text style={sexo ? styles.dropdownTextSelected : styles.dropdownTextPlaceholder}>
+              {sexo || 'Selecciona el sexo'}
+            </Text>
+          </TouchableOpacity>
+
+          {/* Color */}
+          <Text style={styles.label}>Color</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Ej: Negro, Blanco, Café, etc."
+            placeholderTextColor="#999"
+            value={color}
+            onChangeText={setColor}
+            autoCapitalize="words"
+          />
+
+          {/* Fecha de Nacimiento */}
+          <Text style={styles.label}>Fecha de Nacimiento *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="AAAA-MM-DD (Ej: 2022-05-15)"
+            placeholderTextColor="#999"
+            value={fechaNacimiento}
+            onChangeText={setFechaNacimiento}
+          />
+
           {/* Peso */}
           <Text style={styles.label}>Peso (kg)</Text>
           <TextInput
@@ -207,17 +241,6 @@ export default function PetRegisterScreen({ navigation }: any) {
             value={peso}
             onChangeText={setPeso}
             keyboardType="decimal-pad"
-          />
-
-          {/* Edad */}
-          <Text style={styles.label}>Edad (años)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ej: 2"
-            placeholderTextColor="#999"
-            value={edad}
-            onChangeText={setEdad}
-            keyboardType="number-pad"
           />
 
           {/* Alergias */}
@@ -307,6 +330,38 @@ export default function PetRegisterScreen({ navigation }: any) {
               <TouchableOpacity
                 style={styles.modalCloseButton}
                 onPress={() => setShowSpeciesModal(false)}
+              >
+                <Text style={styles.modalCloseText}>Cancelar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Modal para seleccionar sexo */}
+        <Modal
+          visible={showSexModal}
+          animationType="slide"
+          transparent={true}
+          onRequestClose={() => setShowSexModal(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Selecciona el Sexo</Text>
+              <TouchableOpacity
+                style={styles.speciesItem}
+                onPress={() => { setSexo('Macho'); setShowSexModal(false); }}
+              >
+                <Text style={styles.speciesText}>Macho</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.speciesItem}
+                onPress={() => { setSexo('Hembra'); setShowSexModal(false); }}
+              >
+                <Text style={styles.speciesText}>Hembra</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalCloseButton}
+                onPress={() => setShowSexModal(false)}
               >
                 <Text style={styles.modalCloseText}>Cancelar</Text>
               </TouchableOpacity>

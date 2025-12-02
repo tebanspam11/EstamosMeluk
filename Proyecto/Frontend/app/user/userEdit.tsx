@@ -99,61 +99,49 @@ export default function EditProfileScreen({ navigation }: any) {
   const handleUpdate = async () => {
     setSaving(true);
     
-    try {
-      const token = await AsyncStorage.getItem('token');
+    const token = await AsyncStorage.getItem('token');
 
-      const updateData: any = {};
+    const updateData: any = {};
       
-      if (nombre !== originalNombre) {
-          updateData.nombre = nombre;
-      }
+    if (nombre !== originalNombre) {
+      updateData.nombre = nombre;
+    }
       
-      if (telefono !== originalTelefono) {
-          updateData.telefono = telefono || null;
-      }
+    if (telefono !== originalTelefono) {
+      updateData.telefono = telefono || null;
+    }
 
-      if (contraseña.length > 0 && originalContraseña.length > 0) {
-          updateData.contraseñaActual = originalContraseña;
-          updateData.contraseñaNueva = contraseña;
-      }
+    if (contraseña.length > 0 && originalContraseña.length > 0) {
+      updateData.contraseñaActual = originalContraseña;
+      updateData.contraseñaNueva = contraseña;
+    }
 
-      console.log('Enviando datos:', updateData);
-
-      const response = await fetch(`${API_URL}/usuarios`, {
+    const response = await fetch(`${API_URL}/usuarios`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(updateData),
-      });
+    });
 
-      console.log('Response status:', response.status);
-      const data = await response.json();
-      console.log('Response data:', data);
+    const data = await response.json();
 
-      if (response.ok) {
-          setOriginalNombre(nombre);
-          setOriginalTelefono(telefono);
-          setPassword('');
-          setConfirmPassword('');
-          setOriginalContraseña('');
-          setShowChecklist(false);
+    if (response.ok) {
+        setOriginalNombre(nombre);
+        setOriginalTelefono(telefono);
+        setPassword('');
+        setConfirmPassword('');
+        setOriginalContraseña('');
+        setShowChecklist(false);
           
-          Alert.alert('Éxito', 'Perfil actualizado correctamente', [
-          {
-              text: 'OK',
-              onPress: () => navigation.goBack(),
-          },
-          ]);
-      } else {
-          Alert.alert('Error', data?.error);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error al actualizar el perfil');
-    } finally {
-      setSaving(false);
+        Alert.alert('Éxito', 'Perfil actualizado correctamente', [
+        {  text: 'OK', onPress: () => navigation.goBack()},
+        ]);
+    } else {
+        Alert.alert('Error', data?.error);
     }
+    setSaving(false);
   };
 
   if (loading) {

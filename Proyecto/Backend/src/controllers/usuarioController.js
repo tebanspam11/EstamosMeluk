@@ -51,47 +51,40 @@ export const obtenerUsuario = async (req, res) => {
 };
 
 export const editarUsuario = async (req, res) => {
-    try {
-        const { userId } = req.user; // Del token JWT
-        const { nombre, telefono, foto, contraseñaActual, contraseñaNueva } = req.body;
+    const { userId } = req.user; // Del token JWT
+    const { nombre, telefono, foto, contraseñaActual, contraseñaNueva } = req.body;
 
-        const updateData = {};
+    const updateData = {};
 
-        if (nombre) updateData.nombre = nombre;
-        if (telefono !== undefined) updateData.telefono = telefono;
-        if (foto !== undefined) updateData.foto = foto;
+    if (nombre) updateData.nombre = nombre;
+    if (telefono !== undefined) updateData.telefono = telefono;
+    if (foto !== undefined) updateData.foto = foto;
 
-        if (contraseñaNueva) {
-          if (!contraseñaActual) return res.status(400).json({ error: '⚠︎ Debes proporcionar tu contraseña actual' });
+    if (contraseñaNueva) {          
+        const usuario = await prisma.usuario.findUnique({where: { id: userId }, select: { contraseña: true }});
           
-          const usuario = await prisma.usuario.findUnique({where: { id: userId }, select: { contraseña: true }});
-          
-          const match = await bcrypt.compare(contraseñaActual, usuario.contraseña);
-          if (!match) return res.status(401).json({ error: '⚠︎ Contraseña actual incorrecta' });
+        const match = await bcrypt.compare(contraseñaActual, usuario.contraseña);
+        if (!match) return res.status(401).json({ error: '⚠︎ Contraseña actual incorrecta' });
 
-          const hashedPassword = await bcrypt.hash(contraseñaNueva, 10);
-          updateData.contraseña = hashedPassword;
-        }
-
-        const usuarioActualizado = await prisma.usuario.update({
-          where: { id: userId },
-          data: updateData,
-          select: {
-            id: true,
-            nombre: true,
-            correo: true,
-            telefono: true,
-            foto: true,
-            cuenta_google: true,
-            created_at: true,
-          }
-        });
-
-        res.json(usuarioActualizado);
-    } catch (error) {
-        console.error('Error al editar usuario:', error);
-        res.status(500).json({ error: '⚠︎ Error al actualizar el perfil' });
+        const hashedPassword = await bcrypt.hash(contraseñaNueva, 10);
+        updateData.contraseña = hashedPassword;s
     }
+
+    const usuarioActualizado = await prisma.usuario.update({
+        where: { id: userId },
+        data: updateData,
+        select: {
+         id: true,
+         nombre: true,
+         correo: true,
+         telefono: true,
+         foto: true,
+         cuenta_google: true,
+         created_at: true,
+        }
+    });
+
+    res.json(usuarioActualizado);
 };
 
 export const eliminarUsuario = async (req, res) => {
