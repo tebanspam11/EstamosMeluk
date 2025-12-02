@@ -56,14 +56,6 @@ export default function LoginScreen({ navigation }: any) {
     Alert.alert('Google Login', 'Función de Google en desarrollo');
   };
 
-  const handleForgotPassword = () => {
-    navigation.navigate('ForgotPassword');
-  };
-
-  const handleRegister = () => {
-    navigation.navigate('Register');
-  };
-
   const handleIdentifierChange = (text: string) => {
     if (text.includes('@')) {
       setIdentifier(text);
@@ -131,7 +123,7 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.checkboxLabel}>Recordar mi sesión</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+          <TouchableOpacity onPress={() => navigation.replace('ForgotPassword')}>
             <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
 
@@ -168,7 +160,7 @@ export default function LoginScreen({ navigation }: any) {
           {/* Register Link */}
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>¿No tienes cuenta? </Text>
-            <TouchableOpacity onPress={handleRegister}>
+            <TouchableOpacity onPress={() => navigation.replace('Register')}>
               <Text style={styles.registerLink}>Regístrate</Text>
             </TouchableOpacity>
           </View>

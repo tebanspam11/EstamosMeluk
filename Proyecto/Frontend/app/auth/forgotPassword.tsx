@@ -121,7 +121,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
         [
           { 
             text: 'Ir al Login', 
-            onPress: () => navigation.navigate('Login') 
+            onPress: () => navigation.replace('Login') 
           }
         ]
       );
@@ -131,10 +131,6 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     setLoading(false);
   };
 
-  const handleBackToLogin = () => {
-    navigation.goBack();
-  };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -142,7 +138,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={handleBackToLogin} style={styles.backButton}>
+          <TouchableOpacity onPress={() => navigation.replace('Login')} style={styles.backButton}>
             <Text style={styles.backButtonText}>←</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Recuperar Contraseña</Text>
@@ -278,7 +274,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
           </View>
         )}
 
-        <TouchableOpacity onPress={handleBackToLogin} style={styles.backToLogin}>
+        <TouchableOpacity onPress={() => navigation.replace('Login')} style={styles.backToLogin}>
           <Text style={styles.backToLoginText}>← Volver al inicio de sesión</Text>
         </TouchableOpacity>
       </ScrollView>
