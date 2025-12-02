@@ -42,7 +42,7 @@ model Mascota {
   observaciones    String?
   created_at       DateTime            @default(now())
   updated_at       DateTime            @updatedAt
-  carnet           Carnet_Digital?
+  carnet           Carnet_Digital[]
   documentos       Documento_Mascota[]
   eventos          Evento[]
   usuario          Usuario             @relation(fields: [id_usuario], references: [id])
@@ -90,7 +90,7 @@ model Documento_Mascota {
 
 model Carnet_Digital {
   id                    Int       @id @default(autoincrement())
-  id_mascota            Int       @unique
+  id_mascota            Int
   tipo_medicamento      String
   nombre_medicamento    String
   fecha_aplicacion      DateTime
