@@ -107,11 +107,32 @@ export const editarUsuario = async (req, res) => {
 export const eliminarUsuario = async (req, res) => {
     const { userId } = req.user; // Del token JWT
 
-    await prisma.notificacion.deleteMany({where: { id_usuario: userId }});
+    try {
+      const mascotas = await prisma.mascota.findMany({ where: { id_usuario: userId }, select: { id: true } });
+      const mascotaIds = mascotas.map(m => m.id);
 
-    await prisma.mascota.deleteMany({where: { id_usuario: userId }});
+      if (mascotaIds.length > 0) {
+        const eventos = await prisma.evento.findMany({ where: { id_mascota: { in: mascotaIds } }, select: { id: true } });
+        const eventoIds = eventos.map(e => e.id);
 
-    await prisma.usuario.delete({where: { id: userId }});
+        if (eventoIds.length > 0) {
+          await prisma.notificacion.deleteMany({ where: { id_evento: { in: eventoIds } } });
+        }
 
-    res.json({ message: 'Usuario eliminado correctamente' });
+        await prisma.evento.deleteMany({ where: { id_mascota: { in: mascotaIds } } });
+
+        await prisma.documento_Mascota.deleteMany({ where: { id_mascota: { in: mascotaIds } } });
+        await prisma.carnet_Digital.deleteMany({ where: { id_mascota: { in: mascotaIds } } });
+      }
+
+      await prisma.notificacion.deleteMany({ where: { id_usuario: userId } });
+
+      await prisma.mascota.deleteMany({ where: { id_usuario: userId } });
+      await prisma.usuario.delete({ where: { id: userId } });
+
+      res.json({ message: 'Usuario eliminado correctamente' });
+    } catch (err) {
+      console.error('Error eliminando usuario y dependencias:', err);
+      return res.status(500).json({ error: 'Error al eliminar usuario' });
+    }
 };
