@@ -1,8 +1,9 @@
 import { registerRootComponent } from 'expo';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, Button, StyleSheet, Image } from 'react-native';
+import { useNotifications } from './src/hooks/useNotifications';
 
 import AuthLoading from './app/user/authLoading.tsx';
 import LoginScreen from './app/user/userLogin.tsx';
@@ -45,6 +46,9 @@ function VeterinarySearchScreen() {
 const Stack = createStackNavigator();
 
 function App() {
+  // Inicializar notificaciones
+  useNotifications();
+  
   return (
     <NavigationContainer>
 

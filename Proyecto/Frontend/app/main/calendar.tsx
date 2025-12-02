@@ -11,11 +11,17 @@ import {
   SafeAreaView,
   Platform,
   ActivityIndicator,
+  Switch,
 } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { API_URL } from '../../src/config/api';
+import { useNotifications } from '../../src/hooks/useNotifications';
+import { 
+  scheduleMultipleEventReminders,
+  cancelNotification 
+} from '../../src/services/notificationService';
 
 type EventStatus = 'Pendiente' | 'Completo' | 'Cancelado';
 
@@ -28,6 +34,7 @@ interface Event {
   estado: EventStatus;
   repeticion?: string | null;
   id_mascota: number;
+  notificationIds?: string[];
 }
 
 interface Pet {
@@ -45,10 +52,16 @@ interface NewEvent {
   estado: EventStatus;
   repeticion?: string | null;
   id_mascota: number;
+  enableNotifications?: boolean;
+  notificationIds?: string[];
 }
 
 export default function CalendarScreen() {
   const navigation = useNavigation();
+  
+  // Hook de notificaciones
+  const { expoPushToken } = useNotifications();
+  
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [pets, setPets] = useState<Pet[]>([]);
@@ -74,6 +87,8 @@ export default function CalendarScreen() {
     estado: 'Pendiente',
     repeticion: null,
     id_mascota: 0,
+    enableNotifications: true,
+    notificationIds: [],
   });
 
   useFocusEffect(
@@ -153,7 +168,37 @@ export default function CalendarScreen() {
     });
 
     if (response.ok) {
-      Alert.alert('Éxito', `Evento agregado para el ${eventStart.toLocaleDateString('es-ES')}`);
+      // Programar notificaciones si están habilitadas
+      if (newEvent.enableNotifications) {
+        try {
+          const notificationIds = await scheduleMultipleEventReminders(
+            newEvent.titulo,
+            eventStart,
+            [5, 3, 1] // Para pruebas: 5, 3 y 1 minuto antes
+          );
+          console.log('Notificaciones programadas:', notificationIds);
+          console.log('Fecha del evento:', eventStart);
+          console.log('Hora actual:', new Date());
+          
+          if (notificationIds.length === 0) {
+            Alert.alert(
+              'Evento agregado',
+              'No se programaron notificaciones porque el evento está muy cerca. Crea un evento con al menos 5 minutos de anticipación.'
+            );
+          } else {
+            Alert.alert(
+              'Éxito',
+              `Evento agregado con ${notificationIds.length} recordatorio${notificationIds.length > 1 ? 's' : ''} programado${notificationIds.length > 1 ? 's' : ''}\n\nRecibirás notificaciones en: 1, 3 y 5 minutos antes del evento`
+            );
+          }
+        } catch (error) {
+          console.error('Error al programar notificaciones:', error);
+          Alert.alert('Evento agregado', 'Pero no se pudieron programar las notificaciones');
+        }
+      } else {
+        Alert.alert('Éxito', `Evento agregado para el ${eventStart.toLocaleDateString('es-ES')}`);
+      }
+      
       setShowModal(false);
       resetNewEvent();
       cargarDatos();
@@ -179,6 +224,8 @@ export default function CalendarScreen() {
       estado: 'Pendiente',
       repeticion: null,
       id_mascota: pets.length > 0 ? pets[0].id : 0,
+      enableNotifications: true,
+      notificationIds: [],
     });
   };
 
@@ -624,6 +671,22 @@ export default function CalendarScreen() {
                   />
                 </View>
               )}
+
+              {/* Habilitar Notificaciones */}
+              <View style={styles.notificationToggle}>
+                <View style={styles.notificationInfo}>
+                  <Text style={styles.label}>🔔 Recordatorios</Text>
+                  <Text style={styles.notificationDescription}>
+                    Se enviarán notificaciones 1, 3 y 5 minutos antes del evento
+                  </Text>
+                </View>
+                <Switch
+                  value={newEvent.enableNotifications}
+                  onValueChange={(value) => setNewEvent({ ...newEvent, enableNotifications: value })}
+                  trackColor={{ false: '#ccc', true: '#4A90E2' }}
+                  thumbColor={newEvent.enableNotifications ? '#fff' : '#f4f3f4'}
+                />
+              </View>
             </ScrollView>
 
             {/* Botones del Modal */}
@@ -1304,5 +1367,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  notificationToggle: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#f8f8f8',
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+  },
+  notificationInfo: {
+    flex: 1,
+    marginRight: 12,
+  },
+  notificationDescription: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 4,
+    lineHeight: 16,
   },
 });

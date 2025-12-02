@@ -1,10 +1,13 @@
 {
   "devDependencies": {
+    "@types/react": "~19.1.10",
     "jest": "^30.2.0",
-    "prisma": "^6.19.0"
+    "prisma": "^6.19.0",
+    "typescript": "~5.9.2"
   },
   "dependencies": {
     "@prisma/client": "^7.0.1",
-    "expo": "^54.0.25"
+    "expo": "^54.0.25",
+    "expo-router": "^6.0.15"
   }
 }

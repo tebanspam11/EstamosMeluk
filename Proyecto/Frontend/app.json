@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.PocketVet"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +18,11 @@
         "foregroundImage": "./assets/images/LogoPocketVet.jpg"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.PocketVet"
     },
     "web": {
       "output": "static",
@@ -42,6 +47,20 @@
         {
           "photosPermission": "La aplicación necesita acceso a tus fotos para que puedas agregar imágenes de tus mascotas.",
           "cameraPermission": "La aplicación necesita acceso a tu cámara para tomar fotos de tus mascotas."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/LogoPocketVet.jpg",
+          "color": "#4A90E2",
+          "sounds": [],
+          "ios": {
+            "requestPermissionsOnAppLaunch": true
+          },
+          "android": {
+            "requestPermissionsOnAppLaunch": true
+          }
         }
       ]
     ],
