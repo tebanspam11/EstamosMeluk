@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/', crearUsuario);     
 router.get('/', verificarToken, obtenerUsuario);      
-router.put('/:id', verificarToken, editarUsuario);       
-router.delete('/:id', verificarToken, eliminarUsuario);  
+router.put('/', verificarToken, editarUsuario);       
+router.delete('/', verificarToken, eliminarUsuario);  
 
 export default router;

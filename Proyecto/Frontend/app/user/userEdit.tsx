@@ -112,10 +112,12 @@ export default function EditProfileScreen({ navigation }: any) {
           updateData.telefono = telefono || null;
       }
 
-      if (contraseña.length > 0) {
+      if (contraseña.length > 0 && originalContraseña.length > 0) {
           updateData.contraseñaActual = originalContraseña;
           updateData.contraseñaNueva = contraseña;
       }
+
+      console.log('Enviando datos:', updateData);
 
       const response = await fetch(`${API_URL}/usuarios`, {
         method: 'PUT',
@@ -126,7 +128,9 @@ export default function EditProfileScreen({ navigation }: any) {
         body: JSON.stringify(updateData),
       });
 
+      console.log('Response status:', response.status);
       const data = await response.json();
+      console.log('Response data:', data);
 
       if (response.ok) {
           setOriginalNombre(nombre);
