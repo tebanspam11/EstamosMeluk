@@ -50,15 +50,29 @@ export const obtenerUsuario = async (req, res) => {
 
 export const editarUsuario = async (req, res) => {
     const { userId } = req.user; // Del token JWT
-    const { nombre, telefono, foto } = req.body;
+    const { nombre, telefono, foto, contraseñaActual, contraseñaNueva } = req.body;
+
+    const updateData = {};
+
+    if (nombre) updateData.nombre = nombre;
+    if (telefono !== undefined) updateData.telefono = telefono;
+    if (foto !== undefined) updateData.foto = foto;
+
+    if (contraseñaNueva) {
+      if (!contraseñaActual) return res.status(400).json({ error: '⚠︎ Debes proporcionar tu contraseña actual' });
+
+      const usuario = await prisma.usuario.findUnique({where: { id: userId }, select: { contraseña: true }});
+      
+      const match = await bcrypt.compare(contraseñaActual, usuario.contraseña);
+      if (!match) return res.status(401).json({ error: '⚠︎ Contraseña actual incorrecta' });
+
+      const hashedPassword = await bcrypt.hash(contraseñaNueva, 10);
+      updateData.contraseña = hashedPassword;
+    }
 
     const usuarioActualizado = await prisma.usuario.update({
       where: { id: userId },
-      data: {
-        ...(nombre && { nombre }),
-        ...(telefono && { telefono }),
-        ...(foto !== undefined && { foto }),
-      },
+      data: updateData,
       select: {
         id: true,
         nombre: true,
