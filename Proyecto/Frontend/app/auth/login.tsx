@@ -1,7 +1,8 @@
 import LogoImage from '../../assets/images/LogoPocketVet.jpg';
 import { API_URL } from '../../src/config/api.ts';
 import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
-import React, { useState } from 'react';
+import { useGoogleAuth } from '../../src/hooks/useGoogleAuth.ts';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,13 +22,21 @@ export default function LoginScreen({ navigation }: any) {
   const [keepLogged, setKeepLogged] = useState(false);
   const [contraseña, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const { signInWithGoogle, loading: googleLoading, error: googleError, isSuccessful } = useGoogleAuth();
+
+  useEffect(() => {
+    if (isSuccessful === true) {
+      Alert.alert('Login exitoso', 'Bienvenido a PocketVet');
+      navigation.replace('Home');
+    } else if (isSuccessful === false && googleError) {
+      Alert.alert('Error', googleError);
+    }
+  }, [isSuccessful]);
 
   const handleLogin = async () => {
     setLoading(true);
-    
-    const normalizedIdentifier = identifier.includes('@') 
-      ? identifier.trim() 
-      : identifier.replace(/[\s\-()]/g, '');
+    const normalizedIdentifier = identifier.includes('@') ? identifier.trim() : identifier.replace(/[\s\-()]/g, '');
 
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
@@ -44,16 +53,15 @@ export default function LoginScreen({ navigation }: any) {
 
       Alert.alert('Login exitoso');
       navigation.replace('Home');
-    } else {
-      const errorMessage = data?.error || data?.message;
-      Alert.alert('Error de autenticación', errorMessage);
-    }
 
+    } else {
+      Alert.alert('Error de autenticación', data?.error);
+    }
     setLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert('Google Login', 'Función de Google en desarrollo');
+  const handleGoogleLogin = async () => {
+    await signInWithGoogle();
   };
 
   const handleIdentifierChange = (text: string) => {
@@ -149,12 +157,18 @@ export default function LoginScreen({ navigation }: any) {
           </View>
 
           {/* Google Login Button */}
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+          <TouchableOpacity 
+            style={styles.googleButton} 
+            onPress={handleGoogleLogin}
+            disabled={googleLoading}
+          >
             <Image
               source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
               style={styles.googleIcon}
             />
-            <Text style={styles.googleButtonText}>Continuar con Google</Text>
+            <Text style={styles.googleButtonText}>
+              {googleLoading ? 'Conectando con Google...' : 'Continuar con Google'}
+            </Text>
           </TouchableOpacity>
 
           {/* Register Link */}

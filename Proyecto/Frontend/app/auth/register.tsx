@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { API_URL } from '../../src/config/api.ts';
-import { validateEmailFields } from '../../src/utils/validateEmail.ts';
-import { validatePasswordChecklist, PasswordChecklistType } from '../../src/utils/validatePassword.ts';
-import { validatePhoneFields } from '../../src/utils/validatePhone.ts';
-import { validateConfirmPasswordFields } from '../../src/utils/validateConfirmPassword.ts';
+import React, { useState, useEffect } from 'react';
 import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
 import { formatName } from '../../src/utils/formatName.ts';
+import { useGoogleAuth } from '../../src/hooks/useGoogleAuth.ts';
+import { API_URL } from '../../src/config/api.ts';
+import { useFormValidation } from '../../src/hooks/useFormValidation.ts';
 import {
   View,
   Text,
@@ -19,104 +17,46 @@ import {
   Image,
 } from 'react-native';
 
-
 export default function RegisterScreen({ navigation }: any) {
   const [nombre, setName] = useState('');
   const [correo, setEmail] = useState('');
   const [telefono, setPhone] = useState('');
   const [contraseña, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-
-  const [emailError, setEmailError] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
-  const [passwordChecklist, setPasswordChecklist] = useState<PasswordChecklistType>({
-    length: false,
-    uppercase: false,
-    lowercase: false,
-    number: false,
-    special: false,
-    noSpaces: false,
-  });
-  const [passwordValid, setPasswordValid] = useState(false);
-  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
-
   const [showChecklist, setShowChecklist] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
-
-  const isFormValid = useMemo(() => {
-    const confirmPasswordIsValid = confirmPassword && contraseña ? validateConfirmPasswordFields(contraseña, confirmPassword).valido : false;
-
-    return (
-      nombre.trim().length > 0 &&
-      (correo ? validateEmailFields(correo).valido : false) &&
-      (telefono ? validatePhoneFields(telefono) : true) &&
-      (contraseña ? validatePasswordChecklist(contraseña).valido : false) &&
-      confirmPasswordIsValid
-    );
-  }, [nombre, correo, contraseña, telefono, confirmPassword, passwordValid]);
+  
+  const { signInWithGoogle, loading: googleLoading, error: googleError, isSuccessful: googleSuccess } = useGoogleAuth();
+  const { emailError, phoneError, passwordChecklist, passwordValid, confirmPasswordError, isFormValid} = useFormValidation(nombre, correo, telefono, contraseña, confirmPassword);
 
   useEffect(() => {
-    setEmailError(
-      correo
-        ? validateEmailFields(correo).valido
-          ? null
-          : validateEmailFields(correo).error
-        : null
-    );
-  }, [correo]);
-
-  useEffect(() => {
-    setPhoneError(
-      telefono ? (validatePhoneFields(telefono) ? null : 'ⓘ El número no es válido') : null
-    );
-  }, [telefono]);
-
-  useEffect(() => {
-    if (confirmPassword && contraseña) {
-      setConfirmPasswordError(
-        validateConfirmPasswordFields(contraseña, confirmPassword).valido
-          ? null
-          : validateConfirmPasswordFields(contraseña, confirmPassword).error
-      );
-    } else {
-      setConfirmPasswordError(null);
+    if (googleSuccess === true) {
+      Alert.alert('Registro exitoso', '¡Bienvenido a PocketVet!');
+      navigation.replace('Home');
+    } else if (googleSuccess === false && googleError) {
+      Alert.alert('Error', googleError);
     }
-  }, [confirmPassword, contraseña]);
-
-  useEffect(() => {
-    setPasswordChecklist(validatePasswordChecklist(contraseña).checklist)
-    setPasswordValid(
-      contraseña
-      ? validatePasswordChecklist(contraseña).valido
-      : false
-    )
-  }, [contraseña])
+  }, [googleSuccess]);
 
   const handleRegister = async () => {
-    const res = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, correo, telefono, contraseña }),
     });
 
-    const contentType = res.headers.get('content-type') || '';
-    let data: any = null;
+    const data = await response.json();
 
-    if (contentType.includes('application/json')) {
-      data = await res.json();
-    }
-
-    if (res.ok && data && data.ok) {
-      Alert.alert('Registro exitoso');
+    if (response.ok && data && data.ok) {
+      Alert.alert("Su usuario ha sido registrado exitosamente. Por favor, inicie sesión.");
       navigation.replace('Login');
     } else {
-      console.warn('Register failed:', res.status, data);
-      Alert.alert('Error en registro', data?.message || JSON.stringify(data));
+      Alert.alert('Error en registro', data?.error || JSON.stringify(data));
     }
   };
 
-  const handleGoogleRegister = () => {
-    Alert.alert('Google Register', 'Función de Google en desarrollo');
+  const handleGoogleRegister = async () => {
+    await signInWithGoogle();
   };
 
   return (
@@ -280,12 +220,18 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
 
           {/* Google Register Button */}
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister}>
+          <TouchableOpacity 
+            style={styles.googleButton} 
+            onPress={handleGoogleRegister}
+            disabled={googleLoading}
+          >
             <Image
               source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
               style={styles.googleIcon}
             />
-            <Text style={styles.googleButtonText}>Registrarse con Google</Text>
+            <Text style={styles.googleButtonText}>
+              {googleLoading ? 'Conectando con Google...' : 'Registrarse con Google'}
+            </Text>
           </TouchableOpacity>
 
           {/* Login Link */}

@@ -18,6 +18,7 @@ model Usuario {
   telefono      String?  @unique
   contraseña   String?
   cuenta_google Boolean? @default(false)
+  googleId      String?  @unique
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 

@@ -31,6 +31,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
   
   const [showChecklist, setShowChecklist] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
@@ -55,8 +56,8 @@ export default function ForgotPasswordScreen({ navigation }: any) {
   }, [confirmPassword, newPassword]);
 
   const handleSendCode = async () => {
-
     setLoading(true);
+
     const response = await fetch(`${API_URL}/password/request-reset`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -78,11 +79,6 @@ export default function ForgotPasswordScreen({ navigation }: any) {
   };
 
   const handleVerifyCode = async () => {
-    if (code.length !== 6) {
-      Alert.alert('Error', 'El código debe tener 6 dígitos');
-      return;
-    }
-
     setLoading(true);
 
     const response = await fetch(`${API_URL}/password/verify-code`, {
@@ -103,7 +99,6 @@ export default function ForgotPasswordScreen({ navigation }: any) {
   };
 
   const handleResetPassword = async () => {
-
     setLoading(true);
 
     const response = await fetch(`${API_URL}/password/reset-password`, {
