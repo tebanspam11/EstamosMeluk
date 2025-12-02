@@ -2,7 +2,7 @@
 import multer from 'multer';
 import fs from 'fs';
 
-const uploadPath = 'uploads/mascotas';
+const uploadPath = 'uploads/pdfs';
 if (!fs.existsSync(uploadPath)) fs.mkdirSync(uploadPath, { recursive: true });
 
 const storage = multer.diskStorage({
