@@ -67,10 +67,19 @@ export const editarUsuario = async (req, res) => {
         if (!match) return res.status(401).json({ error: '⚠︎ Contraseña actual incorrecta' });
 
         const hashedPassword = await bcrypt.hash(contraseñaNueva, 10);
-        updateData.contraseña = hashedPassword;s
+        updateData.contraseña = hashedPassword;
     }
 
-    const usuarioActualizado = await prisma.usuario.update({
+    // Si el usuario intenta cambiar el teléfono, verificar unicidad
+    if (telefono !== undefined && telefono !== null && telefono !== '') {
+      const existing = await prisma.usuario.findUnique({ where: { telefono } });
+      if (existing && existing.id !== userId) {
+        return res.status(400).json({ error: '⚠︎ El teléfono ya está en uso por otro usuario' });
+      }
+    }
+
+    try {
+      const usuarioActualizado = await prisma.usuario.update({
         where: { id: userId },
         data: updateData,
         select: {
@@ -82,9 +91,17 @@ export const editarUsuario = async (req, res) => {
          cuenta_google: true,
          created_at: true,
         }
-    });
+      });
 
-    res.json(usuarioActualizado);
+      res.json(usuarioActualizado);
+    } catch (err) {
+      // Manejar error de constraint único por si acaso
+      if (err?.code === 'P2002') {
+        return res.status(400).json({ error: '⚠︎ Valor duplicado que viola una restricción única' });
+      }
+      console.error('Error updating user:', err);
+      return res.status(500).json({ error: 'Error al actualizar usuario' });
+    }
 };
 
 export const eliminarUsuario = async (req, res) => {
