@@ -17,6 +17,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from '@react-navigation/native';
 import { API_URL } from '../../src/config/api';
+import { formatName } from '../../src/utils/formatName';
 
 interface Documento {
   id: number;
@@ -60,17 +61,13 @@ export default function ClinicHistoryScreen({ navigation }: any) {
     const token = await AsyncStorage.getItem('token');
     const headers = { 'Authorization': `Bearer ${token}` };
 
-    try {
-      const mascotasRes = await fetch(`${API_URL}/mascotas`, { headers });
-      if (mascotasRes.ok) {
-        const mascotasData = await mascotasRes.json();
-        setMascotas(mascotasData);
-        if (mascotasData.length > 0 && !selectedMascota) {
-          setSelectedMascota(mascotasData[0]);
-        }
+    const mascotasRes = await fetch(`${API_URL}/mascotas`, { headers });
+    if (mascotasRes.ok) {
+      const mascotasData = await mascotasRes.json();
+      setMascotas(mascotasData);
+      if (mascotasData.length > 0 && !selectedMascota) {
+         setSelectedMascota(mascotasData[0]);
       }
-    } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar las mascotas');
     }
     setLoading(false);
   };
@@ -79,14 +76,10 @@ export default function ClinicHistoryScreen({ navigation }: any) {
     const token = await AsyncStorage.getItem('token');
     const headers = { 'Authorization': `Bearer ${token}` };
 
-    try {
-      const docsRes = await fetch(`${API_URL}/documentos/mascota/${idMascota}`, { headers });
-      if (docsRes.ok) {
-        const docsData = await docsRes.json();
-        setDocumentos(docsData);
-      }
-    } catch (error) {
-      console.log('Error cargando documentos:', error);
+    const docsRes = await fetch(`${API_URL}/documentos/mascota/${idMascota}`, { headers });
+    if (docsRes.ok) {
+      const docsData = await docsRes.json();
+      setDocumentos(docsData);
     }
   };
 
@@ -134,7 +127,6 @@ export default function ClinicHistoryScreen({ navigation }: any) {
     setUploading(true);
     const token = await AsyncStorage.getItem('token');
 
-    try {
       const formData = new FormData();
       formData.append('file', {
         uri: newDoc.file.uri,
@@ -143,7 +135,7 @@ export default function ClinicHistoryScreen({ navigation }: any) {
       } as any);
       formData.append('id_mascota', selectedMascota.id.toString());
       formData.append('tipo', newDoc.tipo);
-      formData.append('titulo', newDoc.titulo);
+      formData.append('titulo', formatName(newDoc.titulo));
       formData.append('descripcion', newDoc.descripcion);
 
       const response = await fetch(`${API_URL}/documentos/uploads`, {
@@ -161,11 +153,8 @@ export default function ClinicHistoryScreen({ navigation }: any) {
         cargarDocumentos(selectedMascota.id);
       } else {
         const data = await response.json();
-        Alert.alert('Error', data.error || 'No se pudo subir el documento');
+        Alert.alert('Error', data.error);
       }
-    } catch (error) {
-      Alert.alert('Error', 'Ocurrió un error al subir el documento');
-    }
     setUploading(false);
   };
 
@@ -218,10 +207,10 @@ export default function ClinicHistoryScreen({ navigation }: any) {
 
   const getTipoIcon = (tipo: string) => {
     switch (tipo.toLowerCase()) {
-      case 'consulta': return '🩺';
-      case 'vacuna': return '💉';
-      case 'examen': return '🔬';
-      case 'receta': return '💊';
+      case 'Consulta': return '🩺';
+      case 'Hospilatizaciones': return '💉';
+      case 'Laboratorios': return '🔬';
+      case 'Formulas': return '💊';
       default: return '📄';
     }
   };

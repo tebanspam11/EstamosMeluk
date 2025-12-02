@@ -1,6 +1,8 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -11,12 +13,16 @@ import mascotaRoutes from './src/routes/mascotaRoutes.js';
 import usuarioRoutes from './src/routes/usuarioRoutes.js';
 import eventoRoutes from './src/routes/eventoRoutes.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/documentos', pdfRoutes);
