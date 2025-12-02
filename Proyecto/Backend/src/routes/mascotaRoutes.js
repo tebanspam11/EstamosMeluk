@@ -1,8 +1,12 @@
 import express from 'express';
-import { crearMascota } from '../controllers/mascotaController.js';
+import { obtenerMascotas, crearMascota, editarMascota, eliminarMascota } from '../controllers/mascotaController.js';
+import { verificarToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/', crearMascota);
+router.get('/', verificarToken, obtenerMascotas);
+router.post('/', verificarToken, crearMascota);
+router.put('/:id', verificarToken, editarMascota);
+router.delete('/:id', verificarToken, eliminarMascota);
 
 export default router;

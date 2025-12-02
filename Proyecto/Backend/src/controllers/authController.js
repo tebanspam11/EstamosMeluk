@@ -63,48 +63,37 @@ export const register = async (req, res) => {
 };
 
 export const googleAuth = async (req, res) => {
-  try {
-    const { idToken } = req.body;
+  const { idToken } = req.body;
 
-    if (!idToken) return res.status(400).json({ ok: false, error: '⚠ Token de Google no proporcionado' });
+  if (!idToken) return res.status(400).json({ ok: false, error: '⚠ Token de Google no proporcionado' });
 
-    const ticket = await googleClient.verifyIdToken({idToken, audience: process.env.GOOGLE_CLIENT_ID});
+  const ticket = await googleClient.verifyIdToken({idToken, audience: process.env.GOOGLE_CLIENT_ID});
 
-    const payload = ticket.getPayload();
+  const payload = ticket.getPayload();
     
-    if (!payload) return res.status(401).json({ ok: false, error: '⚠ Token inválido' });
+  if (!payload) return res.status(401).json({ ok: false, error: '⚠ Token inválido' });
 
-    const { email, name, sub: googleId } = payload;
+  const { email, name, sub: googleId } = payload;
 
-    let user = await prisma.usuario.findFirst({where: {OR: [{ correo: email }, { googleId: googleId }]}});
+  let user = await prisma.usuario.findFirst({where: {OR: [{ correo: email }, { googleId: googleId }]}});
 
-    if (!user) {
-      user = await prisma.usuario.create({
-        data: {
-          nombre: name,
-          correo: email,
-          googleId: googleId,
-          contraseña: '',
-        },
-      });
-
-      sendWelcomeEmail(email, name).catch(err => {
-        console.error('⚠ No se pudo enviar email de bienvenida:', err);
-      });
-
-    } else if (!user.googleId) {
-      user = await prisma.usuario.update({where: { id: user.id }, data: { googleId: googleId },});
-    }
-
-    const token = jwt.sign({ id_usuario: user.id }, process.env.JWT_SECRET, { expiresIn: "3650d" });
-
-    return res.json({ ok: true, userId: user.id, correo: user.correo, token, keepLogged: true });
-
-  } catch (error) {
-    console.error('⚠Error en autenticación de Google:', error);
-    return res.status(500).json({ 
-      ok: false, 
-      error: '⚠ Error al verificar con Google' 
+  if (!user) {
+    user = await prisma.usuario.create({
+      data: {
+        nombre: name,
+        correo: email,
+        googleId: googleId,
+        contraseña: '',
+      },
     });
+
+  sendWelcomeEmail(email, name);
+
+  } else if (!user.googleId) {
+    user = await prisma.usuario.update({where: { id: user.id }, data: { googleId: googleId },});
   }
+
+   const token = jwt.sign({ id_usuario: user.id }, process.env.JWT_SECRET, { expiresIn: "3650d" });
+
+  return res.json({ ok: true, userId: user.id, correo: user.correo, token, keepLogged: true });
 };

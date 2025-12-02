@@ -8,6 +8,8 @@ import authRoutes from "./src/routes/authRoutes.js";
 import pdfRoutes from "./src/routes/pdfRoutes.js";
 import passwordResetRoutes from "./src/routes/passwordResetRoutes.js";
 import mascotaRoutes from './src/routes/mascotaRoutes.js';
+import usuarioRoutes from './src/routes/usuarioRoutes.js';
+import eventoRoutes from './src/routes/eventoRoutes.js';
 
 
 const app = express();
@@ -20,6 +22,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/documentos', pdfRoutes);
 app.use('/api/password', passwordResetRoutes);
 app.use('/api/mascotas', mascotaRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/eventos', eventoRoutes);
 
 app.get('/', (req, res) => {
   res.send('API running');

@@ -93,7 +93,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
       Alert.alert('Código verificado', 'Ahora establece tu nueva contraseña');
       setStep(3);
     } else {
-      Alert.alert('Error', data.error || 'Código incorrecto');
+      Alert.alert('Error', data.error);
     }
     setLoading(false);
   };
@@ -121,7 +121,7 @@ export default function ForgotPasswordScreen({ navigation }: any) {
         ]
       );
     } else {
-      Alert.alert('Error', data.error || 'No se pudo actualizar la contraseña');
+      Alert.alert('Error', data.error);
     }
     setLoading(false);
   };
