@@ -97,53 +97,59 @@ export default function EditProfileScreen({ navigation }: any) {
   };
 
   const handleUpdate = async () => {
-    if (!isFormValid()) {
-      Alert.alert('Error', 'No hay cambios o hay errores en el formulario');
-      return;
-    }
-
     setSaving(true);
-    const token = await AsyncStorage.getItem('token');
-
-    const updateData: any = {};
     
-    if (nombre !== originalNombre) {
-      updateData.nombre = nombre;
-    }
-    
-    if (telefono !== originalTelefono) {
-      updateData.telefono = telefono || null;
-    }
+    try {
+      const token = await AsyncStorage.getItem('token');
 
-    // Solo incluir contraseña si el usuario escribió algo
-    if (contraseña.length > 0) {
-      updateData.contraseñaActual = originalContraseña;
-      updateData.contraseñaNueva = contraseña;
-    }
+      const updateData: any = {};
+      
+      if (nombre !== originalNombre) {
+          updateData.nombre = nombre;
+      }
+      
+      if (telefono !== originalTelefono) {
+          updateData.telefono = telefono || null;
+      }
 
-    const response = await fetch(`${API_URL}/usuarios`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updateData),
-    });
+      if (contraseña.length > 0) {
+          updateData.contraseñaActual = originalContraseña;
+          updateData.contraseñaNueva = contraseña;
+      }
 
-    const data = await response.json();
-
-    if (response.ok) {
-      Alert.alert('Éxito', 'Perfil actualizado correctamente', [
-        {
-          text: 'OK',
-          onPress: () => navigation.goBack(),
+      const response = await fetch(`${API_URL}/usuarios`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-      ]);
-    } else {
-      Alert.alert('Error', data?.error);
-    }
+        body: JSON.stringify(updateData),
+      });
 
-    setSaving(false);
+      const data = await response.json();
+
+      if (response.ok) {
+          setOriginalNombre(nombre);
+          setOriginalTelefono(telefono);
+          setPassword('');
+          setConfirmPassword('');
+          setOriginalContraseña('');
+          setShowChecklist(false);
+          
+          Alert.alert('Éxito', 'Perfil actualizado correctamente', [
+          {
+              text: 'OK',
+              onPress: () => navigation.goBack(),
+          },
+          ]);
+      } else {
+          Alert.alert('Error', data?.error);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Ocurrió un error al actualizar el perfil');
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) {
@@ -225,12 +231,14 @@ export default function EditProfileScreen({ navigation }: any) {
 
             <TextInput
               style={styles.phoneInput}
-              placeholder="3001234567"
+              placeholder="300 123 4567"
               placeholderTextColor="#999"
-              value={telefono}
-              onChangeText={(text) => setPhone(formatPhoneColombia(text))}
+              value={formatPhoneColombia(telefono)}
+              onChangeText={(text) => {
+                const digits = text.replace(/\D/g, '');
+                setPhone(digits);
+              }}
               keyboardType="phone-pad"
-              maxLength={10}
             />
           </View>
           {phoneError && <Text style={styles.errorText}>{phoneError}</Text>}
