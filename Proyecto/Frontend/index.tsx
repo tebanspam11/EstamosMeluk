@@ -42,26 +42,6 @@ function VeterinarySearchScreen() {
   );
 }
 
-function NotificationsScreen() {
-  const navigation = useNavigation();
-  return (
-    <View style={styles.container}>
-      <Text>Notificaciones - En desarrollo</Text>
-      <Button title="Volver" onPress={() => navigation.goBack()} />
-    </View>
-  );
-}
-
-function TempHomeScreen({ navigation }: any) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>¡Bienvenido a PocketVet!👋</Text>
-      <Button title="Ir al Home Principal" onPress={() => navigation.navigate('Home')} />
-      <Button title="Ir al Login" onPress={() => navigation.navigate('Login')} />
-    </View>
-  );
-}
-
 const Stack = createStackNavigator();
 
 function App() {
@@ -76,7 +56,20 @@ function App() {
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerTitle: () => <LogoHeader /> }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerTitle: () => <LogoHeader /> }} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerTitle: () => <LogoHeader /> }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen 
+          name="Profile" 
+          component={ProfileScreen} 
+          options={({ navigation }) => ({
+            headerTitle: () => <LogoHeader />,
+            headerRight: () => (
+              <Button
+                onPress={() => navigation.navigate('EditProfile')}
+                title="✏️"
+                color="#4A90E2"
+              />
+            ),
+          })}
+        />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerTitle: () => <LogoHeader /> }} />
 
         {/* Pantalla Home */}

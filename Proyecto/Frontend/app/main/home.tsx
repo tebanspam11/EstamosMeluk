@@ -177,10 +177,17 @@ export default function HomeScreen({ navigation }: any) {
                 style={styles.petCard}
                 onPress={() => navigation.navigate('PetProfile', { pet: mascota })}
               >
-                <Text style={styles.petIcon}>
-                  {mascota.especie.toLowerCase() === 'perro' ? '🐶' : 
-                   mascota.especie.toLowerCase() === 'gato' ? '🐱' : '🐾'}
-                </Text>
+                {mascota.foto ? (
+                  <Image 
+                    source={{ uri: mascota.foto }} 
+                    style={styles.petImage}
+                  />
+                ) : (
+                  <Text style={styles.petIcon}>
+                    {mascota.especie.toLowerCase() === 'perro' ? '🐶' : 
+                     mascota.especie.toLowerCase() === 'gato' ? '🐱' : '🐾'}
+                  </Text>
+                )}
                 <Text style={styles.petName}>{mascota.nombre}</Text>
                 <Text style={styles.petBreed}>{mascota.raza || mascota.especie}</Text>
               </TouchableOpacity>
@@ -397,6 +404,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  petImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 8,
   },
   petIcon: {
     fontSize: 32,

@@ -204,16 +204,6 @@ export default function ProfileScreen({ navigation }: any) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}
-          >
-          </TouchableOpacity>
-          <Text style={styles.title}>Mi Perfil</Text>
-        </View>
-
         {/* Avatar */}
         <View style={styles.avatarSection}>
           <TouchableOpacity 
@@ -282,14 +272,6 @@ export default function ProfileScreen({ navigation }: any) {
           </View>
         </View>
 
-        {/* Botón Editar Perfil */}
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => navigation.navigate('EditProfile')}
-        >
-          <Text style={styles.editButtonText}> Editar Perfil</Text>
-        </TouchableOpacity>
-
         {/* Botón Cerrar Sesión */}
         <TouchableOpacity
           style={styles.logoutButton}
@@ -334,13 +316,14 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 20,
   },
   backButton: {
-    alignSelf: 'flex-start',
     paddingVertical: 8,
     paddingHorizontal: 12,
-    marginBottom: 10,
   },
   backButtonText: {
     fontSize: 16,
@@ -351,7 +334,20 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     color: '#333',
+    flex: 1,
     textAlign: 'center',
+  },
+  editIconButton: {
+    padding: 8,
+    backgroundColor: '#4A90E2',
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  editIcon: {
+    fontSize: 20,
   },
   avatarSection: {
     alignItems: 'center',

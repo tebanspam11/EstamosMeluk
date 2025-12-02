@@ -44,9 +44,15 @@ export default function EditProfileScreen({ navigation }: any) {
 
   useFocusEffect(
     React.useCallback(() => {
+      validateActiveSession();
       cargarDatosUsuario();
     }, [])
   );
+
+  const validateActiveSession = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) navigation.replace('Login');
+  };
 
   const cargarDatosUsuario = async () => {
     setLoading(true);
@@ -116,7 +122,7 @@ export default function EditProfileScreen({ navigation }: any) {
       updateData.contraseñaNueva = contraseña;
     }
 
-    const response = await fetch(`${API_URL}/usuarios`, {
+    const response = await fetch(`${API_URL}/usuarios/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,10 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_URL } from '../../src/config/api';
 
 interface Pet {
   id: number;
@@ -22,7 +25,7 @@ interface Pet {
   color: string;
   sexo: 'Macho' | 'Hembra';
   foto: string;
-  peso_actual?: number;
+  peso?: number;
   microchip?: string;
   notas_adicionales?: string;
 }
@@ -32,19 +35,68 @@ export default function PetProfileScreen({ route }: any) {
   const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
   const [pets, setPets] = useState<Pet[]>([]);
   const [showPetsModal, setShowPetsModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
 
-  useEffect(() => {
-    if (route?.params?.pet) {
-      setSelectedPet(route.params.pet);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadPets();
+      if (selectedPet) {
+        reloadSelectedPet(selectedPet.id);
+      }
+      if (route?.params?.pet) {
+        const updatedPet = route.params.pet;
+        setSelectedPet(updatedPet);
+      }
+    }, [route?.params?.pet])
+  );
+
+  const loadPets = async () => {
+    const token = await AsyncStorage.getItem('token');
+    const response = await fetch(`${API_URL}/mascotas`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    
+    const data = await response.json();
+    if (response.ok) {
+      setPets(data);
+      if (selectedPet) {
+        const updatedPet = data.find((p: Pet) => p.id === selectedPet.id);
+        if (updatedPet) {
+          setSelectedPet(updatedPet);
+        }
+      } else if (data.length > 0 && !route?.params?.pet) {
+        setSelectedPet(data[0]);
+      }
     }
-  }, [route?.params?.pet]);
+  };
+
+  const reloadSelectedPet = async (petId: number) => {
+    const token = await AsyncStorage.getItem('token');
+    const response = await fetch(`${API_URL}/mascotas/${petId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+    
+    const data = await response.json();
+    if (response.ok) {
+      const updatedPet = data.find((p: Pet) => p.id === petId);
+      if (updatedPet) {
+        setSelectedPet(updatedPet);
+      }
+    }
+  };
 
   const calculateAge = (birthDate: Date) => {
     const today = new Date();
     const birth = new Date(birthDate);
     let years = today.getFullYear() - birth.getFullYear();
     let months = today.getMonth() - birth.getMonth();
+  
+    if (today.getDate() < birth.getDate()) {
+      months--;
+    }
     
     if (months < 0) {
       years--;
@@ -77,48 +129,83 @@ export default function PetProfileScreen({ route }: any) {
     }
   };
 
-        const handleEditProfile = () => {
-        navigation.navigate('EditPetProfile', { pet: selectedPet });
-        };
+  const handleEliminarMascota = () => {
+    if (!selectedPet) return;
+
+    Alert.alert(
+      '⚠️ Eliminar mascota',
+      `Esta acción es irreversible. Se eliminarán todos los datos de ${selectedPet.nombre}, incluyendo su carnet, historial médico, eventos y documentos. ¿Estás completamente seguro?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Eliminar definitivamente',
+          style: 'destructive',
+          onPress: async () => {
+            const token = await AsyncStorage.getItem('token');
+              
+            const response = await fetch(`${API_URL}/mascotas/${selectedPet.id}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+              },
+            });
+
+            if (response.ok) {
+              Alert.alert('Éxito', `${selectedPet.nombre} ha sido eliminado exitosamente.`, [
+                { text: 'OK', onPress: () => navigation.navigate('Home') },
+              ]);
+            } else {
+              Alert.alert('Error', '⚠︎ No se pudo eliminar la mascota. Intenta nuevamente.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleEditProfile = () => {
+    navigation.navigate('EditPetProfile', { pet: selectedPet });
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backButton}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Perfil de Mascota</Text>
+      {/* Selector de Mascota con botón de editar */}
+      <View style={styles.selectorRow}>
         <TouchableOpacity 
-        style={styles.editButton}
-        onPress={() => navigation.navigate('EditPetProfile', { pet: selectedPet })}
+          style={styles.petSelector}
+          onPress={() => setShowPetsModal(true)}
         >
-        <Text style={styles.editButtonText}>✏️</Text>
+          <Image 
+            source={{ uri: selectedPet?.foto }} 
+            style={styles.petSelectorImage}
+          />
+          <View style={styles.petSelectorInfo}>
+            <Text style={styles.petSelectorName}>
+              {selectedPet ? selectedPet.nombre : 'Seleccionar mascota'}
+            </Text>
+            <Text style={styles.petSelectorDetails}>
+              {selectedPet ? 
+                `${getPetIcon(selectedPet.especie)} ${selectedPet.raza} • ${selectedPet.sexo}` : 
+                'Toca para seleccionar'
+              }
+            </Text>
+          </View>
+          <Text style={styles.selectorArrow}>▼</Text>
         </TouchableOpacity>
+        
+        {selectedPet && (
+          <TouchableOpacity 
+            style={styles.editIconButton}
+            onPress={() => navigation.navigate('EditPetProfile', { pet: selectedPet })}
+          >
+            <Text style={styles.editIcon}>✏️</Text>
+          </TouchableOpacity>
+        )}
       </View>
-
-      {/* Selector de Mascota */}
-      <TouchableOpacity 
-        style={styles.petSelector}
-        onPress={() => setShowPetsModal(true)}
-      >
-        <Image 
-          source={{ uri: selectedPet?.foto }} 
-          style={styles.petSelectorImage}
-        />
-        <View style={styles.petSelectorInfo}>
-          <Text style={styles.petSelectorName}>
-            {selectedPet ? selectedPet.nombre : 'Seleccionar mascota'}
-          </Text>
-          <Text style={styles.petSelectorDetails}>
-            {selectedPet ? 
-              `${getPetIcon(selectedPet.especie)} ${selectedPet.raza} • ${selectedPet.sexo}` : 
-              'Toca para seleccionar'
-            }
-          </Text>
-        </View>
-        <Text style={styles.selectorArrow}>▼</Text>
-      </TouchableOpacity>
 
       {selectedPet && (
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -142,17 +229,19 @@ export default function PetProfileScreen({ route }: any) {
           {/* Estadísticas Rápidas */}
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>
-                {selectedPet.peso_actual ? `${selectedPet.peso_actual} kg` : 'N/A'}
+              <Text style={styles.statNumber} numberOfLines={1}>
+                {selectedPet.peso != null ? `${selectedPet.peso} kg` : 'N/A'}
               </Text>
               <Text style={styles.statLabel}>Peso Actual</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{selectedPet.sexo}</Text>
+              <Text style={styles.statNumber} numberOfLines={1}>{selectedPet.sexo}</Text>
               <Text style={styles.statLabel}>Sexo</Text>
             </View>
             <View style={styles.statCard}>
-              <Text style={styles.statNumber}>{selectedPet.color}</Text>
+              <Text style={styles.statNumber} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>
+                {selectedPet.color || 'N/A'}
+              </Text>
               <Text style={styles.statLabel}>Color</Text>
             </View>
           </View>
@@ -196,10 +285,10 @@ export default function PetProfileScreen({ route }: any) {
               <Text style={styles.infoValue}>{selectedPet.color}</Text>
             </View>
 
-            {selectedPet.peso_actual && (
+            {selectedPet.peso && (
               <View style={styles.infoRow}>
                 <Text style={styles.infoLabel}>Peso Actual:</Text>
-                <Text style={styles.infoValue}>{selectedPet.peso_actual} kg</Text>
+                <Text style={styles.infoValue}>{selectedPet.peso} kg</Text>
               </View>
             )}
 
@@ -255,6 +344,16 @@ export default function PetProfileScreen({ route }: any) {
                 <Text style={styles.actionText}>Editar</Text>
               </TouchableOpacity>
             </View>
+          </View>
+
+          {/* Botón Eliminar Mascota */}
+          <View style={styles.deleteSection}>
+            <TouchableOpacity 
+              style={styles.deleteButton}
+              onPress={handleEliminarMascota}
+            >
+              <Text style={styles.deleteButtonText}>Eliminar Mascota</Text>
+            </TouchableOpacity>
           </View>
         </ScrollView>
       )}
@@ -330,11 +429,17 @@ const styles = StyleSheet.create({
   editButtonText: {
     fontSize: 18,
   },
+  selectorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    margin: 20,
+    marginBottom: 10,
+  },
   petSelector: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
-    margin: 20,
     padding: 16,
     borderRadius: 16,
     shadowColor: '#000',
@@ -342,6 +447,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
+  },
+  editIconButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  editIcon: {
+    fontSize: 28,
   },
   petSelectorImage: {
     width: 50,
@@ -410,13 +526,13 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 20,
   },
   statCard: {
-    flex: 1,
+    width: '31%',
     backgroundColor: '#fff',
     padding: 16,
-    marginHorizontal: 5,
     borderRadius: 12,
     alignItems: 'center',
     shadowColor: '#000',
@@ -430,6 +546,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#4A90E2',
     marginBottom: 4,
+    textAlign: 'center',
   },
   statLabel: {
     fontSize: 12,
@@ -514,6 +631,26 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
     textAlign: 'center',
+  },
+  deleteSection: {
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+  },
+  deleteButton: {
+    backgroundColor: '#FF3B30',
+    borderRadius: 12,
+    paddingVertical: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  deleteButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
   modalOverlay: {
     flex: 1,

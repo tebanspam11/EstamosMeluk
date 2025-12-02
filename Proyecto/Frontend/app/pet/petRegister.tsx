@@ -17,6 +17,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../src/config/api';
+import { formatName } from '../../src/utils/formatName';
 
 const speciesData = [{ id: '1', name: 'Perro' }, { id: '2', name: 'Gato' }];
 
@@ -108,7 +109,7 @@ export default function PetRegisterScreen({ navigation }: any) {
       sexo,
       fecha_nacimiento: new Date(fechaNacimiento).toISOString(),
       color: color || null,
-      peso: peso ? parseFloat(peso) : null,
+      peso: peso ? parseFloat(peso.replace(',', '.')) : null,
       foto: petImage,
       alergias: alergias || null,
       enfermedades: enfermedades || null,
@@ -180,7 +181,7 @@ export default function PetRegisterScreen({ navigation }: any) {
             placeholder="Ej: Max, Luna, etc."
             placeholderTextColor="#999"
             value={nombre}
-            onChangeText={setNombre}
+            onChangeText={(text) => setNombre(formatName(text))}
             autoCapitalize="words"
           />
 
@@ -199,7 +200,7 @@ export default function PetRegisterScreen({ navigation }: any) {
             placeholder="Ej: Labrador, Siamés, etc."
             placeholderTextColor="#999"
             value={raza}
-            onChangeText={setRaza}
+            onChangeText={(text) => setRaza(formatName(text))}
             autoCapitalize="words"
           />
 
@@ -218,7 +219,7 @@ export default function PetRegisterScreen({ navigation }: any) {
             placeholder="Ej: Negro, Blanco, Café, etc."
             placeholderTextColor="#999"
             value={color}
-            onChangeText={setColor}
+            onChangeText={(text) => setColor(formatName(text))}
             autoCapitalize="words"
           />
 
