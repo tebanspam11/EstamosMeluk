@@ -9,6 +9,7 @@ import LoginScreen from './app/user/userLogin.tsx';
 import RegisterScreen from './app/user/userRegister.tsx';
 import ForgotPasswordScreen from './app/user/forgotPassword.tsx';
 import ProfileScreen from './app/user/userProfile.tsx';
+import EditProfileScreen from './app/user/userEdit.tsx';
 import HomeScreen from './app/main/home.tsx';
 import CalendarScreen from './app/main/calendar.tsx';
 import CarnetScreen from './app/pet/carnet.tsx';
@@ -65,6 +66,7 @@ function App() {
         <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
         <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ title: 'Recuperar Contraseña' }} />
         <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ title: 'Editar Perfil' }} />
 
         {/* Pantalla Home */}
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />

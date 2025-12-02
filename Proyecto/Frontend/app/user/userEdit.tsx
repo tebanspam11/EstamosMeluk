@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -166,7 +167,6 @@ export default function EditProfileScreen({ navigation }: any) {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>← Volver</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Editar Perfil</Text>
           <Text style={styles.subtitle}>Actualiza tu información</Text>
@@ -198,18 +198,33 @@ export default function EditProfileScreen({ navigation }: any) {
           <View
             style={{
               flexDirection: 'row',
+              marginBottom: 18,
               alignItems: 'center',
               borderWidth: 1,
-              borderColor: phoneError ? 'red' : '#ddd',
-              borderRadius: 12,
-              backgroundColor: phoneError ? '#ffe6e6' : '#fff',
-              paddingHorizontal: 15,
-              height: 50,
+              borderColor: phoneError ? 'red' : '#ccc',
+              borderRadius: 10,
+              paddingHorizontal: 10,
+              height: 55,
+              backgroundColor: phoneError ? '#ffe6e6' : '#f8f8f8',
             }}
           >
-            <Text style={{ color: '#666', marginRight: 8 }}>🇨🇴 +57</Text>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginRight: 12,
+                backgroundColor: '#e8e7e7ff',
+            }}
+            >
+              <Image
+                source={{ uri: 'https://flagcdn.com/w20/co.png' }}
+                style={{ width: 22, height: 16, borderRadius: 2, marginRight: 4 }}
+              />
+              <Text style={{ fontSize: 16, fontWeight: '600' }}>+57</Text>
+            </View>
+
             <TextInput
-              style={{ flex: 1, fontSize: 16, color: '#333' }}
+              style={styles.phoneInput}
               placeholder="3001234567"
               placeholderTextColor="#999"
               value={telefono}
@@ -392,6 +407,30 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 4,
     fontStyle: 'italic',
+  },
+  phoneContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 12,
+    backgroundColor: '#fff',
+    paddingHorizontal: 15,
+    height: 50,
+  },
+  phoneContainerError: {
+    borderColor: 'red',
+    backgroundColor: '#ffe6e6',
+  },
+  phonePrefix: {
+    color: '#666',
+    marginRight: 8,
+    fontSize: 16,
+  },
+  phoneInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#333',
   },
   divider: {
     height: 1,

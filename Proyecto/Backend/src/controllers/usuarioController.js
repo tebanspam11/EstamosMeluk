@@ -41,7 +41,9 @@ export const obtenerUsuario = async (req, res) => {
         nombre: true,
         correo: true,
         telefono: true,
+        foto: true,
         cuenta_google: true,
+        created_at: true,
       }
     });
 

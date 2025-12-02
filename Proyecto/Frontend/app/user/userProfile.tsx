@@ -39,7 +39,7 @@ export default function ProfileScreen({ navigation }: any) {
     const token = await AsyncStorage.getItem('token');
     const headers = {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'};
 
-    const response = await fetch(`${API_URL}/usuarios/perfil`, { headers });
+    const response = await fetch(`${API_URL}/usuarios`, { headers });
 
     if (response.ok) {
       const userData = await response.json();
@@ -285,7 +285,7 @@ export default function ProfileScreen({ navigation }: any) {
         {/* Botón Editar Perfil */}
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => navigation.navigate('UserEdit')}
+          onPress={() => navigation.navigate('EditProfile')}
         >
           <Text style={styles.editButtonText}> Editar Perfil</Text>
         </TouchableOpacity>

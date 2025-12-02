@@ -30,7 +30,7 @@ export const login = async (req, res) => {
 
   const token = jwt.sign({id_usuario: user.id}, process.env.JWT_SECRET, {expiresIn});
 
-  return res.json({ ok: true, id: user.id, correo: user.correo, token, keepLogged});
+  return res.json({ ok: true, userId: user.id, correo: user.correo, token, keepLogged});
 };
 
 export const googleAuth = async (req, res) => {

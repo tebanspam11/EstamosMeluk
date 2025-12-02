@@ -156,24 +156,24 @@ export default function RegisterScreen({ navigation }: any) {
             autoCapitalize="none"
           />
           {showChecklist && (
-            <View style={{ marginTop: 10, marginBottom: 18 }}>
-              <Text style={{ color: passwordChecklist.length ? 'green' : 'red' }}>
-                • Mínimo 8 caracteres
+            <View style={styles.checklist}>
+              <Text style={[styles.checklistItem, passwordChecklist.length && styles.checklistValid]}>
+                {passwordChecklist.length ? '✓' : '○'} Mínimo 8 caracteres
               </Text>
-              <Text style={{ color: passwordChecklist.uppercase ? 'green' : 'red' }}>
-                • Al menos una mayúscula
+              <Text style={[styles.checklistItem, passwordChecklist.uppercase && styles.checklistValid]}>
+                {passwordChecklist.uppercase ? '✓' : '○'} Una letra mayúscula
               </Text>
-              <Text style={{ color: passwordChecklist.lowercase ? 'green' : 'red' }}>
-                • Al menos una minúscula
+              <Text style={[styles.checklistItem, passwordChecklist.lowercase && styles.checklistValid]}>
+                {passwordChecklist.lowercase ? '✓' : '○'} Una letra minúscula
               </Text>
-              <Text style={{ color: passwordChecklist.number ? 'green' : 'red' }}>
-                • Al menos un número
+              <Text style={[styles.checklistItem, passwordChecklist.number && styles.checklistValid]}>
+                {passwordChecklist.number ? '✓' : '○'} Un número
               </Text>
-              <Text style={{ color: passwordChecklist.special ? 'green' : 'red' }}>
-                • Al menos un símbolo (!@#$%^&*-_)
+              <Text style={[styles.checklistItem, passwordChecklist.special && styles.checklistValid]}>
+                {passwordChecklist.special ? '✓' : '○'} Un carácter especial
               </Text>
-              <Text style={{ color: passwordChecklist.noSpaces ? 'green' : 'red' }}>
-                • Sin espacios
+              <Text style={[styles.checklistItem, passwordChecklist.noSpaces && styles.checklistValid]}>
+                {passwordChecklist.noSpaces ? '✓' : '○'} Sin espacios
               </Text>
             </View>
           )}
@@ -295,6 +295,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     color: '#333',
+  },
+  checklist: {
+    backgroundColor: '#f9f9f9',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: -10,
+    marginBottom: 18,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  checklistItem: {
+    fontSize: 13,
+    color: '#666',
+    marginVertical: 3,
+  },
+  checklistValid: {
+    color: '#4CAF50',
+    fontWeight: '600',
   },
   registerButton: {
     backgroundColor: '#4A90E2',
