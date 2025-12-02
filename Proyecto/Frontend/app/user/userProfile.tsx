@@ -7,16 +7,19 @@ import {
   ScrollView,
   Alert,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
 import { API_URL } from '../../src/config/api';
 import { Usuario } from '../../src/types';
 
 export default function ProfileScreen({ navigation }: any) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -34,12 +37,9 @@ export default function ProfileScreen({ navigation }: any) {
     setLoading(true);
 
     const token = await AsyncStorage.getItem('token');
-    const response = await fetch(`${API_URL}/usuarios`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    const headers = {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'};
+
+    const response = await fetch(`${API_URL}/usuarios/perfil`, { headers });
 
     if (response.ok) {
       const userData = await response.json();
@@ -47,6 +47,90 @@ export default function ProfileScreen({ navigation }: any) {
     }
     
     setLoading(false);
+  };
+
+  const handleChangePhoto = async () => {
+    Alert.alert(
+      'Cambiar foto de perfil',
+      'Selecciona una opción',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Tomar foto',
+          onPress: () => takePhoto(),
+        },
+        {
+          text: 'Elegir de galería',
+          onPress: () => pickImage(),
+        },
+      ]
+    );
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert('Permiso necesario', 'Necesitamos acceso a tu galería para seleccionar una foto.');
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      await uploadPhoto(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+
+    if (status !== 'granted') {
+      Alert.alert('Permiso necesario', 'Necesitamos acceso a tu cámara para tomar una foto.');
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+
+    if (!result.canceled) {
+      await uploadPhoto(result.assets[0].uri);
+    }
+  };
+
+  const uploadPhoto = async (uri: string) => {
+    setUploadingPhoto(true);
+    const token = await AsyncStorage.getItem('token');
+
+    const response = await fetch(`${API_URL}/usuarios/perfil`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ foto: uri }),
+    });
+
+    if (response.ok) {
+      const updatedUser = await response.json();
+      setUsuario(updatedUser);
+      Alert.alert('Éxito', 'Foto de perfil actualizada correctamente');
+    } else {
+      Alert.alert('Error', 'No se pudo actualizar la foto. Intenta nuevamente.');
+    }
+
+    setUploadingPhoto(false);
   };
 
   const handleCerrarSesion = () => {
@@ -126,19 +210,37 @@ export default function ProfileScreen({ navigation }: any) {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backButtonText}>← Volver</Text>
           </TouchableOpacity>
           <Text style={styles.title}>Mi Perfil</Text>
         </View>
 
         {/* Avatar */}
         <View style={styles.avatarSection}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarText}>
-              {usuario?.nombre?.charAt(0).toUpperCase() || 'U'}
-            </Text>
-          </View>
-          <Text style={styles.userName}>{usuario?.nombre || 'Usuario'}</Text>
+          <TouchableOpacity 
+            style={styles.avatarContainer}
+            onPress={handleChangePhoto}
+            disabled={uploadingPhoto}
+          >
+            {usuario?.foto ? (
+              <Image source={{ uri: usuario.foto }} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarCircle}>
+                <Text style={styles.avatarText}>
+                  {usuario?.nombre?.charAt(0).toUpperCase() || 'U'}
+                </Text>
+              </View>
+            )}
+            {uploadingPhoto && (
+              <View style={styles.uploadingOverlay}>
+                <ActivityIndicator size="large" color="#fff" />
+              </View>
+            )}
+            <View style={styles.cameraIcon}>
+              <Text style={styles.cameraIconText}>📷</Text>
+            </View>
+          </TouchableOpacity>
+          <Text style={styles.userName}>{usuario?.nombre}</Text>
+          <Text style={styles.changePhotoText}>Toca para cambiar foto</Text>
         </View>
 
         {/* Información del usuario */}
@@ -148,14 +250,14 @@ export default function ProfileScreen({ navigation }: any) {
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Nombre</Text>
-              <Text style={styles.infoValue}>{usuario?.nombre || 'No especificado'}</Text>
+              <Text style={styles.infoValue}>{usuario?.nombre}</Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>Correo</Text>
-              <Text style={styles.infoValue}>{usuario?.correo || 'No especificado'}</Text>
+              <Text style={styles.infoValue}>{usuario?.correo}</Text>
             </View>
 
             <View style={styles.divider} />
@@ -168,9 +270,13 @@ export default function ProfileScreen({ navigation }: any) {
             <View style={styles.divider} />
 
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>Tipo de cuenta</Text>
+              <Text style={styles.infoLabel}>Activo desde</Text>
               <Text style={styles.infoValue}>
-                {usuario?.cuenta_google ? '🔗 Google' : '📧 Email'}
+                {usuario?.created_at ? new Date(usuario.created_at).toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                }) : 'No disponible'}
               </Text>
             </View>
           </View>
@@ -181,7 +287,7 @@ export default function ProfileScreen({ navigation }: any) {
           style={styles.editButton}
           onPress={() => navigation.navigate('UserEdit')}
         >
-          <Text style={styles.editButtonText}>✏️ Editar Perfil</Text>
+          <Text style={styles.editButtonText}> Editar Perfil</Text>
         </TouchableOpacity>
 
         {/* Botón Cerrar Sesión */}
@@ -189,7 +295,7 @@ export default function ProfileScreen({ navigation }: any) {
           style={styles.logoutButton}
           onPress={handleCerrarSesion}
         >
-          <Text style={styles.logoutButtonText}>🚪 Cerrar Sesión</Text>
+          <Text style={styles.logoutButtonText}> Cerrar Sesión</Text>
         </TouchableOpacity>
 
         {/* Botón Eliminar Cuenta */}
@@ -197,7 +303,7 @@ export default function ProfileScreen({ navigation }: any) {
           style={styles.deleteButton}
           onPress={handleEliminarCuenta}
         >
-          <Text style={styles.deleteButtonText}>⚠️ Eliminar Cuenta</Text>
+          <Text style={styles.deleteButtonText}> ELIMINAR CUENTA</Text>
         </TouchableOpacity>
 
         <Text style={styles.warningText}>
@@ -251,24 +357,65 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 30,
   },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 15,
+  },
   avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     backgroundColor: '#4A90E2',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+  },
+  avatarImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
   },
   avatarText: {
-    fontSize: 40,
+    fontSize: 48,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  cameraIcon: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#4A90E2',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  cameraIconText: {
+    fontSize: 18,
+  },
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   userName: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
+    marginBottom: 4,
+  },
+  changePhotoText: {
+    fontSize: 13,
+    color: '#666',
+    fontStyle: 'italic',
   },
   infoSection: {
     marginBottom: 25,
@@ -311,6 +458,41 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#e0e0e0',
+  },
+  statsSection: {
+    marginBottom: 25,
+  },
+  statsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  statIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  statNumber: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#4A90E2',
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
   editButton: {
     backgroundColor: '#4A90E2',

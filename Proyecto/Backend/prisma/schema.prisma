@@ -17,6 +17,7 @@ model Usuario {
   correo        String   @unique
   telefono      String?  @unique
   contraseña   String?
+  foto          String?
   cuenta_google Boolean? @default(false)
   googleId      String?  @unique
   created_at    DateTime @default(now())

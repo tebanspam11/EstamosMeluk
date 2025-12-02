@@ -50,20 +50,23 @@ export const obtenerUsuario = async (req, res) => {
 
 export const editarUsuario = async (req, res) => {
     const { userId } = req.user; // Del token JWT
-    const { nombre, telefono } = req.body;
+    const { nombre, telefono, foto } = req.body;
 
     const usuarioActualizado = await prisma.usuario.update({
       where: { id: userId },
       data: {
         ...(nombre && { nombre }),
         ...(telefono && { telefono }),
+        ...(foto !== undefined && { foto }),
       },
       select: {
         id: true,
         nombre: true,
         correo: true,
         telefono: true,
+        foto: true,
         cuenta_google: true,
+        created_at: true,
       }
     });
 

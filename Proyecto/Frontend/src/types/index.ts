@@ -4,6 +4,7 @@ export interface Usuario {
   correo: string;
   telefono: string | null;
   contraseña: string | null;
+  foto: string | null;
   cuenta_google: boolean | null;
   googleId: string | null;
   created_at: Date;

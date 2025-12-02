@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../src/config/api';
 import { useFocusEffect } from '@react-navigation/native';
 import { Usuario, Mascota, Evento } from '../../src/types';
-import UserIcon from '../../assets/images/200668125-user-profile-icon-vector-avatar-or-person-icon-profile-picture-portrait-symbol-neutral-gender.jpg';
 
 export default function HomeScreen({ navigation }: any) {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
@@ -90,9 +89,17 @@ export default function HomeScreen({ navigation }: any) {
         </View>
         <TouchableOpacity
           style={styles.profileButton}
-          onPress={() => navigation.replace('Profile')}
+          onPress={() => navigation.navigate('Profile')}
         >
-          <Image source={UserIcon} style={styles.profileImage} />
+          {usuario?.foto ? (
+            <Image source={{ uri: usuario.foto }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatarCircle}>
+              <Text style={styles.avatarText}>
+                {usuario?.nombre?.charAt(0).toUpperCase() || 'U'}
+              </Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -103,11 +110,11 @@ export default function HomeScreen({ navigation }: any) {
           <View style={styles.headerButtons}>
             <TouchableOpacity 
               style={styles.addEventButton}
-              onPress={() => navigation.replace('CreateEvent')}
+              onPress={() => navigation.navigate('CreateEvent')}
             >
               <Text style={styles.addEventText}>+</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.replace('Calendar')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Calendar')}>
               <Text style={styles.seeAllText}>Ver todos</Text>
             </TouchableOpacity>
           </View>
@@ -145,7 +152,7 @@ export default function HomeScreen({ navigation }: any) {
       <View style={styles.petsSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Tus Mascotas</Text>
-          <TouchableOpacity onPress={() => navigation.replace('List')}>
+          <TouchableOpacity onPress={() => navigation.navigate('List')}>
             <Text style={styles.seeAllText}>Ver todos</Text>
           </TouchableOpacity>
         </View>
@@ -167,7 +174,7 @@ export default function HomeScreen({ navigation }: any) {
               <TouchableOpacity
                 key={mascota.id}
                 style={styles.petCard}
-                onPress={() => navigation.replace('PetProfile', { pet: mascota })}
+                onPress={() => navigation.navigate('PetProfile', { pet: mascota })}
               >
                 <Text style={styles.petIcon}>
                   {mascota.especie.toLowerCase() === 'perro' ? '🐶' : 
@@ -180,7 +187,7 @@ export default function HomeScreen({ navigation }: any) {
 
             <TouchableOpacity
               style={[styles.petCard, styles.addPetCard]}
-              onPress={() => navigation.replace('PetRegister')}
+              onPress={() => navigation.navigate('PetRegister')}
             >
               <Text style={styles.addPetIcon}>+</Text>
               <Text style={styles.addPetText}>Agregar Mascota</Text>
@@ -193,7 +200,7 @@ export default function HomeScreen({ navigation }: any) {
       <View style={styles.bottomNav}>
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.replace('Calendar')}
+          onPress={() => navigation.navigate('Calendar')}
         >
           <Text style={styles.navIcon}>📅</Text>
           <Text style={styles.navText}>Calendario</Text>
@@ -201,7 +208,7 @@ export default function HomeScreen({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.replace('VeterinarySearch')}
+          onPress={() => navigation.navigate('VeterinarySearch')}
         >
           <Text style={styles.navIcon}>🏥</Text>
           <Text style={styles.navText}>Veterinarias</Text>
@@ -209,7 +216,7 @@ export default function HomeScreen({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.replace('Carnet')}
+          onPress={() => navigation.navigate('Carnet')}
         >
           <Text style={styles.navIcon}>📄</Text>
           <Text style={styles.navText}>Carnet</Text>
@@ -217,7 +224,7 @@ export default function HomeScreen({ navigation }: any) {
 
         <TouchableOpacity
           style={styles.navButton}
-          onPress={() => navigation.replace('ClinicHistory')}
+          onPress={() => navigation.navigate('ClinicHistory')}
         >
           <Text style={styles.navIcon}>🏥</Text>
           <Text style={styles.navText}>Historial</Text>
@@ -256,10 +263,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  profileImage: {
+  avatarCircle: {
     width: 50,
     height: 50,
     borderRadius: 25,
+    backgroundColor: '#4A90E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#fff',
   },
   remindersSection: {
     marginTop: 20,
