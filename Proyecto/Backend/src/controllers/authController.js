@@ -17,11 +17,11 @@ export const login = async (req, res) => {
     user = allUsers.find(u => u.telefono && u.telefono.replace(/[\s\-()]/g, '') === identifier);
   }
 
-  if (!user) return res.status(404).json({ error: 'Usuario no encontrado' });
+  if (!user) return res.status(404).json({ error: '⚠︎ Usuario no encontrado' });
 
   const match = await bcrypt.compare(contraseña, user.contraseña);
 
-  if (!match) return res.status(401).json({ error: 'Contraseña incorrecta' });
+  if (!match) return res.status(401).json({ error: '⚠︎ Contraseña incorrecta' });
 
   const expiresIn = keepLogged ? "3650d" : "30d";
 
@@ -33,21 +33,13 @@ export const login = async (req, res) => {
 export const register = async (req, res) => {
   const { nombre, correo, telefono, contraseña } = req.body;
 
-  if (!nombre || !contraseña || !correo) {
-    return res.status(400).json({ ok: false, message: 'Los campos son obligatorios' });
-  }
-
   let existingPhone = null;
-  if (telefono) {
-    existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
-  }
+  if (telefono) existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
 
   const existingEmail = await prisma.usuario.findUnique({ where: { correo } });
 
-  if (existingEmail)
-    return res.status(400).json({ ok: false, message: 'Este correo ya está registrado' });
-  if (existingPhone)
-    return res.status(400).json({ ok: false, message: 'Este telefono ya está registrado' });
+  if (existingEmail) return res.status(400).json({ ok: false, message: '⚠︎ Este correo ya está registrado' });
+  if (existingPhone) return res.status(400).json({ ok: false, message: '⚠︎ Este telefono ya está registrado' });
 
   const hashedPassword = await bcrypt.hash(contraseña, 10);
 

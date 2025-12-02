@@ -4,7 +4,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 
-import AuthLoading from './app/auth/AuthLoading.tsx';
+import AuthLoading from './app/auth/authLoading.tsx';
 import LoginScreen from './app/auth/login.tsx';
 import RegisterScreen from './app/auth/register.tsx';
 import ForgotPasswordScreen from './app/auth/forgotPassword.tsx';
@@ -55,7 +55,7 @@ function App() {
   return (
     <NavigationContainer>
 
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="AuthLoading">
         {/* Pantalla Principal (Validacion si hay sesion iniciada o no*/}
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 

@@ -6,8 +6,8 @@ const resetCodes = new Map();
 
 export const requestPasswordReset = async (req, res) => {
   const { correo } = req.body;
-  const user = await prisma.usuario.findUnique({ where: { correo } });
 
+  const user = await prisma.usuario.findUnique({ where: { correo } });
   if (!user) return res.status(404).json({ error: '⚠ No existe una cuenta con este correo' });
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -17,32 +17,16 @@ export const requestPasswordReset = async (req, res) => {
     code,
     expiresAt,
     attempts: 0,
-    verified: false
   });
 
   const emailResult = await sendPasswordResetCode(correo, code);
-  
-  if (!emailResult.success) {
-    console.error('⚠ Error al enviar email:', emailResult.error);
-    return res.status(500).json({ error: '⚠ No se pudo enviar el email. Intenta de nuevo' });
-  }
+  if (!emailResult.success) return res.status(500).json({ error: '⚠ No se pudo enviar el email. Intenta de nuevo' });
 
-  // En desarrollo, mostrar el código en consola
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🔐 Código para ${correo}: ${code}`);
-  }
-
-  return res.json({
-    ok: true,
-    message: 'Código enviado al correo electrónico',
-    devCode: process.env.NODE_ENV === 'development' ? code : undefined
-  });
+  return res.json({ok: true, message: 'Código enviado al correo electrónico', devCode: process.env.NODE_ENV === 'development' ? code : undefined});
 };
 
 export const verifyResetCode = async (req, res) => {
   const { correo, code } = req.body;
-
-  if (!code) return res.status(400).json({ error: '⚠ Un codigo es requerido' });
 
   const resetData = resetCodes.get(correo);
 
@@ -57,7 +41,7 @@ export const verifyResetCode = async (req, res) => {
     
     if (resetData.attempts >= 3) {
       resetCodes.delete(correo);
-      return res.status(400).json({ error: '⚠Demasiados intentos. Solicita un nuevo código' });
+      return res.status(400).json({ error: '⚠ Demasiados intentos. Solicita un nuevo código' });
     }
     
     return res.status(400).json({ error: '⚠ Código incorrecto', attemptsLeft: 3 - resetData.attempts});
@@ -70,9 +54,6 @@ export const verifyResetCode = async (req, res) => {
 export const resetPassword = async (req, res) => {
   const { correo, nuevaContraseña } = req.body;
 
-  if (!nuevaContraseña) return res.status(400).json({ error: '⚠ Nueva contraseña es requerida' });
-
-  const resetData = resetCodes.get(correo);
   const hashedPassword = await bcrypt.hash(nuevaContraseña, 10);
   await prisma.usuario.update({where: { correo }, data: { contraseña: hashedPassword }});
 

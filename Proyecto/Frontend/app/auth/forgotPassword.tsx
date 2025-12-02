@@ -67,11 +67,10 @@ export default function ForgotPasswordScreen({ navigation }: any) {
 
     if (response.ok && data.ok) {
       Alert.alert('Código enviado', 'Hemos enviado un código de 6 dígitos a tu correo');
-        // En desarrollo, mostrar el código
-      if (data.devCode) {
-        console.log('🔐 Código de desarrollo:', data.devCode);
-      }
+      // En desarrollo, mostrar el código
+      if (data.devCode) console.log('🔐 Código de desarrollo:', data.devCode);
       setStep(2);
+
     } else {
       Alert.alert('Error', data.error);
     }
@@ -104,15 +103,6 @@ export default function ForgotPasswordScreen({ navigation }: any) {
   };
 
   const handleResetPassword = async () => {
-    if (!passwordValid) {
-      Alert.alert('Error', 'La contraseña no cumple con los requisitos');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
-      return;
-    }
 
     setLoading(true);
 
