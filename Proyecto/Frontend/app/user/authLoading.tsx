@@ -10,25 +10,19 @@ export default function AuthLoading() {
 
   useEffect(() => {
     const check = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (!token) return navigation.reset({ index:0, routes:[{name:'Login'}] });
+      const token = await AsyncStorage.getItem('token');
+      if (!token) return navigation.reset({ index:0, routes:[{name:'Login'}] });
 
-        const decoded = jwtDecode(token); 
-        const now = Date.now() / 1000;
+      const decoded = jwtDecode(token); 
+      const now = Date.now() / 1000;
 
-        if (decoded.exp && decoded.exp < now) {
-
-          await AsyncStorage.removeItem('token');
-          await AsyncStorage.removeItem('keepLogged');
-          return navigation.reset({ index:0, routes:[{name:'Login'}] });
-
-        }
-
-        navigation.reset({ index:0, routes:[{name:'Home'}] });
-      } catch (e) {
-        navigation.reset({ index:0, routes:[{name:'Login'}] });
+      if (decoded.exp && decoded.exp < now) { //Expired
+        await AsyncStorage.removeItem('token');
+        await AsyncStorage.removeItem('keepLogged');
+        return navigation.reset({ index:0, routes:[{name:'Login'}] }); 
       }
+
+      navigation.reset({ index:0, routes:[{name:'Home'}] });
     };
     check();
   }, []);
