@@ -13,7 +13,7 @@ import EditProfileScreen from './app/user/userEdit.tsx';
 import HomeScreen from './app/main/home.tsx';
 import CalendarScreen from './app/main/calendar.tsx';
 import CarnetScreen from './app/pet/carnet.tsx';
-import ClinicHistoryScreen from './app/pet/clinic_history.tsx';
+import ClinicHistoryScreen from './app/pet/clinicHistory.tsx';
 
 import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
 import PetProfileScreen from './app/pet/petProfile.tsx';

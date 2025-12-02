@@ -123,21 +123,6 @@ export default function CalendarScreen() {
   };
 
   const handleAddEvent = async () => {
-    if (!newEvent.titulo || newEvent.titulo.trim() === '') {
-      Alert.alert('Error', 'Por favor completa el título del evento');
-      return;
-    }
-
-    if (!newEvent.fecha_inicio) {
-      Alert.alert('Error', 'Por favor selecciona la hora de inicio');
-      return;
-    }
-
-    if (!newEvent.id_mascota || newEvent.id_mascota === 0) {
-      Alert.alert('Error', 'Por favor selecciona una mascota');
-      return;
-    }
-
     const token = await AsyncStorage.getItem('token');
       
     const eventStart = new Date(selectedDate);
@@ -171,7 +156,7 @@ export default function CalendarScreen() {
       Alert.alert('Éxito', `Evento agregado para el ${eventStart.toLocaleDateString('es-ES')}`);
       setShowModal(false);
       resetNewEvent();
-      cargarDatos(); // Recargar eventos
+      cargarDatos();
     } else {
       const data = await response.json();
       Alert.alert('Error', data?.error);
@@ -208,12 +193,6 @@ export default function CalendarScreen() {
 
   const handleUpdateEvent = async () => {
     if (!editingEvent) return;
-
-    if (!editingEvent.titulo || editingEvent.titulo.trim() === '') {
-      Alert.alert('Error', 'Por favor completa el título del evento');
-      return;
-    }
-
     const token = await AsyncStorage.getItem('token');
 
     const eventData = {

@@ -132,7 +132,11 @@ export default function HomeScreen({ navigation }: any) {
             style={styles.remindersScroll}
           >
             {eventos.map((evento) => (
-              <View key={evento.id} style={styles.reminderCard}>
+              <TouchableOpacity 
+                key={evento.id} 
+                style={styles.reminderCard}
+                onPress={() => navigation.navigate('Calendar')}
+              >
                 <View style={styles.reminderHeader}>
                   <Text style={styles.reminderIcon}>📅</Text>
                   <View style={styles.reminderBadge}>
@@ -142,7 +146,7 @@ export default function HomeScreen({ navigation }: any) {
                 <Text style={styles.reminderTitle}>{evento.titulo}</Text>
                 <Text style={styles.reminderPet}>{evento.mascota?.nombre}</Text>
                 <Text style={styles.reminderDate}>{formatearFecha(evento.fecha_inicio.toString())}</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         )}

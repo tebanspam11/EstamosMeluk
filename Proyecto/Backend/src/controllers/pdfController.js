@@ -18,3 +18,23 @@ export const uploadDocumentoMascota = async (req, res) => {
 
   res.status(200).json({ message: 'PDF de mascota subido correctamente', documento });
 };
+
+export const obtenerDocumentosPorMascota = async (req, res) => {
+  const { id_mascota } = req.params;
+
+    const documentos = await prisma.documento_Mascota.findMany({
+      where: { id_mascota: parseInt(id_mascota) },
+      orderBy: { uploadedAt: 'desc' },
+    });
+
+    res.status(200).json(documentos);
+};
+
+export const eliminarDocumento = async (req, res) => {
+  const { id } = req.params;
+
+  await prisma.documento_Mascota.delete({where: { id: parseInt(id) },});
+
+  res.status(200).json({ message: 'Documento eliminado correctamente' });
+};
+
