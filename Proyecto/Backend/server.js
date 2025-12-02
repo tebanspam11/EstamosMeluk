@@ -12,6 +12,7 @@ import passwordResetRoutes from "./src/routes/passwordResetRoutes.js";
 import mascotaRoutes from './src/routes/mascotaRoutes.js';
 import usuarioRoutes from './src/routes/usuarioRoutes.js';
 import eventoRoutes from './src/routes/eventoRoutes.js';
+import carnetRoutes from './src/routes/carnetRoutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,7 @@ app.use('/api/password', passwordResetRoutes);
 app.use('/api/mascotas', mascotaRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/eventos', eventoRoutes);
+app.use('/api/carnet', carnetRoutes);
 
 app.get('/', (req, res) => {
   res.send('API running');

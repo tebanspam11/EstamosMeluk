@@ -159,7 +159,8 @@ export default function ClinicHistoryScreen({ navigation }: any) {
   };
 
   const viewDocument = async (documento: Documento) => {
-    const pdfUrl = `${API_URL}/uploads/pdfs/${documento.archivo_pdf}`;
+    const baseUrl = API_URL.replace('/api', '');
+    const pdfUrl = `${baseUrl}/uploads/pdfs/${documento.archivo_pdf}`;
     
     const canOpen = await Linking.canOpenURL(pdfUrl);
     if (canOpen) {
