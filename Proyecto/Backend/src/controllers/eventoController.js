@@ -8,8 +8,6 @@ export const crearEvento = async (req, res) => {
 
     const mascota = await prisma.mascota.findFirst({where: {id: id_mascota, id_usuario: userId}});
 
-    if (!mascota) return res.status(404).json({ message: 'Mascota no encontrada o no pertenece al usuario' });
-
     const nuevoEvento = await prisma.evento.create({
       data: {
         id_mascota,
@@ -59,8 +57,6 @@ export const editarEvento = async (req, res) => {
 
     const evento = await prisma.evento.findFirst({where: {id: parseInt(id), mascota: {id_usuario: userId}}});
 
-    if (!evento) return res.status(404).json({ message: 'Evento no encontrado o no pertenece al usuario' });
-
     const eventoActualizado = await prisma.evento.update({
       where: { id: parseInt(id) },
       data: {
@@ -82,11 +78,9 @@ export const eliminarEvento = async (req, res) => {
 
     const evento = await prisma.evento.findFirst({where: {id: parseInt(id), mascota: {id_usuario: userId}}});
 
-    if (!evento) return res.status(404).json({ message: 'Evento no encontrado o no pertenece al usuario' });
-
     await prisma.notificacion.deleteMany({where: { id_evento: parseInt(id) }});
 
     await prisma.evento.delete({where: { id: parseInt(id) }});
 
-    res.json({ message: 'Evento eliminado correctamente' });
+    res.json({ message: '⚠︎ Evento eliminado correctamente' });
 };

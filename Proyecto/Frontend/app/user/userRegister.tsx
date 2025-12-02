@@ -39,7 +39,7 @@ export default function RegisterScreen({ navigation }: any) {
   }, [googleSuccess]);
 
   const handleRegister = async () => {
-    const response = await fetch(`${API_URL}/auth/register`, {
+    const response = await fetch(`${API_URL}/usuarios`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nombre, correo, telefono, contraseña }),

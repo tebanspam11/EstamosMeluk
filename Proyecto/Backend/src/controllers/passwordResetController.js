@@ -22,7 +22,7 @@ export const requestPasswordReset = async (req, res) => {
   const emailResult = await sendPasswordResetCode(correo, code);
   if (!emailResult.success) return res.status(500).json({ error: '⚠ No se pudo enviar el email. Intenta de nuevo' });
 
-  return res.json({ok: true, message: 'Código enviado al correo electrónico', devCode: process.env.NODE_ENV === 'development' ? code : undefined});
+  return res.json({ok: true, message: 'Código enviado al correo electrónico'});
 };
 
 export const verifyResetCode = async (req, res) => {

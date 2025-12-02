@@ -33,35 +33,6 @@ export const login = async (req, res) => {
   return res.json({ ok: true, id: user.id, correo: user.correo, token, keepLogged});
 };
 
-export const register = async (req, res) => {
-  const { nombre, correo, telefono, contraseña } = req.body;
-
-  let existingPhone = null;
-  if (telefono) existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
-
-  const existingEmail = await prisma.usuario.findUnique({ where: { correo } });
-
-  if (existingEmail) return res.status(400).json({ error: '⚠︎ Este correo ya está registrado' });
-  if (existingPhone) return res.status(400).json({ error: '⚠︎ Este telefono ya está registrado' });
-
-  const hashedPassword = await bcrypt.hash(contraseña, 10);
-
-  const newUser = await prisma.usuario.create({
-    data: { 
-      nombre, 
-      correo, 
-      ...(telefono && { telefono }), 
-      contraseña: hashedPassword 
-    },
-  });
-
-  sendWelcomeEmail(correo, nombre).catch(err => {
-    console.error('⚠ No se pudo enviar email de bienvenida:', err);
-  });
-
-  return res.json({ok: true, id: newUser.id, nombre: newUser.nombre, correo: newUser.correo, telefono: newUser.telefono || null,});
-};
-
 export const googleAuth = async (req, res) => {
   const { idToken } = req.body;
 

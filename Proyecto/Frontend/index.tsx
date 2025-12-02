@@ -4,20 +4,21 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 
-import AuthLoading from './app/auth/authLoading.tsx';
-import LoginScreen from './app/auth/login.tsx';
-import RegisterScreen from './app/auth/register.tsx';
-import ForgotPasswordScreen from './app/auth/forgotPassword.tsx';
-import ProfileScreen from './app/auth/profile.tsx';
+import AuthLoading from './app/user/authLoading.tsx';
+import LoginScreen from './app/user/userLogin.tsx';
+import RegisterScreen from './app/user/userRegister.tsx';
+import ForgotPasswordScreen from './app/user/forgotPassword.tsx';
+import ProfileScreen from './app/user/userProfile.tsx';
 import HomeScreen from './app/main/home.tsx';
 import CalendarScreen from './app/main/calendar.tsx';
 import CarnetScreen from './app/pet/carnet.tsx';
 import ClinicHistoryScreen from './app/pet/clinic_history.tsx';
 import PetListScreen from './app/pet/list.tsx';
-import UploadScreen from './app/pet/upload.tsx';
+
 import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
 import PetProfileScreen from './app/pet/pet_profile.tsx';
-import EditPetProfileScreen from './app/pet/edit_pet_profile.tsx';
+import EditPetProfileScreen from './app/pet/petProfile.tsx';
+import PetRegisterScreen from './app/pet/petRegister.tsx';
 
 function VeterinarySearchScreen() {
   const navigation = useNavigation();
@@ -97,8 +98,8 @@ function App() {
           options={{ title: 'Mis Mascotas' }}
         />
         <Stack.Screen
-          name="Upload"
-          component={UploadScreen}
+          name="PetRegister"
+          component={PetRegisterScreen}
           options={{ title: 'Registrar Mascota' }}
         />
         <Stack.Screen
@@ -124,8 +125,6 @@ function App() {
           options={{ title: 'Subir PDF' }}
         />
 
-        {/* Pantalla Temporal (opcional) */}
-        <Stack.Screen name="TempHome" component={TempHomeScreen} options={{ title: 'Inicio' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

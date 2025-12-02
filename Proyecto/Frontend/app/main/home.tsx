@@ -1,60 +1,56 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from '../../src/config/api';
+import { useFocusEffect } from '@react-navigation/native';
+import { Usuario, Mascota, Evento } from '../../src/types';
+import UserIcon from '../../assets/images/200668125-user-profile-icon-vector-avatar-or-person-icon-profile-picture-portrait-symbol-neutral-gender.jpg';
 
 export default function HomeScreen({ navigation }: any) {
-  const [usuario, setUsuario] = useState(null);
-  const [mascotas, setMascotas] = useState([]);
-  const [eventos, setEventos] = useState([]);
+  const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [mascotas, setMascotas] = useState<Mascota[]>([]);
+  const [eventos, setEventos] = useState<Evento[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    cargarDatos();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      validateActiveSession();
+      cargarDatos();
+    }, [])
+  );
+
+  const validateActiveSession = async () => {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) navigation.replace('Login');
+  }
 
   const cargarDatos = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
+    const token = await AsyncStorage.getItem('token');
+    const headers = {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'};
 
-      if (!token) navigation.replace('Login');
+    const [usuarioRes, mascotasRes, eventosRes] = await Promise.all([
+      fetch(`${API_URL}/usuarios`, { headers }),
+      fetch(`${API_URL}/mascotas`, { headers }),
+      fetch(`${API_URL}/eventos`, { headers }),
+    ]);
 
-      const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      };
-
-      const [perfilRes, mascotasRes, eventosRes] = await Promise.all([
-        fetch(`${API_URL}/usuarios/perfil`, { headers }),
-        fetch(`${API_URL}/mascotas`, { headers }),
-        fetch(`${API_URL}/eventos`, { headers }),
-      ]);
-
-      if (perfilRes.ok) {
-        const perfilData = await perfilRes.json();
-        console.log('📋 Datos del perfil:', perfilData);
-        setUsuario(perfilData);
-      } else {
-        console.log('❌ Error al cargar perfil:', perfilRes.status);
-      }
-
-      if (mascotasRes.ok) {
-        const mascotasData = await mascotasRes.json();
-        console.log('🐾 Mascotas:', mascotasData);
-        setMascotas(mascotasData);
-      }
-
-      if (eventosRes.ok) {
-        const eventosData = await eventosRes.json();
-        console.log('📅 Eventos:', eventosData);
-        setEventos(eventosData);
-      }
-    } catch (error) {
-      console.error('Error al cargar datos:', error);
-    } finally {
-      setLoading(false);
+    if (usuarioRes.ok) {
+      const usuarioData = await usuarioRes.json();
+      setUsuario(usuarioData);
     }
+
+    if (mascotasRes.ok) {
+      const mascotasData = await mascotasRes.json();
+      setMascotas(mascotasData);
+    }
+
+    if (eventosRes.ok) {
+      const eventosData = await eventosRes.json();
+      setEventos(eventosData);
+    }
+    
+    setLoading(false);
   };
 
   const formatearFecha = (fecha: string) => {
@@ -84,24 +80,19 @@ export default function HomeScreen({ navigation }: any) {
     );
   }
 
-  const nombreUsuario = usuario?.nombre;
-
   return (
     <SafeAreaView style={styles.container}>
       {/* Header con botón de perfil */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>¡Hola, {nombreUsuario}!</Text>
-          <Text style={styles.subtitle}>Bienvenida a PocketVet</Text>
+          <Text style={styles.greeting}>¡Hola, {usuario?.nombre}!</Text>
+          <Text style={styles.subtitle}>Te damos la Bienvenida a PocketVet</Text>
         </View>
         <TouchableOpacity
           style={styles.profileButton}
           onPress={() => navigation.replace('Profile')}
         >
-          <Image
-            source={{ uri: 'https://via.placeholder.com/40x40?text=👤' }}
-            style={styles.profileImage}
-          />
+          <Image source={UserIcon} style={styles.profileImage} />
         </TouchableOpacity>
       </View>
 
@@ -109,9 +100,17 @@ export default function HomeScreen({ navigation }: any) {
       <View style={styles.remindersSection}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Próximos Recordatorios</Text>
-          <TouchableOpacity onPress={() => navigation.replace('Calendar')}>
-            <Text style={styles.seeAllText}>Ver todos</Text>
-          </TouchableOpacity>
+          <View style={styles.headerButtons}>
+            <TouchableOpacity 
+              style={styles.addEventButton}
+              onPress={() => navigation.replace('CreateEvent')}
+            >
+              <Text style={styles.addEventText}>+</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.replace('Calendar')}>
+              <Text style={styles.seeAllText}>Ver todos</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {eventos.length === 0 ? (
@@ -134,8 +133,8 @@ export default function HomeScreen({ navigation }: any) {
                   </View>
                 </View>
                 <Text style={styles.reminderTitle}>{evento.titulo}</Text>
-                <Text style={styles.reminderPet}>{evento.mascota.nombre}</Text>
-                <Text style={styles.reminderDate}>{formatearFecha(evento.fecha_inicio)}</Text>
+                <Text style={styles.reminderPet}>{evento.mascota?.nombre}</Text>
+                <Text style={styles.reminderDate}>{formatearFecha(evento.fecha_inicio.toString())}</Text>
               </View>
             ))}
           </ScrollView>
@@ -144,7 +143,12 @@ export default function HomeScreen({ navigation }: any) {
 
       {/* Sección de Mascotas */}
       <View style={styles.petsSection}>
-        <Text style={styles.sectionTitle}>Tus Mascotas</Text>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Tus Mascotas</Text>
+          <TouchableOpacity onPress={() => navigation.replace('List')}>
+            <Text style={styles.seeAllText}>Ver todos</Text>
+          </TouchableOpacity>
+        </View>
 
         {mascotas.length === 0 ? (
           <View style={styles.emptyCard}>
@@ -152,7 +156,7 @@ export default function HomeScreen({ navigation }: any) {
             <Text style={styles.emptyText}>Nada por aquí...</Text>
             <TouchableOpacity
               style={styles.addButton}
-              onPress={() => navigation.replace('Upload')}
+              onPress={() => navigation.navigate('PetRegister')}
             >
               <Text style={styles.addButtonText}>Agregar Mascota</Text>
             </TouchableOpacity>
@@ -176,7 +180,7 @@ export default function HomeScreen({ navigation }: any) {
 
             <TouchableOpacity
               style={[styles.petCard, styles.addPetCard]}
-              onPress={() => navigation.replace('Upload')}
+              onPress={() => navigation.replace('PetRegister')}
             >
               <Text style={styles.addPetIcon}>+</Text>
               <Text style={styles.addPetText}>Agregar Mascota</Text>
@@ -231,9 +235,9 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 10,
     paddingBottom: 10,
   },
   greeting: {
@@ -247,14 +251,15 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   profileButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    overflow: 'hidden',
+    width: 50,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
+    width: 50,
+    height: 50,
+    borderRadius: 25,
   },
   remindersSection: {
     marginTop: 20,
@@ -275,6 +280,25 @@ const styles = StyleSheet.create({
     color: '#4A90E2',
     fontSize: 14,
     fontWeight: '600',
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  addEventButton: {
+    backgroundColor: '#4A90E2',
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addEventText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: -2,
   },
   remindersScroll: {
     marginHorizontal: -5,
@@ -328,8 +352,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   petsSection: {
-    marginTop: 30,
+    marginTop: 25,
     paddingHorizontal: 20,
+    marginBottom: 100,
   },
   petsGrid: {
     flexDirection: 'row',

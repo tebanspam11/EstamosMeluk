@@ -1,11 +1,13 @@
 import express from 'express';
-import { obtenerUsuario, editarUsuario, eliminarUsuario } from '../controllers/usuarioController.js';
+import { crearUsuario, obtenerUsuario, editarUsuario, eliminarUsuario } from '../controllers/usuarioController.js';
 import { verificarToken } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.get('/perfil', verificarToken, obtenerUsuario);
-router.put('/perfil', verificarToken, editarUsuario);
-router.delete('/perfil', verificarToken, eliminarUsuario);
+
+router.post('/', crearUsuario);     
+router.get('/', verificarToken, obtenerUsuario);      
+router.put('/:id', verificarToken, editarUsuario);       
+router.delete('/:id', verificarToken, eliminarUsuario);  
 
 export default router;

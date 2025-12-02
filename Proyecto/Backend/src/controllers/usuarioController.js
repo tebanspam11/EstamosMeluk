@@ -1,6 +1,35 @@
 import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+import { sendWelcomeEmail } from '../services/emailService.js';
 
 const prisma = new PrismaClient();
+
+export const crearUsuario = async (req, res) => {
+  const { nombre, correo, telefono, contraseña } = req.body;
+
+  let existingPhone = null;
+  if (telefono) existingPhone = await prisma.usuario.findUnique({ where: { telefono } });
+
+  const existingEmail = await prisma.usuario.findUnique({ where: { correo } });
+
+  if (existingEmail) return res.status(400).json({ error: '⚠︎ Este correo ya está registrado' });
+  if (existingPhone) return res.status(400).json({ error: '⚠︎ Este telefono ya está registrado' });
+
+  const hashedPassword = await bcrypt.hash(contraseña, 10);
+
+  const newUser = await prisma.usuario.create({
+    data: { 
+      nombre, 
+      correo, 
+      ...(telefono && { telefono }), 
+      contraseña: hashedPassword 
+    },
+  });
+
+  sendWelcomeEmail(correo, nombre);
+
+  return res.json({ok: true, id: newUser.id, nombre: newUser.nombre, correo: newUser.correo, telefono: newUser.telefono || null,});
+};
 
 export const obtenerUsuario = async (req, res) => {
     const { userId } = req.user; // Del token JWT
@@ -16,7 +45,6 @@ export const obtenerUsuario = async (req, res) => {
       }
     });
 
-    if (!usuario) return res.status(404).json({ message: 'Usuario no encontrado' });
     res.json(usuario);
 };
 

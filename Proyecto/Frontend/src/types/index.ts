@@ -1,70 +1,112 @@
-// Interfaz principal de Mascota
-export interface Pet {
-  id?: string;
-  name: string;
-  species: string;
-  breed: string;
-  weight: string; 
-  age: string;    
-  image: string | null;
-  birthDate?: Date;
-  gender?: 'male' | 'female' | 'unknown';
-  ownerId?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+export interface Usuario {
+  id: number;
+  nombre: string | null;
+  correo: string;
+  telefono: string | null;
+  contraseña: string | null;
+  cuenta_google: boolean | null;
+  googleId: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Mascota {
+  id: number;
+  id_usuario: number;
+  nombre: string;
+  especie: string;
+  raza: string | null;
+  edad: number | null;
+  peso: string | null;
+  foto: string | null;
+  alergias: string | null;
+  enfermedades: string | null;
+  observaciones: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+
+export interface Pet extends Mascota {}
+
+export interface Evento {
+  id: number;
+  id_mascota: number;
+  titulo: string;
+  descripcion: string | null;
+  fecha_inicio: Date;
+  fecha_fin: Date | null;
+  estado: string;
+  repeticion: string | null;
+  created_at: Date;
+  updated_at: Date;
+  mascota?: {
+    id: number;
+    nombre: string;
+    especie: string;
+    foto: string | null;
+  };
+}
+
+export interface Notificacion {
+  id: number;
+  id_usuario: number;
+  id_evento: number;
+  tipo: string;
+  mensaje: string;
+  fecha_programada: Date;
+  canal: string;
+  enviada: boolean | null;
+  created_at: Date;
+}
+
+export interface DocumentoMascota {
+  id: number;
+  id_mascota: number;
+  tipo: string;
+  titulo: string;
+  descripcion: string | null;
+  archivo_pdf: string;
+  uploadedAt: Date;
+}
+
+export interface CarnetDigital {
+  id: number;
+  id_mascota: number;
+  tipo_medicamento: string;
+  nombre_medicamento: string;
+  fecha_aplicacion: Date;
+  laboratorio: string | null;
+  id_lote: string;
+  fecha_elaboracion: Date | null;
+  fecha_vencimiento: Date;
+  peso: number;
+  nombre_veterinaria: string;
+  telefono_veterinaria: string | null;
+  direccion_veterinaria: string;
+  proxima_dosis: Date | null;
+  observaciones: string | null;
+  created_at: Date;
+  updated_at: Date;
 }
 
 export interface PetFormData {
-  name: string;
-  species: string;
-  breed: string;
-  weight: string;
-  age: string;
-  image: string | null;
+  nombre: string;
+  especie: string;
+  raza?: string;
+  edad?: number;
+  peso?: number;
+  foto?: string;
+  alergias?: string;
+  enfermedades?: string;
+  observaciones?: string;
 }
 
-// Especies predefinidas
-export interface Species {
-  id: string;
-  name: string;
-  icon?: string;
-}
-
-// Usuario
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  phone?: string;
-  pets?: Pet[];
-}
-
-// Eventos del calendario
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  date: Date;
-  petId: string;
-  type: 'vaccine' | 'vet' | 'grooming' | 'other';
-  description?: string;
-}
-
-// Documentos médicos
-export interface MedicalDocument {
-  id: string;
-  petId: string;
-  title: string;
-  type: 'pdf' | 'image' | 'text';
-  url: string;
-  date: Date;
-}
-
-// Vacuna
-export interface Vaccine {
-  id: string;
-  name: string;
-  date: Date;
-  nextDate?: Date;
-  petId: string;
-  verified: boolean;
+export interface EventoFormData {
+  id_mascota: number;
+  titulo: string;
+  descripcion?: string;
+  fecha_inicio: Date;
+  fecha_fin?: Date;
+  estado?: string;
+  repeticion?: string;
 }
