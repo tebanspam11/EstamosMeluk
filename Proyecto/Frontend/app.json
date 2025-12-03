@@ -9,28 +9,31 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.PocketVet"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "foregroundImage": "./assets/images/LogoPocketVet.jpg"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "package": "com.anonymous.PocketVet"
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/LogoPocketVet.jpg"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/LogoPocketVet.jpg",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -44,6 +47,20 @@
         {
           "photosPermission": "La aplicación necesita acceso a tus fotos para que puedas agregar imágenes de tus mascotas.",
           "cameraPermission": "La aplicación necesita acceso a tu cámara para tomar fotos de tus mascotas."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/LogoPocketVet.jpg",
+          "color": "#4A90E2",
+          "sounds": [],
+          "ios": {
+            "requestPermissionsOnAppLaunch": true
+          },
+          "android": {
+            "requestPermissionsOnAppLaunch": true
+          }
         }
       ]
     ],

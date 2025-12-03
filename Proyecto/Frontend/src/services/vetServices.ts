@@ -3,7 +3,7 @@ import { Vet } from "../types/vet";
 export const getVets = async (
   lat: number,
   lon: number,
-  radius: number = 5000 // radio por defecto en metros
+  radius: number = 5000
 ): Promise<Vet[]> => {
   const query = `
     [out:json][timeout:25];

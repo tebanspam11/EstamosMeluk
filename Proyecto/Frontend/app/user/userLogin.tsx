@@ -1,6 +1,8 @@
-import LogoImage from '@/assets/images/LogoPocketVet.jpg';
+import LogoImage from '../../assets/images/LogoPocketVet.jpg';
 import { API_URL } from '../../src/config/api.ts';
-import React, { useState } from 'react';
+import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
+import { useGoogleAuth } from '../../src/hooks/useGoogleAuth.ts';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,39 +15,66 @@ import {
   ScrollView,
   Image,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }: any) {
-  const [correo, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
+  const [keepLogged, setKeepLogged] = useState(false);
   const [contraseña, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  
+  const { signInWithGoogle, loading: googleLoading, error: googleError, isSuccessful } = useGoogleAuth();
+
+  useEffect(() => {
+    if (isSuccessful === true) {
+      Alert.alert('Login exitoso', 'Bienvenido a PocketVet');
+      navigation.replace('Home');
+    } else if (isSuccessful === false && googleError) {
+      Alert.alert('Error', googleError);
+    }
+  }, [isSuccessful]);
 
   const handleLogin = async () => {
+    setLoading(true);
+    const normalizedIdentifier = identifier.includes('@') ? identifier.trim() : identifier.replace(/[\s\-()]/g, '');
+
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ correo, contraseña }),
+      body: JSON.stringify({ identifier: normalizedIdentifier, contraseña, keepLogged }),
     });
 
     const data = await response.json();
 
-    if (data.ok) {
+    if (data && response.ok && data.ok) {
+      await AsyncStorage.setItem("token", data.token);
+      await AsyncStorage.setItem("userId", data.userId.toString());
+      await AsyncStorage.setItem("keepLogged", data.keepLogged ? "true" : "false");
+
       Alert.alert('Login exitoso');
-      navigation.navigate('Home');
+      navigation.replace('Home');
+
     } else {
-      Alert.alert('Error:', data.message);
+      Alert.alert('Error de autenticación', data?.error);
     }
+    setLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert('Google Login', 'Función de Google en desarrollo');
+  const handleGoogleLogin = async () => {
+    await signInWithGoogle();
   };
 
-  const handleForgotPassword = () => {
-    Alert.alert('Recuperar Contraseña', 'Función en desarrollo');
-  };
-
-  const handleRegister = () => {
-    navigation.navigate('Register');
+  const handleIdentifierChange = (text: string) => {
+    if (text.includes('@')) {
+      setIdentifier(text);
+    } else {
+      const hasLetters = /[a-zA-Z]/.test(text);
+      if (hasLetters) {
+        setIdentifier(text);
+      } else {
+        setIdentifier(formatPhoneColombia(text));
+      }
+    }
   };
 
   return (
@@ -66,13 +95,13 @@ export default function LoginScreen({ navigation }: any) {
 
         {/* Form */}
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Email/Telefono</Text>
           <TextInput
             style={styles.input}
-            placeholder="tu@email.com"
+            placeholder="tu@email.com/345 678 9000"
             placeholderTextColor="#999"
-            value={correo}
-            onChangeText={setEmail}
+            value={identifier}
+            onChangeText={handleIdentifierChange}
             keyboardType="email-address"
             autoCapitalize="none"
           />
@@ -88,16 +117,32 @@ export default function LoginScreen({ navigation }: any) {
             autoCapitalize="none"
           />
 
-          {/* Forgot Password */}
-          <TouchableOpacity onPress={handleForgotPassword}>
+          {/* Checkbox - Recordar sesión */}
+          <TouchableOpacity 
+            style={styles.checkboxContainer}
+            onPress={() => setKeepLogged(!keepLogged)}
+            activeOpacity={0.7}
+          >
+            <View style={[styles.checkbox, keepLogged && styles.checkboxChecked]}>
+              {keepLogged && (
+                <Text style={styles.checkboxIcon}>✓</Text>
+              )}
+            </View>
+            <Text style={styles.checkboxLabel}>Recordar mi sesión</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.replace('ForgotPassword')}>
             <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
           </TouchableOpacity>
 
           {/* Login Button */}
           <TouchableOpacity
-            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+            style={[
+              styles.loginButton,
+              (loading || !identifier.trim() || !contraseña.trim()) && styles.loginButtonDisabled
+            ]}
             onPress={handleLogin}
-            disabled={loading}
+            disabled={loading || !identifier.trim() || !contraseña.trim()}
           >
             <Text style={styles.loginButtonText}>
               {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
@@ -112,18 +157,24 @@ export default function LoginScreen({ navigation }: any) {
           </View>
 
           {/* Google Login Button */}
-          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin}>
+          <TouchableOpacity 
+            style={styles.googleButton} 
+            onPress={handleGoogleLogin}
+            disabled={googleLoading}
+          >
             <Image
               source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
               style={styles.googleIcon}
             />
-            <Text style={styles.googleButtonText}>Continuar con Google</Text>
+            <Text style={styles.googleButtonText}>
+              {googleLoading ? 'Conectando con Google...' : 'Continuar con Google'}
+            </Text>
           </TouchableOpacity>
 
           {/* Register Link */}
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>¿No tienes cuenta? </Text>
-            <TouchableOpacity onPress={handleRegister}>
+            <TouchableOpacity onPress={() => navigation.replace('Register')}>
               <Text style={styles.registerLink}>Regístrate</Text>
             </TouchableOpacity>
           </View>
@@ -182,6 +233,35 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginBottom: 30,
     fontSize: 14,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderWidth: 2,
+    borderColor: '#e1e1e1',
+    borderRadius: 6,
+    marginRight: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+  },
+  checkboxChecked: {
+    backgroundColor: '#4A90E2',
+    borderColor: '#4A90E2',
+  },
+  checkboxIcon: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  checkboxLabel: {
+    fontSize: 15,
+    color: '#333',
   },
   loginButton: {
     backgroundColor: '#4A90E2',

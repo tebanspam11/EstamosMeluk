@@ -1,12 +1,9 @@
-import express from 'express';
-import { obtenerMascotas, crearMascota, editarMascota, eliminarMascota } from '../controllers/mascotaController.js';
-import { verificarToken } from '../middlewares/authMiddleware.js';
+const express = require('express');
+const { obtenerMascotas, crearMascota } = require('../controllers/mascotaController');
 
 const router = express.Router();
 
-router.get('/', verificarToken, obtenerMascotas);
-router.post('/', verificarToken, crearMascota);
-router.put('/:id\\', verificarToken, editarMascota);
-router.delete('/:id', verificarToken, eliminarMascota);
+router.get('/', obtenerMascotas);
+router.post('/', crearMascota);
 
-export default router;
+module.exports = router;
