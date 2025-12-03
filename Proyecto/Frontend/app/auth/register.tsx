@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
-import { formatName } from '../../src/utils/formatName.ts';
-import { useGoogleAuth } from '../../src/hooks/useGoogleAuth.ts';
-import { API_URL } from '../../src/config/api.ts';
-import { useFormValidation } from '../../src/hooks/useFormValidation.ts';
+import React, { useState, useEffect, useMemo } from 'react';
+import { API_URL } from '@/src/config/api.ts';
+import { validateEmailFields } from '@/src/utils/validateEmail.ts';
+import { validatePasswordChecklist, PasswordChecklistType } from '@/src/utils/validatePassword.ts';
+import { validatePhoneFields } from '@/src/utils/validatePhone.ts';
+import { validateConfirmPasswordFields } from '@/src/utils/validateConfirmPassword.ts';
+import { formatPhoneColombia } from '@/src/utils/formatPhone.ts';
+import { formatName } from '@/src/utils/formatName.ts';
 import {
   View,
   Text,
@@ -20,43 +22,134 @@ import {
 export default function RegisterScreen({ navigation }: any) {
   const [nombre, setName] = useState('');
   const [correo, setEmail] = useState('');
-  const [telefono, setPhone] = useState('');
   const [contraseña, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [telefono, setPhone] = useState('');
+
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [passwordChecklist, setPasswordChecklist] = useState<PasswordChecklistType>({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    special: false,
+    noSpaces: false,
+  });
+  const [passwordValid, setPasswordValid] = useState(false);
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string | null>(null);
+
   const [showChecklist, setShowChecklist] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
-  
-  const { signInWithGoogle, loading: googleLoading, error: googleError, isSuccessful: googleSuccess } = useGoogleAuth();
-  const { emailError, phoneError, passwordChecklist, passwordValid, confirmPasswordError, isFormValid} = useFormValidation(nombre, correo, telefono, contraseña, confirmPassword);
+
+  const isFormValid = useMemo(() => {
+    const passwordIsValid = passwordValid;
+    const emailIsValid = correo ? validateEmailFields(correo).valido : false;
+    const phoneIsValid = telefono ? validatePhoneFields(telefono) : true;
+    const confirmPasswordIsValid =
+      confirmPassword && contraseña
+        ? validateConfirmPasswordFields(contraseña, confirmPassword).valido
+        : false;
+
+    return (
+      nombre.trim().length > 0 &&
+      emailIsValid &&
+      passwordIsValid &&
+      phoneIsValid &&
+      confirmPasswordIsValid
+    );
+  }, [nombre, correo, contraseña, telefono, confirmPassword, passwordValid]);
 
   useEffect(() => {
-    if (googleSuccess === true) {
-      Alert.alert('Registro exitoso', '¡Bienvenido a PocketVet!');
-      navigation.replace('Home');
-    } else if (googleSuccess === false && googleError) {
-      Alert.alert('Error', googleError);
+    setEmailError(
+      correo
+        ? validateEmailFields(correo).valido
+          ? null
+          : validateEmailFields(correo).error
+        : null
+    );
+  }, [correo]);
+
+  useEffect(() => {
+    setPhoneError(
+      telefono ? (validatePhoneFields(telefono) ? null : 'ⓘ El número no es válido') : null
+    );
+  }, [telefono]);
+
+  useEffect(() => {
+    if (confirmPassword && contraseña) {
+      setConfirmPasswordError(
+        validateConfirmPasswordFields(contraseña, confirmPassword).valido
+          ? null
+          : validateConfirmPasswordFields(contraseña, confirmPassword).error
+      );
+    } else {
+      setConfirmPasswordError(null);
     }
-  }, [googleSuccess]);
+  }, [confirmPassword, contraseña]);
+
+  useEffect(() => {
+    setPasswordChecklist(validatePasswordChecklist(contraseña).checklist)
+    setPasswordValid(
+      contraseña
+      ? validatePasswordChecklist(contraseña).valido
+      : false
+    )
+  }, [contraseña])
 
   const handleRegister = async () => {
-    const response = await fetch(`${API_URL}/usuarios`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nombre, correo, telefono, contraseña }),
-    });
+    const emailIsValid = correo ? validateEmailFields(correo).valido : false;
+    const confirmPasswordIsValid =
+      confirmPassword && contraseña
+        ? validateConfirmPasswordFields(contraseña, confirmPassword).valido
+        : false;
+    const passwordIsStrict =
+      contraseña.length > 0 &&
+      confirmPassword.length > 0 &&
+      validatePasswordChecklist(contraseña).valido;
 
-    const data = await response.json();
+    if (!(nombre.trim().length > 0 && emailIsValid && passwordIsStrict && confirmPasswordIsValid)) {
+      Alert.alert('Formulario inválido', 'Revisa los campos antes de continuar');
+      return;
+    }
+    try {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, correo, telefono, contraseña }),
+      });
 
-    if (response.ok && data && data.ok) {
-      Alert.alert("Su usuario ha sido registrado exitosamente. Por favor, inicie sesión.");
-      navigation.replace('Login');
-    } else {
-      Alert.alert('Error en registro', data?.error || JSON.stringify(data));
+      const contentType = res.headers.get('content-type') || '';
+      let data: any = null;
+
+      if (contentType.includes('application/json')) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        console.warn('Non-JSON response from register:', res.status, text);
+        Alert.alert(
+          'Error de red',
+          `Respuesta inesperada del servidor (status ${res.status}). Revise el backend.`
+        );
+        return;
+      }
+
+      if (res.ok && data && data.ok) {
+        Alert.alert('Registro exitoso');
+        navigation.replace('Login');
+      } else {
+        // If backend returned JSON with error message, display it
+        console.warn('Register failed:', res.status, data);
+        Alert.alert('Error en registro', data?.message || JSON.stringify(data));
+      }
+    } catch (err: any) {
+      console.error('Network error during register:', err);
+      Alert.alert('Error de red', err?.message ?? String(err));
     }
   };
 
-  const handleGoogleRegister = async () => {
-    await signInWithGoogle();
+  const handleGoogleRegister = () => {
+    Alert.alert('Google Register', 'Función de Google en desarrollo');
   };
 
   return (
@@ -156,24 +249,24 @@ export default function RegisterScreen({ navigation }: any) {
             autoCapitalize="none"
           />
           {showChecklist && (
-            <View style={styles.checklist}>
-              <Text style={[styles.checklistItem, passwordChecklist.length && styles.checklistValid]}>
-                {passwordChecklist.length ? '✓' : '○'} Mínimo 8 caracteres
+            <View style={{ marginTop: 10, marginBottom: 18 }}>
+              <Text style={{ color: passwordChecklist.length ? 'green' : 'red' }}>
+                • Mínimo 8 caracteres
               </Text>
-              <Text style={[styles.checklistItem, passwordChecklist.uppercase && styles.checklistValid]}>
-                {passwordChecklist.uppercase ? '✓' : '○'} Una letra mayúscula
+              <Text style={{ color: passwordChecklist.uppercase ? 'green' : 'red' }}>
+                • Al menos una mayúscula
               </Text>
-              <Text style={[styles.checklistItem, passwordChecklist.lowercase && styles.checklistValid]}>
-                {passwordChecklist.lowercase ? '✓' : '○'} Una letra minúscula
+              <Text style={{ color: passwordChecklist.lowercase ? 'green' : 'red' }}>
+                • Al menos una minúscula
               </Text>
-              <Text style={[styles.checklistItem, passwordChecklist.number && styles.checklistValid]}>
-                {passwordChecklist.number ? '✓' : '○'} Un número
+              <Text style={{ color: passwordChecklist.number ? 'green' : 'red' }}>
+                • Al menos un número
               </Text>
-              <Text style={[styles.checklistItem, passwordChecklist.special && styles.checklistValid]}>
-                {passwordChecklist.special ? '✓' : '○'} Un carácter especial
+              <Text style={{ color: passwordChecklist.special ? 'green' : 'red' }}>
+                • Al menos un símbolo (!@#$%^&*-_)
               </Text>
-              <Text style={[styles.checklistItem, passwordChecklist.noSpaces && styles.checklistValid]}>
-                {passwordChecklist.noSpaces ? '✓' : '○'} Sin espacios
+              <Text style={{ color: passwordChecklist.noSpaces ? 'green' : 'red' }}>
+                • Sin espacios
               </Text>
             </View>
           )}
@@ -220,18 +313,12 @@ export default function RegisterScreen({ navigation }: any) {
           </View>
 
           {/* Google Register Button */}
-          <TouchableOpacity 
-            style={styles.googleButton} 
-            onPress={handleGoogleRegister}
-            disabled={googleLoading}
-          >
+          <TouchableOpacity style={styles.googleButton} onPress={handleGoogleRegister}>
             <Image
               source={{ uri: 'https://developers.google.com/identity/images/g-logo.png' }}
               style={styles.googleIcon}
             />
-            <Text style={styles.googleButtonText}>
-              {googleLoading ? 'Conectando con Google...' : 'Registrarse con Google'}
-            </Text>
+            <Text style={styles.googleButtonText}>Registrarse con Google</Text>
           </TouchableOpacity>
 
           {/* Login Link */}
@@ -295,24 +382,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 20,
     color: '#333',
-  },
-  checklist: {
-    backgroundColor: '#f9f9f9',
-    padding: 12,
-    borderRadius: 8,
-    marginTop: -10,
-    marginBottom: 18,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  checklistItem: {
-    fontSize: 13,
-    color: '#666',
-    marginVertical: 3,
-  },
-  checklistValid: {
-    color: '#4CAF50',
-    fontWeight: '600',
   },
   registerButton: {
     backgroundColor: '#4A90E2',

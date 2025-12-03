@@ -1,18 +1,25 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "target": "ESNext",
-    "module": "Preserve",
-    "moduleResolution": "bundler",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "jsx": "react-native",
+    "strict": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "allowImportingTsExtensions": true,
-    "strict": true,
-    "paths": {"@/*": ["./*"]},
-    "types": ["react", "react-native", "expo-router"],
-    "jsx": "react"
+    "types": ["react", "react-native"],
+    "paths": {
+      "@/*": ["./*"]
+    }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "async-storage.d.ts", "src/config/google.js"],
-  "extends": "expo/tsconfig.base"
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ]
 }
