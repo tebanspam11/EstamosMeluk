@@ -16,7 +16,7 @@ export default function AuthLoading() {
       const now = Date.now() / 1000;
 
       if (decoded.exp && decoded.exp < now) {
-        //Expired
+        
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('keepLogged');
         return navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
