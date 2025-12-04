@@ -43,7 +43,6 @@ interface NewEvent {
 export default function CalendarScreen() {
   const navigation = useNavigation();
 
-  // Hook de notificaciones
   const { expoPushToken } = useNotifications();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
