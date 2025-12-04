@@ -3,7 +3,6 @@ import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
 
-// Configurar cómo se muestran las notificaciones cuando la app está en primer plano
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -14,7 +13,6 @@ Notifications.setNotificationHandler({
   }),
 });
 
-// Solicitar permisos para notificaciones
 export async function registerForPushNotificationsAsync() {
   let token;
 
@@ -52,16 +50,13 @@ export async function registerForPushNotificationsAsync() {
   return token;
 }
 
-// Programar una notificación local para un evento
 export async function scheduleEventNotification(
   eventTitle: string,
   eventDate: Date,
   minutesBefore: number = 60
 ) {
-  // Calcular el tiempo de la notificación (por defecto 1 hora antes)
   const notificationDate = new Date(eventDate.getTime() - minutesBefore * 60 * 1000);
   
-  // Si la fecha ya pasó, no programar la notificación
   if (notificationDate <= new Date()) {
     console.log('La fecha del evento ya pasó, no se programa notificación');
     return null;
@@ -80,7 +75,6 @@ export async function scheduleEventNotification(
   return notificationId;
 }
 
-// Programar múltiples recordatorios para un evento (ej: 1 día antes, 1 hora antes, 15 min antes)
 export async function scheduleMultipleEventReminders(
   eventTitle: string,
   eventDate: Date,
@@ -127,22 +121,19 @@ export async function scheduleMultipleEventReminders(
   return notificationIds;
 }
 
-// Cancelar una notificación programada
 export async function cancelNotification(notificationId: string) {
   await Notifications.cancelScheduledNotificationAsync(notificationId);
 }
 
-// Cancelar todas las notificaciones programadas
 export async function cancelAllNotifications() {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
 
-// Obtener todas las notificaciones programadas
+
 export async function getAllScheduledNotifications() {
   return await Notifications.getAllScheduledNotificationsAsync();
 }
 
-// Programar notificación de vacuna próxima a vencer
 export async function scheduleVaccineReminder(
   petName: string,
   vaccineName: string,
@@ -165,7 +156,6 @@ export async function scheduleVaccineReminder(
     notificationIds.push(id1);
   }
   
-  // Recordatorio 1 día antes
   const oneDayBefore = new Date(dueDate.getTime() - 24 * 60 * 60 * 1000);
   if (oneDayBefore > new Date()) {
     const id2 = await Notifications.scheduleNotificationAsync({
@@ -180,7 +170,6 @@ export async function scheduleVaccineReminder(
     notificationIds.push(id2);
   }
   
-  // Recordatorio el día de la vacuna
   if (dueDate > new Date()) {
     const id3 = await Notifications.scheduleNotificationAsync({
       content: {
