@@ -63,7 +63,7 @@ export default function PetProfileScreen({ route }: any) {
 
   const reloadSelectedPet = async (petId: number) => {
     const token = await AsyncStorage.getItem('token');
-    const response = await fetch(`${API_URL}/mascotas/${petId}`, {
+    const response = await fetch(`${API_URL}/mascotas`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -71,10 +71,7 @@ export default function PetProfileScreen({ route }: any) {
 
     const data = await response.json();
     if (response.ok) {
-      const updatedPet = data.find((p: Pet) => p.id === petId);
-      if (updatedPet) {
-        setSelectedPet(updatedPet);
-      }
+      setSelectedPet(data)
     }
   };
 

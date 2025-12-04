@@ -1,0 +1,1 @@
+export const MAPTILER_API_KEY = "Hlumwjzw6Y9pnDUhy3x2";

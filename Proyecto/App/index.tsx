@@ -20,21 +20,12 @@ import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
 import PetProfileScreen from './app/pet/petProfile.tsx';
 import EditPetProfileScreen from './app/pet/petEdit.tsx';
 import PetRegisterScreen from './app/pet/petRegister.tsx';
+import { VeterinarySearchScreen } from './app/main/veterinarySearch.tsx';
 
 function LogoHeader() {
   return (
     <View style={styles.logoContainer}>
       <Image source={require('./assets/images/LogoPocketVet.jpg')} style={styles.logo} resizeMode="contain" />
-    </View>
-  );
-}
-
-function VeterinarySearchScreen() {
-  const navigation = useNavigation();
-  return (
-    <View style={styles.container}>
-      <Text>Búsqueda de Veterinarias - En desarrollo</Text>
-      <Button title="Volver" onPress={() => navigation.goBack()} />
     </View>
   );
 }
