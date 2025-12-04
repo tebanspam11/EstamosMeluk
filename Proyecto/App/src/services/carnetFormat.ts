@@ -144,7 +144,9 @@ export default function carnetFormat(mascotaSeleccionada: any, vacunas: any[], d
                         </div>
                       </td>
                       <td>${v.peso}</td>
-                      <td><div class="vet-container"><div><strong>${v.nombre_veterinaria}</strong></div><div class="small">Tel: ${v.telefono_veterinaria || 'N/A'}</div><div class="small">Dir: ${v.direccion_veterinaria}</div></div></td>
+                      <td><div class="vet-container"><div><strong>${v.nombre_veterinaria}</strong></div><div class="small">Tel: ${v.telefono_veterinaria || 'N/A'}</div><div class="small">Dir: ${
+                        v.direccion_veterinaria
+                      }</div></div></td>
                       <td>${v.proxima_dosis ? new Date(v.proxima_dosis).toLocaleDateString('es-ES') : 'N/A'}</td>
                       <td>${v.observaciones || 'N/A'}</td>
                     </tr>
@@ -189,7 +191,9 @@ export default function carnetFormat(mascotaSeleccionada: any, vacunas: any[], d
                         </div>
                       </td>
                       <td>${d.peso}</td>
-                      <td><div class="vet-container"><div><strong>${d.nombre_veterinaria}</strong></div><div class="small">Tel: ${d.telefono_veterinaria || 'N/A'}</div><div class="small">Dir: ${d.direccion_veterinaria}</div></div></td>
+                      <td><div class="vet-container"><div><strong>${d.nombre_veterinaria}</strong></div><div class="small">Tel: ${d.telefono_veterinaria || 'N/A'}</div><div class="small">Dir: ${
+                        d.direccion_veterinaria
+                      }</div></div></td>
                       <td>${d.proxima_dosis ? new Date(d.proxima_dosis).toLocaleDateString('es-ES') : 'N/A'}</td>
                       <td>${d.observaciones || 'N/A'}</td>
                     </tr>

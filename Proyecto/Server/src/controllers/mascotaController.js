@@ -19,25 +19,24 @@ export const crearMascota = async (req, res) => {
 };
 
 export const editarMascota = async (req, res) => {
-  const { mascotaId } = req.params;
+  const { id } = req.params;
 
   const datosMascotaActualizada = req.body;
 
-  const mascotaActualizada = await prisma.mascota.update({ where: { id: parseInt(mascotaId) }, data: datosMascotaActualizada });
-
+  const mascotaActualizada = await prisma.mascota.update({ where: { id: parseInt(id) }, data: datosMascotaActualizada });
   res.status(201).json({ message: 'Tu mascota ha sido actualizada exitosamente', mascotaActualizada });
 };
 
 export const eliminarMascota = async (req, res) => {
-  const { mascotaId } = req.params;
+  const { id } = req.params;
 
-  await prisma.evento.deleteMany({ where: { id_mascota: parseInt(mascotaId) } });
+  await prisma.evento.deleteMany({ where: { id_mascota: parseInt(id) } });
 
-  await prisma.documento_Mascota.deleteMany({ where: { id_mascota: parseInt(mascotaId) } });
+  await prisma.documento_Mascota.deleteMany({ where: { id_mascota: parseInt(id) } });
+  
+  await prisma.carnet_Digital.deleteMany({ where: { id_mascota: parseInt(id) } });
 
-  await prisma.carnet_Digital.deleteMany({ where: { id_mascota: parseInt(mascotaId) } });
-
-  await prisma.mascota.delete({ where: { id: parseInt(mascotaId) } });
+  await prisma.mascota.delete({ where: { id: parseInt(id) } });
 
   res.status(201).json({ message: 'Tu mascota ha sido eliminada exitosamente' });
 };

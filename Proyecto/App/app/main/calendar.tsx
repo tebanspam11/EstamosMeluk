@@ -149,11 +149,7 @@ export default function CalendarScreen() {
     if (response.ok) {
       if (newEvent.enableNotifications) {
         try {
-          const notificationIds = await scheduleMultipleEventReminders(
-            newEvent.titulo,
-            eventStart,
-            [5, 3, 1] 
-          );
+          const notificationIds = await scheduleMultipleEventReminders(newEvent.titulo, eventStart, [5, 3, 1]);
           console.log('Notificaciones programadas:', notificationIds);
           console.log('Fecha del evento:', eventStart);
           console.log('Hora actual:', new Date());
@@ -163,7 +159,9 @@ export default function CalendarScreen() {
           } else {
             Alert.alert(
               'Éxito',
-              `Evento agregado con ${notificationIds.length} recordatorio${notificationIds.length > 1 ? 's' : ''} programado${notificationIds.length > 1 ? 's' : ''}\n\nRecibirás notificaciones en: 1, 3 y 5 minutos antes del evento`
+              `Evento agregado con ${notificationIds.length} recordatorio${notificationIds.length > 1 ? 's' : ''} programado${
+                notificationIds.length > 1 ? 's' : ''
+              }\n\nRecibirás notificaciones en: 1, 3 y 5 minutos antes del evento`
             );
           }
         } catch (error) {

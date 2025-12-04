@@ -10,23 +10,11 @@
     "allowImportingTsExtensions": true,
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     },
-    "types": [
-      "react",
-      "react-native",
-      "expo-router"
-    ],
+    "types": ["react", "react-native", "expo-router"],
     "jsx": "react"
   },
-  "include": [
-    "index.tsx",
-    "src",
-    "app",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
-  ],
+  "include": ["index.tsx", "src", "app", ".expo/types/**/*.ts", "expo-env.d.ts"],
   "extends": "expo/tsconfig.base"
 }

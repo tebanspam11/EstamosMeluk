@@ -9,7 +9,6 @@ export function useNotifications() {
   const responseListener = useRef<Notifications.Subscription | null>(null);
 
   useEffect(() => {
-    
     registerForPushNotificationsAsync().then((token) => {
       if (token) {
         setExpoPushToken(token);
@@ -17,7 +16,6 @@ export function useNotifications() {
       }
     });
 
-  
     notificationListener.current = Notifications.addNotificationReceivedListener((notification) => {
       console.log('Notificación recibida:', notification);
       setNotification(notification);
@@ -26,7 +24,7 @@ export function useNotifications() {
     responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
       console.log('Usuario tocó la notificación:', response);
       const data = response.notification.request.content.data;
-     
+
       // navigation.navigate('Calendar', { eventId: data.eventId });
     });
 
