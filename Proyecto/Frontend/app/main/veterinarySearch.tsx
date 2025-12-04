@@ -1,7 +1,6 @@
 import React from "react";
 import { View, Button } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-// Importa MapScreen con ruta relativa (sin alias)
 import MapScreen from "../../src/screens/mapScreen.tsx";
 
 export default function VeterinarySearchScreen() {
