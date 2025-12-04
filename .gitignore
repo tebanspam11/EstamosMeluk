@@ -1,5 +1,6 @@
-#AL terminar la app
-#añadir prisma, migrations, schemas, Database
+# DB
+.prisma/
+uploads/
 
 # s/o
 .DS_Store
@@ -44,8 +45,6 @@ temp/
 .env.development
 .env.production
 .env.*.local
-Proyecto/Backend/.env
-../.env
 
 # tests/tmp
 coverage/
