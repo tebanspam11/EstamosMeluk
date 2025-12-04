@@ -1,4 +1,3 @@
-// src/screens/mapScreen.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import MapView, { UrlTile, Marker, Region } from "react-native-maps";
