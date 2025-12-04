@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { jwtDecode } from 'jwt-decode';
@@ -16,7 +16,6 @@ export default function AuthLoading() {
       const now = Date.now() / 1000;
 
       if (decoded.exp && decoded.exp < now) {
-        
         await AsyncStorage.removeItem('token');
         await AsyncStorage.removeItem('keepLogged');
         return navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
@@ -25,7 +24,7 @@ export default function AuthLoading() {
       navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     };
     check();
-  }, []);
+  }, [navigation]);
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <ActivityIndicator size="large" />
