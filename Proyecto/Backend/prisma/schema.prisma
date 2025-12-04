@@ -12,43 +12,44 @@ datasource db {
 }
 
 model Usuario {
-  id            Int      @id @default(autoincrement())
-  nombre        String?
-  correo        String   @unique
-  telefono      String?  @unique
-  contraseña   String?
-  cuenta_google Boolean? @default(false)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
+  id             Int            @id @default(autoincrement())
+  nombre         String?
+  correo         String         @unique
+  telefono       String?        @unique
+  contraseña    String?
+  foto           String?
+  cuenta_google  Boolean?       @default(false)
+  googleId       String?        @unique
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
   Mascotas       Mascota[]
   Notificaciones Notificacion[]
-  documentos     DocumentoUsuario[] // ← campo inverso agregado
 }
 
 model Mascota {
-  id            Int      @id @default(autoincrement())
-  id_usuario    Int
-  nombre        String
-  especie       String
-  raza          String?
-  edad          Int?
-  peso          Float?
-  foto          String?
-  alergias      String?
-  enfermedades  String?
-  observaciones String?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
-
-  usuario    Usuario             @relation(fields: [id_usuario], references: [id])
-  eventos    Evento[]
-  documentos Documento_Mascota[]
-  carnet     Carnet_Digital?
+  id               Int                 @id @default(autoincrement())
+  id_usuario       Int
+  nombre           String
+  especie          String
+  raza             String?
+  fecha_nacimiento DateTime
+  sexo             String
+  color            String?
+  peso             Float?
+  foto             String?
+  alergias         String?
+  enfermedades     String?
+  observaciones    String?
+  created_at       DateTime            @default(now())
+  updated_at       DateTime            @updatedAt
+  carnet           Carnet_Digital[]
+  documentos       Documento_Mascota[]
+  eventos          Evento[]
+  usuario          Usuario             @relation(fields: [id_usuario], references: [id])
 }
 
 model Evento {
-  id           Int       @id @default(autoincrement())
+  id           Int           @id @default(autoincrement())
   id_mascota   Int
   titulo       String
   descripcion  String?
@@ -56,9 +57,8 @@ model Evento {
   fecha_fin    DateTime?
   estado       String
   repeticion   String?
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
   mascota      Mascota       @relation(fields: [id_mascota], references: [id])
   notificacion Notificacion?
 }
@@ -73,9 +73,8 @@ model Notificacion {
   canal            String
   enviada          Boolean? @default(false)
   created_at       DateTime @default(now())
-
-  usuario Usuario @relation(fields: [id_usuario], references: [id])
-  evento  Evento  @relation(fields: [id_evento], references: [id])
+  evento           Evento   @relation(fields: [id_evento], references: [id])
+  usuario          Usuario  @relation(fields: [id_usuario], references: [id])
 }
 
 model Documento_Mascota {
@@ -85,15 +84,13 @@ model Documento_Mascota {
   titulo      String
   descripcion String?
   archivo_pdf String
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  mascota Mascota @relation(fields: [id_mascota], references: [id])
+  uploadedAt  DateTime @default(now())
+  mascota     Mascota  @relation(fields: [id_mascota], references: [id])
 }
 
 model Carnet_Digital {
   id                    Int       @id @default(autoincrement())
-  id_mascota            Int       @unique
+  id_mascota            Int
   tipo_medicamento      String
   nombre_medicamento    String
   fecha_aplicacion      DateTime
@@ -109,14 +106,5 @@ model Carnet_Digital {
   observaciones         String?
   created_at            DateTime  @default(now())
   updated_at            DateTime  @updatedAt
-
-  mascota Mascota @relation(fields: [id_mascota], references: [id])
-}
-
-model DocumentoUsuario {
-  id         Int      @id @default(autoincrement())
-  filename   String
-  user       Usuario  @relation(fields: [userId], references: [id])
-  userId     Int
-  uploadedAt DateTime @default(now())
+  mascota               Mascota   @relation(fields: [id_mascota], references: [id])
 }

@@ -18,9 +18,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { API_URL } from '../../src/config/api';
 import { useNotifications } from '../../src/hooks/useNotifications';
-import { 
+import {
   scheduleMultipleEventReminders,
-  cancelNotification 
+  cancelNotification
 } from '../../src/services/notificationService';
 
 type EventStatus = 'Pendiente' | 'Completo' | 'Cancelado';
@@ -58,10 +58,10 @@ interface NewEvent {
 
 export default function CalendarScreen() {
   const navigation = useNavigation();
-  
+
   // Hook de notificaciones
   const { expoPushToken } = useNotifications();
-  
+
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [events, setEvents] = useState<Event[]>([]);
   const [pets, setPets] = useState<Pet[]>([]);
@@ -121,7 +121,7 @@ export default function CalendarScreen() {
     if (mascotasRes.ok) {
       const mascotasData = await mascotasRes.json();
       setPets(mascotasData);
-    
+
       if (mascotasData.length > 0 && newEvent.id_mascota === 0) {
         setNewEvent(prev => ({ ...prev, id_mascota: mascotasData[0].id }));
       }
@@ -139,7 +139,7 @@ export default function CalendarScreen() {
 
   const handleAddEvent = async () => {
     const token = await AsyncStorage.getItem('token');
-      
+
     const eventStart = new Date(selectedDate);
     if (newEvent.fecha_inicio) {
       const selectedTime = newEvent.fecha_inicio;
@@ -179,7 +179,7 @@ export default function CalendarScreen() {
           console.log('Notificaciones programadas:', notificationIds);
           console.log('Fecha del evento:', eventStart);
           console.log('Hora actual:', new Date());
-          
+
           if (notificationIds.length === 0) {
             Alert.alert(
               'Evento agregado',
@@ -198,7 +198,7 @@ export default function CalendarScreen() {
       } else {
         Alert.alert('Éxito', `Evento agregado para el ${eventStart.toLocaleDateString('es-ES')}`);
       }
-      
+
       setShowModal(false);
       resetNewEvent();
       cargarDatos();
@@ -231,7 +231,7 @@ export default function CalendarScreen() {
 
   const handleEditEvent = (event: Event) => {
     setEditingEvent(event);
-    const eventType = ['Vacuna', 'Consulta', 'Baño', 'Desparasitación'].find(type => 
+    const eventType = ['Vacuna', 'Consulta', 'Baño', 'Desparasitación'].find(type =>
       event.titulo.toLowerCase().includes(type)
     );
     setSelectedEventType(eventType || (event.titulo ? 'Otro...' : ''));
@@ -341,7 +341,7 @@ export default function CalendarScreen() {
     const days: Array<{ date: Date; isCurrentMonth: boolean }> = [];
 
     const firstDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-    
+
     for (let i = firstDayOfWeek - 1; i >= 0; i--) {
       const prevDate = new Date(year, month, -i);
       days.push({ date: prevDate, isCurrentMonth: false });
@@ -494,8 +494,8 @@ export default function CalendarScreen() {
             todayEvents.map((event) => {
               const pet = pets.find((p) => p.id === event.id_mascota);
               return (
-                <TouchableOpacity 
-                  key={event.id} 
+                <TouchableOpacity
+                  key={event.id}
                   style={styles.eventCard}
                   onPress={() => handleEditEvent(event)}
                 >

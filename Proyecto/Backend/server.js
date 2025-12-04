@@ -1,9 +1,21 @@
-const express = require('express');
-const cors = require('cors');
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from 'url';
 
-const mascotaRoutes = require('./src/routes/mascotaRoutes');
-const authRoutes = require('./src/routes/authRoutes');
-const pdfRoutes = require('./src/routes/pdfRoutes');
+dotenv.config();
+
+import authRoutes from "./src/routes/authRoutes.js";
+import pdfRoutes from "./src/routes/pdfRoutes.js";
+import passwordResetRoutes from "./src/routes/passwordResetRoutes.js";
+import mascotaRoutes from './src/routes/mascotaRoutes.js';
+import usuarioRoutes from './src/routes/usuarioRoutes.js';
+import eventoRoutes from './src/routes/eventoRoutes.js';
+import carnetRoutes from './src/routes/carnetRoutes.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -11,9 +23,15 @@ const PORT = process.env.PORT || 4000;
 app.use(cors());
 app.use(express.json());
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/documentos', pdfRoutes);
-app.use('/mascotas', mascotaRoutes);
+app.use('/api/password', passwordResetRoutes);
+app.use('/api/mascotas', mascotaRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/eventos', eventoRoutes);
+app.use('/api/carnet', carnetRoutes);
 
 app.get('/', (req, res) => {
   res.send('API running');
@@ -22,5 +40,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
-
-

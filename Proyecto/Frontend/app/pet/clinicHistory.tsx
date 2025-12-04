@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  ScrollView, 
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
   Alert,
   ActivityIndicator,
   TextInput,
@@ -48,7 +48,7 @@ export default function ClinicHistoryScreen({ navigation }: any) {
   const [showPdfModal, setShowPdfModal] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState('');
   const [remotePdfUrl, setRemotePdfUrl] = useState('');
-  
+
   const [newDoc, setNewDoc] = useState({
     tipo: 'consulta',
     titulo: '',
@@ -72,7 +72,7 @@ export default function ClinicHistoryScreen({ navigation }: any) {
       const mascotasData = await mascotasRes.json();
       setMascotas(mascotasData);
       if (mascotasData.length > 0 && !selectedMascota) {
-         setSelectedMascota(mascotasData[0]);
+        setSelectedMascota(mascotasData[0]);
       }
     }
     setLoading(false);
@@ -133,34 +133,34 @@ export default function ClinicHistoryScreen({ navigation }: any) {
     setUploading(true);
     const token = await AsyncStorage.getItem('token');
 
-      const formData = new FormData();
-      formData.append('file', {
-        uri: newDoc.file.uri,
-        type: 'application/pdf',
-        name: newDoc.file.name,
-      } as any);
-      formData.append('id_mascota', selectedMascota.id.toString());
-      formData.append('tipo', newDoc.tipo);
-      formData.append('titulo', formatName(newDoc.titulo));
-      formData.append('descripcion', newDoc.descripcion);
+    const formData = new FormData();
+    formData.append('file', {
+      uri: newDoc.file.uri,
+      type: 'application/pdf',
+      name: newDoc.file.name,
+    } as any);
+    formData.append('id_mascota', selectedMascota.id.toString());
+    formData.append('tipo', newDoc.tipo);
+    formData.append('titulo', formatName(newDoc.titulo));
+    formData.append('descripcion', newDoc.descripcion);
 
-      const response = await fetch(`${API_URL}/documentos/uploads`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-        body: formData,
-      });
+    const response = await fetch(`${API_URL}/documentos/uploads`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
 
-      if (response.ok) {
-        Alert.alert('Éxito', 'Documento subido correctamente');
-        setShowUploadModal(false);
-        setNewDoc({ tipo: 'consulta', titulo: '', descripcion: '', file: null });
-        cargarDocumentos(selectedMascota.id);
-      } else {
-        const data = await response.json();
-        Alert.alert('Error', data.error);
-      }
+    if (response.ok) {
+      Alert.alert('Éxito', 'Documento subido correctamente');
+      setShowUploadModal(false);
+      setNewDoc({ tipo: 'consulta', titulo: '', descripcion: '', file: null });
+      cargarDocumentos(selectedMascota.id);
+    } else {
+      const data = await response.json();
+      Alert.alert('Error', data.error);
+    }
     setUploading(false);
   };
   const viewDocument = async (documento: Documento) => {
@@ -308,7 +308,7 @@ export default function ClinicHistoryScreen({ navigation }: any) {
                 </View>
                 <Text style={styles.documentDate}>{formatDate(doc.uploadedAt)}</Text>
               </View>
-              
+
               {doc.descripcion && (
                 <Text style={styles.documentDescription}>{doc.descripcion}</Text>
               )}

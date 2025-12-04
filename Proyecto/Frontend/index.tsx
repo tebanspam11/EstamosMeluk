@@ -1,57 +1,72 @@
 import { registerRootComponent } from 'expo';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, Button, StyleSheet, Image } from 'react-native';
+import { useNotifications } from './src/hooks/useNotifications';
 
-import AuthLoading from './app/auth/AuthLoading.tsx';
-import LoginScreen from './app/auth/login.tsx';
-import RegisterScreen from './app/auth/register.tsx';
+import AuthLoading from './app/user/authLoading.tsx';
+import LoginScreen from './app/user/userLogin.tsx';
+import RegisterScreen from './app/user/userRegister.tsx';
+import ForgotPasswordScreen from './app/user/forgotPassword.tsx';
+import ProfileScreen from './app/user/userProfile.tsx';
+import EditProfileScreen from './app/user/userEdit.tsx';
 import HomeScreen from './app/main/home.tsx';
-import ProfileScreen from './app/auth/profile.tsx';
 import CalendarScreen from './app/main/calendar.tsx';
 import CarnetScreen from './app/pet/carnet.tsx';
-import ClinicHistoryScreen from './app/pet/clinic_history.tsx';
-import PetListScreen from './app/pet/list.tsx';
-import UploadScreen from './app/pet/upload.tsx';
+import ClinicHistoryScreen from './app/pet/clinicHistory.tsx';
+
 import UploadPDFScreen from './app/pet/UploadPDFScreen.tsx';
+import PetProfileScreen from './app/pet/petProfile.tsx';
+import EditPetProfileScreen from './app/pet/petEdit.tsx';
+import PetRegisterScreen from './app/pet/petRegister.tsx';
 import VeterinarySearchScreen from "./app/main/veterinarySearch";
 
-
-
-function NotificationsScreen() {
-  const navigation = useNavigation();
+function LogoHeader() {
   return (
-    <View style={styles.container}>
-      <Text>Notificaciones - En desarrollo</Text>
-      <Button title="Volver" onPress={() => navigation.goBack()} />
+    <View style={styles.logoContainer}>
+      <Image
+        source={require('./assets/images/LogoPocketVet.jpg')}
+        style={styles.logo}
+        resizeMode="contain"
+      />
     </View>
   );
 }
 
-function TempHomeScreen({ navigation }: any) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>¡Bienvenido a PocketVet!👋</Text>
-      <Button title="Ir al Home Principal" onPress={() => navigation.navigate('Home')} />
-      <Button title="Ir al Login" onPress={() => navigation.navigate('Login')} />
-    </View>
-  );
-}
 
 const Stack = createStackNavigator();
 
 function App() {
+  // Inicializar notificaciones
+  useNotifications();
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+
+      <Stack.Navigator initialRouteName="AuthLoading">
         {/* Pantalla Principal (Validacion si hay sesion iniciada o no*/}
         <Stack.Screen name="AuthLoading" component={AuthLoading} options={{ headerShown: false }} />
 
         {/* Pantallas de Autenticación */}
-        <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Iniciar Sesión' }} />
-        <Stack.Screen name="Register" component={RegisterScreen} options={{ title: 'Registro' }} />
-        <Stack.Screen name="Profile" component={ProfileScreen} options={{ title: 'Perfil' }} />
+        <Stack.Screen name="Login" component={LoginScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen name="Register" component={RegisterScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{ headerTitle: () => <LogoHeader /> }} />
+        <Stack.Screen
+          name="Profile"
+          component={ProfileScreen}
+          options={({ navigation }) => ({
+            headerTitle: () => <LogoHeader />,
+            headerRight: () => (
+              <Button
+                onPress={() => navigation.navigate('EditProfile')}
+                title="✏️"
+                color="#4A90E2"
+              />
+            ),
+          })}
+        />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} options={{ headerTitle: () => <LogoHeader /> }} />
 
         {/* Pantalla Home */}
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
@@ -60,34 +75,34 @@ function App() {
         <Stack.Screen
           name="Calendar"
           component={CalendarScreen}
-          options={{ title: 'Calendario' }}
-        />
-        <Stack.Screen
-          name="Notifications"
-          component={NotificationsScreen}
-          options={{ title: 'Notificaciones' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
 
         {/* Pantallas de Mascotas */}
         <Stack.Screen
           name="Carnet"
           component={CarnetScreen}
-          options={{ title: 'Carnet de Vacunas' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
           name="ClinicHistory"
           component={ClinicHistoryScreen}
-          options={{ title: 'Historial Clínico' }}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
-          name="PetList"
-          component={PetListScreen}
-          options={{ title: 'Mis Mascotas' }}
+          name="PetRegister"
+          component={PetRegisterScreen}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
         <Stack.Screen
-          name="Upload"
-          component={UploadScreen}
-          options={{ title: 'Registrar Mascota' }}
+          name="PetProfile"
+          component={PetProfileScreen}
+          options={{ headerTitle: () => <LogoHeader /> }}
+        />
+        <Stack.Screen
+          name="EditPetProfile"
+          component={EditPetProfileScreen}
+          options={{ headerTitle: () => <LogoHeader /> }}
         />
 
         {/* Otras Pantallas */}
@@ -102,9 +117,6 @@ function App() {
           options={{ title: 'Subir PDF' }}
         />
 
-
-        {/* Pantalla Temporal (opcional) */}
-        <Stack.Screen name="TempHome" component={TempHomeScreen} options={{ title: 'Inicio' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -122,6 +134,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 40,
   },
 });
 

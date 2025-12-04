@@ -10,6 +10,6 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
   },
-  "include": ["**/*.ts", "prisma/client.js", "src/controllers/pdfController.js", "src/routes/pdfRoutes.JS", "src/middlewares/multerPdf.JS"],
+  "include": ["**/*.ts", "prisma/client.js", "src/controllers/pdfController.js", "src/routes/pdfRoutes.js", "src/middlewares/multerPdf.js", "src/prisma/client.js"],
   "exclude": ["node_modules", "dist"]
 }
