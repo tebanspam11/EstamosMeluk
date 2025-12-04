@@ -28,13 +28,13 @@ npm -v
 npm install -g expo-cli
 ```
 
-## Flujo de ejecución
+## Flujo de ejecución para usar la app
 
 1️⃣ Descargar el repositorio en .zip o clonar el repositorio (git como requisito)
 
 ```bash
 git clone https://github.com/tebanspam11/EstamosMeluk
-cd EstamosMeluk/Proyecto
+cd EstamosMeluk/Proyecto/App
 ```
 
 2️⃣ Instalar dependencias
@@ -48,3 +48,5 @@ npm install
 ```bash
 npm run start
 ```
+
+
