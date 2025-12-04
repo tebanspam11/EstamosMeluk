@@ -168,13 +168,12 @@ export default function CalendarScreen() {
     });
 
     if (response.ok) {
-      // Programar notificaciones si están habilitadas
       if (newEvent.enableNotifications) {
         try {
           const notificationIds = await scheduleMultipleEventReminders(
             newEvent.titulo,
             eventStart,
-            [5, 3, 1] // Para pruebas: 5, 3 y 1 minuto antes
+            [5, 3, 1] 
           );
           console.log('Notificaciones programadas:', notificationIds);
           console.log('Fecha del evento:', eventStart);
