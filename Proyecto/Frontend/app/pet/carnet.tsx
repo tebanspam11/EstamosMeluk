@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  Modal,
-  TextInput,
-  Alert,
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Modal, TextInput, Alert,
   SafeAreaView,
   Image,
   ActivityIndicator,
@@ -18,576 +10,311 @@ import { API_URL } from '../../src/config/api';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 
-interface CarnetRecord {
-  id: number;
-  id_mascota: number;
-  tipo_medicamento: 'Vacuna' | 'Desparasitación';
-  nombre_medicamento: string;
-  fecha_aplicacion: Date;
-  laboratorio: string;
-  id_lote: string;
-  fecha_elaboracion: Date | null;
-  fecha_vencimiento: Date;
-  peso: number;
-  nombre_veterinaria: string;
-  telefono_veterinaria: string;
-  direccion_veterinaria: string;
-  proxima_dosis: Date | null;
-  observaciones: string;
-}
-
-interface Pet {
-  id: number;
-  nombre: string;
-  especie: string;
-  raza: string;
-  fecha_nacimiento: string;
-  color: string;
-  sexo: 'Macho' | 'Hembra';
-  peso: number;
-  alergias: string | null;
-  enfermedades: string | null;
-  observaciones: string | null;
-  foto: string | null;
-}
+import carnetFormat from '../../src/services/carnetFormat';
+import { Mascota, CarnetDigital } from '../../src/types/index';
+import { useDatesValidation } from '../../src/hooks/useDatesValidation';
+import { Picker } from '@react-native-picker/picker';
 
 export default function CarnetScreen() {
   const navigation = useNavigation();
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [selectedPet, setSelectedPet] = useState<Pet | null>(null);
-  const [carnetRecords, setCarnetRecords] = useState<CarnetRecord[]>([]);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showPetsModal, setShowPetsModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<CarnetRecord | null>(null);
 
-  // Estados para manejo de fechas separadas (día, mes, año)
-  const [elaboracionDia, setElaboracionDia] = useState('');
-  const [elaboracionMes, setElaboracionMes] = useState('');
-  const [elaboracionAno, setElaboracionAno] = useState('');
-  
-  const [vencimientoDia, setVencimientoDia] = useState('');
-  const [vencimientoMes, setVencimientoMes] = useState('');
-  const [vencimientoAno, setVencimientoAno] = useState('');
+  const [mascotas, setMascotas] = useState<Mascota[]>([]);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState<Mascota | null>(null);
+  const [registrosCarnet, setRegistrosCarnet] = useState<CarnetDigital[]>([]);
+  const [editarRegistro, setEditarRegistro] = useState<CarnetDigital | null>(null);
+  const [mostrarPaginaNuevoRegistro, setMostrarPaginaNuevoRegistro] = useState(false);
+  const [mostrarPaginaEditarRegistro, setMostrarPaginaEditarRegistro] = useState(false);
+  const [mostrarPaginaMascotas, setMostrarPaginaMascotas] = useState(false);
   
   const [proximaDia, setProximaDia] = useState('');
   const [proximaMes, setProximaMes] = useState('');
   const [proximaAno, setProximaAno] = useState('');
 
-  const [newRecord, setNewRecord] = useState<Partial<CarnetRecord>>({
+  const [aplicacionDia, setAplicacionDia] = useState('');
+  const [aplicacionMes, setAplicacionMes] = useState('');
+  const [aplicacionAno, setAplicacionAno] = useState('');
+
+  const [elaboracionMes, setElaboracionMes] = useState('');
+  const [elaboracionAno, setElaboracionAno] = useState('');
+  const [vencimientoMes, setVencimientoMes] = useState('');
+  const [vencimientoAno, setVencimientoAno] = useState('');
+
+  const { fechaAplicacionError, proximaDosisError, areDatesValid } = useDatesValidation(
+    `${aplicacionDia}/${aplicacionMes}/${aplicacionAno}`,
+    `${proximaDia}/${proximaMes}/${proximaAno}`
+  );
+
+  const [nuevoRegistro, setNuevoRegistro] = useState<Partial<CarnetDigital>>({
     tipo_medicamento: 'Vacuna',
     nombre_medicamento: '',
     fecha_aplicacion: new Date(),
     laboratorio: '',
     id_lote: '',
-    fecha_elaboracion: null,
-    fecha_vencimiento: new Date(),
+    mes_elaboracion_medicamento: null,
+    ano_elaboracion_medicamento: null,
+    mes_vencimiento_medicamento: 0,
+    ano_vencimiento_medicamento: 0,
     peso: 0,
     nombre_veterinaria: '',
-    telefono_veterinaria: '',
+    telefono_veterinaria: null,
     direccion_veterinaria: '',
     proxima_dosis: null,
-    observaciones: '',
+    observaciones: null,
   });
 
-  // Cargar mascotas desde la API
-  const fetchMascotas = async () => {
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${API_URL}/mascotas`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      const data = await response.json();
-      setPets(data);
-      if (data.length > 0) {
-        setSelectedPet(data[0]);
-      }
-    } catch (error) {
-      Alert.alert('Error', 'No se pudieron cargar las mascotas');
-    }
+  useFocusEffect(
+    React.useCallback(() => {
+      validarSesionActiva();
+      obtenerMascotas();
+    }, [])
+  );
+
+  const validarSesionActiva = async () => {
+    const isUserLogged = await AsyncStorage.getItem('token');
+    if (!isUserLogged) navigation.navigate('Login' as never);
   };
 
-  const getPetPhotoUrl = (foto: string | null) => {
+  const obtenerMascotas = async () => {
+    const tokenUsuario = await AsyncStorage.getItem('token');
+    
+    const respuestaDeDB = await fetch(`${API_URL}/mascotas`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${tokenUsuario}` },
+    });
+
+    const mascotasDesdeDB = await respuestaDeDB.json();
+    setMascotas(mascotasDesdeDB);
+
+    if (mascotasDesdeDB.length > 0) setMascotaSeleccionada(mascotasDesdeDB[0]);
+  };
+
+  const obtenerURLdeFoto = (foto: string | null) => {
     if (!foto) return 'https://via.placeholder.com/50?text=🐾';
     
-    if (foto.startsWith('file://') || foto.startsWith('content://')) {
-      return foto;
-    }
+    if (foto.startsWith('file://') || foto.startsWith('content://')) return foto;
     
     const baseUrl = API_URL.replace('/api', '');
     const url = `${baseUrl}/uploads/mascotas/${foto}`;
     return url;
   };
 
-  // Cargar registros de carnet para la mascota seleccionada
-  const fetchCarnetRecords = async (id_mascota: number) => {
-    try {
-      setLoading(true);
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${API_URL}/carnet/mascota/${id_mascota}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
-      const data = await response.json();
-      
-      // Convertir fechas de string a Date
-      const recordsWithDates = data.map((record: any) => ({
-        ...record,
-        fecha_aplicacion: new Date(record.fecha_aplicacion),
-        fecha_elaboracion: record.fecha_elaboracion ? new Date(record.fecha_elaboracion) : null,
-        fecha_vencimiento: new Date(record.fecha_vencimiento),
-        proxima_dosis: record.proxima_dosis ? new Date(record.proxima_dosis) : null,
-      }));
-      
-      setCarnetRecords(recordsWithDates);
-    } catch (error) {
-      console.error('Error al cargar registros de carnet:', error);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    if (mascotaSeleccionada) obtenerRegistrosCarnet(mascotaSeleccionada.id);
+  }, [mascotaSeleccionada]);
+
+  const obtenerRegistrosCarnet = async (id_mascota: number) => {
+    setLoading(true);
+
+    const tokenUsuario = await AsyncStorage.getItem('token');
+    const respuestaDeDB = await fetch(`${API_URL}/carnet/mascota/${id_mascota}`, {
+      method: 'GET',
+      headers: { 'Authorization': `Bearer ${tokenUsuario}` },
+    });
+
+    const registrosCarnetDesdeDB = await respuestaDeDB.json();
+    setRegistrosCarnet(registrosCarnetDesdeDB);
+
+    setLoading(false);
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchMascotas();
-    }, [])
-  );
+  const resetearNuevoRegistro = () => {
+    setNuevoRegistro({
+      tipo_medicamento: 'Vacuna',
+      nombre_medicamento: '',
+      fecha_aplicacion: new Date(),
+      laboratorio: '',
+      id_lote: '',
+      mes_elaboracion_medicamento: null,
+      ano_elaboracion_medicamento: null,
+      mes_vencimiento_medicamento: 0,
+      ano_vencimiento_medicamento: 0,
+      peso: 0,
+      nombre_veterinaria: '',
+      telefono_veterinaria: null,
+      direccion_veterinaria: '',
+      proxima_dosis: null,
+      observaciones: null,
+    });
 
-  useEffect(() => {
-    if (selectedPet) {
-      fetchCarnetRecords(selectedPet.id);
-    }
-  }, [selectedPet]);
+    setProximaDia('');
+    setProximaMes('');
+    setProximaAno('');
+    setAplicacionDia('');
+    setAplicacionMes('');
+    setAplicacionAno('');
+    setElaboracionMes('');
+    setElaboracionAno('');
+    setVencimientoMes('');
+    setVencimientoAno('');
+  };
 
-  const isFormValid = () => {
+  const crearRegistroCarnet = async () => {
+    setSubmitting(true);
+    const tokenUsuario = await AsyncStorage.getItem('token');
+      
+    const registroCarnet = {
+      id_mascota: mascotaSeleccionada!.id,
+      tipo_medicamento: nuevoRegistro.tipo_medicamento,
+      nombre_medicamento: nuevoRegistro.nombre_medicamento,
+      fecha_aplicacion: nuevoRegistro.fecha_aplicacion,
+      laboratorio: nuevoRegistro.laboratorio,
+      id_lote: nuevoRegistro.id_lote,
+      mes_elaboracion_medicamento: nuevoRegistro.mes_elaboracion_medicamento || null,
+      ano_elaboracion_medicamento: nuevoRegistro.ano_elaboracion_medicamento || null,
+      mes_vencimiento_medicamento: nuevoRegistro.mes_vencimiento_medicamento,
+      ano_vencimiento_medicamento: nuevoRegistro.ano_vencimiento_medicamento,
+      peso: nuevoRegistro.peso,
+      nombre_veterinaria: nuevoRegistro.nombre_veterinaria,
+      telefono_veterinaria: nuevoRegistro.telefono_veterinaria || null,
+      direccion_veterinaria: nuevoRegistro.direccion_veterinaria,
+      proxima_dosis: nuevoRegistro.proxima_dosis ? nuevoRegistro.proxima_dosis.toISOString() : null,
+      observaciones: nuevoRegistro.observaciones || null,
+    };
+
+    const respuestaDeDB = await fetch(`${API_URL}/carnet`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenUsuario}`},
+      body: JSON.stringify(registroCarnet),
+    });
+
+    const nuevoRegistroCarnetDB = await respuestaDeDB.json();
+    
+    if (respuestaDeDB.ok && nuevoRegistroCarnetDB && nuevoRegistroCarnetDB.ok) {
+      Alert.alert('Éxito', `Vacuna/desparasitación agregada al carnet de ${mascotaSeleccionada?.nombre}`);
+      if (!mascotaSeleccionada) return;
+      await obtenerRegistrosCarnet(mascotaSeleccionada.id);
+      setMostrarPaginaNuevoRegistro(false);
+      resetearNuevoRegistro();
+
+    } else Alert.alert('Error en registro', nuevoRegistroCarnetDB?.error, [ { text: 'Intentar de nuevo' } ]);
+
+    setSubmitting(false);
+  };
+
+  const isFormularioValid = () => {
     return (
-      selectedPet &&
-      newRecord.nombre_medicamento?.trim() &&
-      newRecord.id_lote?.trim() &&
-      newRecord.fecha_vencimiento &&
-      newRecord.peso &&
-      newRecord.peso > 0 &&
-      newRecord.nombre_veterinaria?.trim() &&
-      newRecord.direccion_veterinaria?.trim()
+      mascotaSeleccionada &&
+      nuevoRegistro.nombre_medicamento?.trim() &&
+      nuevoRegistro.id_lote?.trim() &&
+      nuevoRegistro.fecha_aplicacion &&
+      nuevoRegistro.mes_vencimiento_medicamento && 
+      nuevoRegistro.ano_vencimiento_medicamento &&
+      nuevoRegistro.laboratorio?.trim() &&
+      nuevoRegistro.peso &&
+      nuevoRegistro.peso > 0 &&
+      nuevoRegistro.nombre_veterinaria?.trim() &&
+      nuevoRegistro.direccion_veterinaria?.trim() &&
+      areDatesValid
     );
   };
 
-  const handleAddRecord = async () => {
-    if (!isFormValid()) {
-      Alert.alert('Error', 'Por favor completa todos los campos obligatorios (*)\n\n- Nombre del medicamento\n- ID Lote\n- Fecha de vencimiento\n- Peso\n- Veterinaria\n- Dirección veterinaria');
-      return;
-    }
+  const editarRegistroCarnet = async () => {
+    if (!editarRegistro) return;
 
-    try {
-      setSubmitting(true);
-      const token = await AsyncStorage.getItem('token');
-      
-      const recordData = {
-        id_mascota: selectedPet!.id,
-        tipo_medicamento: newRecord.tipo_medicamento || 'Vacuna',
-        nombre_medicamento: newRecord.nombre_medicamento,
-        fecha_aplicacion: (newRecord.fecha_aplicacion || new Date()).toISOString(),
-        laboratorio: newRecord.laboratorio || '',
-        id_lote: newRecord.id_lote,
-        fecha_elaboracion: newRecord.fecha_elaboracion ? newRecord.fecha_elaboracion.toISOString() : null,
-        fecha_vencimiento: (newRecord.fecha_vencimiento || new Date()).toISOString(),
-        peso: newRecord.peso,
-        nombre_veterinaria: newRecord.nombre_veterinaria,
-        telefono_veterinaria: newRecord.telefono_veterinaria || '',
-        direccion_veterinaria: newRecord.direccion_veterinaria,
-        proxima_dosis: newRecord.proxima_dosis ? newRecord.proxima_dosis.toISOString() : null,
-        observaciones: newRecord.observaciones || '',
-      };
+    setSubmitting(true);
+    const token = await AsyncStorage.getItem('token');
 
-      const response = await fetch(`${API_URL}/carnet`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(recordData),
-      });
+    const registroEditado = {
+      telefono_veterinaria: editarRegistro.telefono_veterinaria || '',
+      proxima_dosis: editarRegistro.proxima_dosis ? editarRegistro.proxima_dosis.toISOString() : null,
+      observaciones: editarRegistro.observaciones || '',
+    };
 
-      if (!response.ok) {
-        throw new Error('Error al crear registro');
-      }
+    const respuestaDeDB = await fetch(`${API_URL}/carnet/${editarRegistro.id}`, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+      body: JSON.stringify(registroEditado),
+    });
 
-      if (!selectedPet) return;
-      await fetchCarnetRecords(selectedPet.id);
-      setShowAddModal(false);
-      resetNewRecord();
-      Alert.alert('Éxito', 'Registro agregado al carnet');
-    } catch (error) {
-      console.error('Error al agregar registro:', error);
-      Alert.alert('Error', 'No se pudo agregar el registro');
-    } finally {
-      setSubmitting(false);
-    }
+    const registroEditadoCarnetDB = await respuestaDeDB.json();
+
+    if (respuestaDeDB.ok && registroEditadoCarnetDB && registroEditadoCarnetDB.ok) {
+      Alert.alert('Éxito', `Vacuna/desparasitación actualizada al carnet de ${mascotaSeleccionada?.nombre}`);
+      if (!mascotaSeleccionada) return;
+      await obtenerRegistrosCarnet(mascotaSeleccionada.id);
+      setMostrarPaginaEditarRegistro(false);
+      setEditarRegistro(null);
+
+    } else Alert.alert('Error en edición', registroEditadoCarnetDB?.error, [ { text: 'Intentar de nuevo' } ]);
+
+    setSubmitting(false);
   };
 
-  const openEditModal = (record: CarnetRecord) => {
-    setEditingRecord(record);
-    setShowEditModal(true);
-  };
-
-  const handleEditRecord = async () => {
-    if (!editingRecord) return;
-
-    try {
-      setSubmitting(true);
-      const token = await AsyncStorage.getItem('token');
-
-      const updateData = {
-        telefono_veterinaria: editingRecord.telefono_veterinaria || '',
-        proxima_dosis: editingRecord.proxima_dosis ? editingRecord.proxima_dosis.toISOString() : null,
-        observaciones: editingRecord.observaciones || '',
-      };
-
-      const response = await fetch(`${API_URL}/carnet/${editingRecord.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(updateData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al actualizar registro');
-      }
-
-      if (!selectedPet) return;
-      await fetchCarnetRecords(selectedPet.id);
-      setShowEditModal(false);
-      setEditingRecord(null);
-      Alert.alert('Éxito', 'Registro actualizado correctamente');
-    } catch (error) {
-      console.error('Error al editar registro:', error);
-      Alert.alert('Error', 'No se pudo actualizar el registro');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const deleteRecord = async (id: number) => {
-    Alert.alert(
-      'Eliminar Registro',
-      '¿Estás seguro de que deseas eliminar este registro del carnet?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
+  const eliminarRegistroCarnet = async (id: number) => {
+    Alert.alert('Eliminar Registro', '¿Estás segur@ de que deseas eliminar este registro del carnet?',
+      [ { text: 'Cancelar', style: 'cancel' }, { text: 'Eliminar', style: 'destructive',
           onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem('token');
-              const response = await fetch(`${API_URL}/carnet/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` },
-              });
+            const tokenUsuario = await AsyncStorage.getItem('token');
 
-              if (!response.ok) {
-                throw new Error('Error al eliminar registro');
-              }
+            const respuestaDeDB = await fetch(`${API_URL}/carnet/${id}`, {
+              method: 'DELETE', headers: { 'Authorization': `Bearer ${tokenUsuario}` },
+            });
 
-              if (!selectedPet) return;
-              await fetchCarnetRecords(selectedPet.id);
-              Alert.alert('Éxito', 'Registro eliminado correctamente');
-            } catch (error) {
-              console.error('Error al eliminar registro:', error);
-              Alert.alert('Error', 'No se pudo eliminar el registro');
-            }
+            const registroEliminadoCarnetDB = await respuestaDeDB.json();
+
+            if (respuestaDeDB.ok && registroEliminadoCarnetDB && registroEliminadoCarnetDB.ok) {
+              Alert.alert('Éxito', `Vacuna/desparasitación eliminada del carnet de ${mascotaSeleccionada?.nombre}`);
+              if (!mascotaSeleccionada) return;
+              await obtenerRegistrosCarnet(mascotaSeleccionada.id);
+
+            } else Alert.alert('Error eliminando el registro', "Intenta de nuevo", [ { text: 'Intentar de nuevo' } ]);
           },
         },
       ]
     );
   };
 
-  const resetNewRecord = () => {
-    setNewRecord({
-      tipo_medicamento: 'Vacuna',
-      nombre_medicamento: '',
-      fecha_aplicacion: new Date(),
-      laboratorio: '',
-      id_lote: '',
-      fecha_elaboracion: null,
-      fecha_vencimiento: new Date(),
-      peso: 0,
-      nombre_veterinaria: '',
-      telefono_veterinaria: '',
-      direccion_veterinaria: '',
-      proxima_dosis: null,
-      observaciones: '',
-    });
-    
-    // Limpiar estados de fechas
-    setElaboracionDia('');
-    setElaboracionMes('');
-    setElaboracionAno('');
-    setVencimientoDia('');
-    setVencimientoMes('');
-    setVencimientoAno('');
-    setProximaDia('');
-    setProximaMes('');
-    setProximaAno('');
+  const exportarAPDF = async () => {
+    if (!mascotaSeleccionada) return;
+
+    const vacunas = obtenerRegistrosporTipoMedicamento('Vacuna');
+    const desparasitaciones = obtenerRegistrosporTipoMedicamento('Desparasitación');
+
+    const carnetHTML = carnetFormat(mascotaSeleccionada, vacunas, desparasitaciones);
+
+    const { uri } = await Print.printToFileAsync({ html: carnetHTML });
+
+    if (await Sharing.isAvailableAsync()) {
+      await Sharing.shareAsync(uri, { mimeType: 'application/pdf',
+        dialogTitle: `Carnet_${mascotaSeleccionada.nombre}_${new Date().getTime()}.pdf`,
+      });
+
+    } else Alert.alert('Éxito', `Tu PDF ha sido generado: ${uri}`);
   };
 
-  const exportToPDF = async () => {
-    if (!selectedPet) {
-      Alert.alert('Error', 'Selecciona una mascota primero');
-      return;
-    }
-
-    try {
-      const vacunas = getRecordsByType('Vacuna');
-      const desparasitaciones = getRecordsByType('Desparasitación');
-
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <style>
-            body {
-              font-family: 'Arial', sans-serif;
-              padding: 20px;
-              color: #333;
-            }
-            .header {
-              text-align: center;
-              border-bottom: 3px solid #4A90E2;
-              padding-bottom: 20px;
-              margin-bottom: 30px;
-            }
-            .logo {
-              font-size: 32px;
-              font-weight: bold;
-              color: #4A90E2;
-              margin-bottom: 10px;
-            }
-            .subtitle {
-              font-size: 18px;
-              color: #666;
-            }
-            .pet-info {
-              background: #f8f9fa;
-              padding: 20px;
-              border-radius: 10px;
-              margin-bottom: 30px;
-            }
-            .pet-info h2 {
-              color: #4A90E2;
-              margin-top: 0;
-            }
-            .info-row {
-              display: flex;
-              justify-content: space-between;
-              margin-bottom: 10px;
-            }
-            .section-title {
-              background: #4A90E2;
-              color: white;
-              padding: 12px;
-              border-radius: 5px;
-              margin-top: 30px;
-              margin-bottom: 15px;
-              font-size: 18px;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              margin-bottom: 30px;
-            }
-            th {
-              background: #e3f2fd;
-              padding: 12px;
-              text-align: left;
-              font-weight: bold;
-              border-bottom: 2px solid #4A90E2;
-            }
-            td {
-              padding: 10px;
-              border-bottom: 1px solid #e0e0e0;
-            }
-            tr:last-child td {
-              border-bottom: none;
-            }
-            .vigente {
-              color: #4CAF50;
-              font-weight: bold;
-            }
-            .vencida {
-              color: #FF6B6B;
-              font-weight: bold;
-            }
-            .footer {
-              text-align: center;
-              margin-top: 50px;
-              padding-top: 20px;
-              border-top: 2px solid #e0e0e0;
-              color: #666;
-              font-size: 12px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="logo">🐾 PocketVet</div>
-            <div class="subtitle">Carnet Digital de Salud</div>
-          </div>
-
-          <div class="pet-info">
-            <h2>Información de la Mascota</h2>
-            <div class="info-row">
-              <strong>Nombre:</strong> <span>${selectedPet.nombre}</span>
-            </div>
-            <div class="info-row">
-              <strong>Especie:</strong> <span>${selectedPet.especie}</span>
-            </div>
-            <div class="info-row">
-              <strong>Raza:</strong> <span>${selectedPet.raza || 'No especifica'}</span>
-            </div>
-            <div class="info-row">
-              <strong>Sexo:</strong> <span>${selectedPet.sexo}</span>
-            </div>
-            <div class="info-row">
-              <strong>Color:</strong> <span>${selectedPet.color || 'No especifica'}</span>
-            </div>
-            <div class="info-row">
-              <strong>Peso:</strong> <span>${selectedPet.peso ? selectedPet.peso + ' kg' : 'No especifica'}</span>
-            </div>
-            <div class="info-row">
-              <strong>Fecha de Nacimiento:</strong> <span>${new Date(selectedPet.fecha_nacimiento).toLocaleDateString('es-ES')}</span>
-            </div>
-            <div class="info-row">
-              <strong>Alergias:</strong> <span>${selectedPet.alergias || 'No especifica'}</span>
-            </div>
-            <div class="info-row">
-              <strong>Enfermedades:</strong> <span>${selectedPet.enfermedades || 'No especifica'}</span>
-            </div>
-            <div class="info-row">
-              <strong>Observaciones:</strong> <span>${selectedPet.observaciones || 'No especifica'}</span>
-            </div>
-          </div>
-
-          <div class="section-title">💉 VACUNAS</div>
-          ${vacunas.length === 0 
-            ? '<p style="text-align: center; color: #666; font-style: italic;">No hay vacunas registradas</p>' 
-            : `
-              <table>
-                <thead>
-                  <tr>
-                    <th>Medicamento / Laboratorio</th>
-                    <th>Lote</th>
-                    <th>Aplicación</th>
-                    <th>Vencimiento</th>
-                    <th>Peso (kg)</th>
-                    <th>Veterinaria</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${vacunas.map(v => `
-                    <tr>
-                      <td><strong>${v.nombre_medicamento}</strong><br/><small>${v.laboratorio || 'No especifica'}</small></td>
-                      <td>${v.id_lote}</td>
-                      <td>${formatDate(v.fecha_aplicacion)}</td>
-                      <td>${formatDate(v.fecha_vencimiento)}</td>
-                      <td>${v.peso}</td>
-                      <td><small>${v.nombre_veterinaria}</small></td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            `}
-
-          <div class="section-title">💊 DESPARASITACIONES</div>
-          ${desparasitaciones.length === 0 
-            ? '<p style="text-align: center; color: #666; font-style: italic;">No hay desparasitaciones registradas</p>' 
-            : `
-              <table>
-                <thead>
-                  <tr>
-                    <th>Medicamento / Laboratorio</th>
-                    <th>Lote</th>
-                    <th>Aplicación</th>
-                    <th>Peso (kg)</th>
-                    <th>Veterinaria</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${desparasitaciones.map(d => `
-                    <tr>
-                      <td><strong>${d.nombre_medicamento}</strong><br/><small>${d.laboratorio || 'No especifica'}</small></td>
-                      <td>${d.id_lote}</td>
-                      <td>${formatDate(d.fecha_aplicacion)}</td>
-                      <td>${d.peso}</td>
-                      <td><small>${d.nombre_veterinaria}</small></td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            `}
-
-          <div class="footer">
-            <p><strong>PocketVet - Carnet Digital</strong></p>
-            <p>Generado el ${new Date().toLocaleDateString('es-ES', { 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}</p>
-          </div>
-        </body>
-        </html>
-      `;
-
-      const { uri } = await Print.printToFileAsync({ html: htmlContent });
-
-      if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, {
-          mimeType: 'application/pdf',
-          dialogTitle: `Carnet_${selectedPet.nombre}_${new Date().getTime()}.pdf`,
-        });
-      } else {
-        Alert.alert('Éxito', `PDF generado: ${uri}`);
-      }
-    } catch (error) {
-      console.error('Error al generar PDF:', error);
-      Alert.alert('Error', 'No se pudo generar el PDF');
-    }
-  };
-
-  const getRecordsByType = (type: 'Vacuna' | 'Desparasitación') => {
-    return carnetRecords.filter(
-      (record) => record.tipo_medicamento === type && record.id_mascota === selectedPet?.id
+  const obtenerRegistrosporTipoMedicamento = (type: 'Vacuna' | 'Desparasitación') => {
+    return registrosCarnet.filter(
+      (registro) => registro.tipo_medicamento === type && registro.id_mascota === mascotaSeleccionada?.id
     );
   };
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return 'N/A';
-    return date.toLocaleDateString('es-ES');
+  const isMedicamentoVigente = (medicamento: any) => {
+    if (medicamento.ano_vencimiento_medicamento > new Date().getFullYear()) return true;
+    if (medicamento.ano_vencimiento_medicamento === new Date().getFullYear() && medicamento.mes_vencimiento_medicamento >= new Date().getMonth() + 1) return true;
+    return false;
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Carnet Digital</Text>
-        <TouchableOpacity style={styles.exportButton} onPress={exportToPDF}>
+        <TouchableOpacity style={styles.exportButton} onPress={exportarAPDF}>
           <Text style={styles.exportButtonText}>📄 PDF</Text>
         </TouchableOpacity>
       </View>
 
       {/* Selector de Mascota */}
-      <TouchableOpacity style={styles.petSelector} onPress={() => setShowPetsModal(true)}>
+      <TouchableOpacity style={styles.petSelector} onPress={() => setMostrarPaginaMascotas(true)}>
         <Image 
-          source={{ uri: getPetPhotoUrl(selectedPet?.foto || null) }} 
+          source={{ uri: obtenerURLdeFoto(mascotaSeleccionada?.foto || null) }} 
           style={styles.petImage} 
         />
         <View style={styles.petInfo}>
-          <Text style={styles.petName}>{selectedPet?.nombre || 'Seleccionar mascota'}</Text>
+          <Text style={styles.petName}>{mascotaSeleccionada?.nombre || 'Seleccionar mascota'}</Text>
           <Text style={styles.petDetails}>
-            {selectedPet ? `${selectedPet.raza} • ${selectedPet.sexo}` : 'Toca para seleccionar'}
+            {mascotaSeleccionada ? `${mascotaSeleccionada.raza} • ${mascotaSeleccionada.sexo}` : 'Toca para seleccionar'}
           </Text>
         </View>
         <Text style={styles.selectorArrow}>▼</Text>
@@ -596,28 +323,24 @@ export default function CarnetScreen() {
       {/* Estadísticas Rápidas */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{getRecordsByType('Vacuna').length}</Text>
+          <Text style={styles.statNumber}>{obtenerRegistrosporTipoMedicamento('Vacuna').length}</Text>
           <Text style={styles.statLabel}>Vacunas</Text>
         </View>
         <View style={styles.statCard}>
-          <Text style={styles.statNumber}>{getRecordsByType('Desparasitación').length}</Text>
+          <Text style={styles.statNumber}>{obtenerRegistrosporTipoMedicamento('Desparasitación').length}</Text>
           <Text style={styles.statLabel}>Desparasitaciones</Text>
         </View>
         <View style={styles.statCard}>
           <Text style={styles.statNumber}>
-            {
-              carnetRecords.filter(
-                (r) =>
-                  r.id_mascota === selectedPet?.id && new Date(r.fecha_vencimiento) > new Date()
-              ).length
-            }
+            {registrosCarnet.filter((r) => r.id_mascota === mascotaSeleccionada?.id && 
+              (isMedicamentoVigente(r))).length}
           </Text>
           <Text style={styles.statLabel}>Vigentes</Text>
         </View>
       </View>
 
       {/* Botón Agregar Registro */}
-      <TouchableOpacity style={styles.addRecordButton} onPress={() => setShowAddModal(true)}>
+      <TouchableOpacity style={styles.addRecordButton} onPress={() => setMostrarPaginaNuevoRegistro(true)}>
         <Text style={styles.addRecordButtonText}>+ Agregar Registro</Text>
       </TouchableOpacity>
 
@@ -632,47 +355,48 @@ export default function CarnetScreen() {
           {/* Vacunas */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>💉 Vacunas</Text>
-            {getRecordsByType('Vacuna').length === 0 ? (
+            {obtenerRegistrosporTipoMedicamento('Vacuna').length === 0 ? (
               <Text style={styles.emptyText}>No hay vacunas registradas</Text>
             ) : (
-              getRecordsByType('Vacuna').map((record) => (
-                <View key={record.id} style={styles.recordCard}>
+              obtenerRegistrosporTipoMedicamento('Vacuna').map((registro) => (
+                <View key={registro.id} style={styles.recordCard}>
                   <View style={styles.recordHeader}>
-                    <Text style={styles.recordName}>{record.nombre_medicamento}</Text>
+                    <Text style={styles.recordName}>{registro.nombre_medicamento}</Text>
                     <View
                       style={[
                         styles.statusBadge,
-                        {
-                          backgroundColor:
-                            new Date(record.fecha_vencimiento) > new Date() ? '#4CAF50' : '#FF6B6B',
-                        },
+                        { backgroundColor: isMedicamentoVigente(registro) ? '#4CAF50' : '#FF6B6B' },
                       ]}
                     >
                       <Text style={styles.statusText}>
-                        {new Date(record.fecha_vencimiento) > new Date() ? 'Vigente' : 'Vencida'}
+                            {isMedicamentoVigente(registro) ? 'Vigente' : 'Vencida'}
                       </Text>
                     </View>
                 </View>
-                <Text style={styles.recordDetail}>Lote: {record.id_lote}</Text>
-                <Text style={styles.recordDetail}>
-                  Aplicación: {formatDate(record.fecha_aplicacion)}
-                </Text>
-                <Text style={styles.recordDetail}>
-                  Vence: {formatDate(record.fecha_vencimiento)}
-                </Text>
-                {record.observaciones && (
-                  <Text style={styles.recordObservations}>{record.observaciones}</Text>
+                <Text style={styles.recordDetail}>Lote: {registro.id_lote}</Text>
+                    <Text style={styles.recordDetail}>
+                      Aplicación: {new Date(registro.fecha_aplicacion).toLocaleDateString('es-ES')}
+                    </Text>
+                    <Text style={styles.recordDetail}>
+                      Vence: {`${registro.mes_vencimiento_medicamento}/${registro.ano_vencimiento_medicamento}`}
+                    </Text>
+                {registro.observaciones && (
+                  <Text style={styles.recordObservations}>{registro.observaciones}</Text>
                 )}
                 <View style={styles.recordActions}>
                   <TouchableOpacity 
                     style={styles.editButton} 
-                    onPress={() => openEditModal(record)}
+                    onPress={() => {
+                      setEditarRegistro(registro);
+                      setMostrarPaginaEditarRegistro(true);
+                      }
+                    }
                   >
                     <Text style={styles.editButtonText}>✏️ Editar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.deleteButton} 
-                    onPress={() => deleteRecord(record.id)}
+                    onPress={() => eliminarRegistroCarnet(registro.id)}
                   >
                     <Text style={styles.deleteButtonText}>🗑️ Eliminar</Text>
                   </TouchableOpacity>
@@ -685,48 +409,49 @@ export default function CarnetScreen() {
         {/* Desparasitaciones */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>💊 Desparasitaciones</Text>
-          {getRecordsByType('Desparasitación').length === 0 ? (
+          {obtenerRegistrosporTipoMedicamento('Desparasitación').length === 0 ? (
             <Text style={styles.emptyText}>No hay desparasitaciones registradas</Text>
           ) : (
-            getRecordsByType('Desparasitación').map((record) => (
-              <View key={record.id} style={styles.recordCard}>
+            obtenerRegistrosporTipoMedicamento('Desparasitación').map((registro) => (
+              <View key={registro.id} style={styles.recordCard}>
                 <View style={styles.recordHeader}>
-                  <Text style={styles.recordName}>{record.nombre_medicamento}</Text>
+                  <Text style={styles.recordName}>{registro.nombre_medicamento}</Text>
                   <View
                     style={[
                       styles.statusBadge,
-                      {
-                        backgroundColor:
-                          new Date(record.fecha_vencimiento) > new Date() ? '#4CAF50' : '#FF6B6B',
-                      },
+                      { backgroundColor: isMedicamentoVigente(registro) ? '#4CAF50' : '#FF6B6B' },
                     ]}
                   >
                     <Text style={styles.statusText}>
-                      {new Date(record.fecha_vencimiento) > new Date() ? 'Vigente' : 'Vencida'}
+                        {isMedicamentoVigente(registro) ? 'Vigente' : 'Vencida'}
                     </Text>
                   </View>
                 </View>
-                <Text style={styles.recordDetail}>Lote: {record.id_lote}</Text>
+                <Text style={styles.recordDetail}>Lote: {registro.id_lote}</Text>
                 <Text style={styles.recordDetail}>
-                  Aplicación: {formatDate(record.fecha_aplicacion)}
+                  Aplicación: {(new Date(registro.fecha_aplicacion)).toLocaleDateString('es-ES')}
                 </Text>
                 <Text style={styles.recordDetail}>
-                  Vence: {formatDate(record.fecha_vencimiento)}
+                  Vence: {`${registro.mes_vencimiento_medicamento}/${registro.ano_vencimiento_medicamento}`}
                 </Text>
-                <Text style={styles.recordDetail}>Peso: {record.peso} kg</Text>
-                {record.observaciones && (
-                  <Text style={styles.recordObservations}>{record.observaciones}</Text>
+                <Text style={styles.recordDetail}>Peso: {registro.peso} kg</Text>
+                {registro.observaciones && (
+                  <Text style={styles.recordObservations}>{registro.observaciones}</Text>
                 )}
                 <View style={styles.recordActions}>
                   <TouchableOpacity 
                     style={styles.editButton} 
-                    onPress={() => openEditModal(record)}
+                    onPress={() => {
+                      setEditarRegistro(registro);
+                      setMostrarPaginaEditarRegistro(true);
+                      }
+                    }
                   >
                     <Text style={styles.editButtonText}>✏️ Editar</Text>
                   </TouchableOpacity>
                   <TouchableOpacity 
                     style={styles.deleteButton} 
-                    onPress={() => deleteRecord(record.id)}
+                    onPress={() => eliminarRegistroCarnet(registro.id)}
                   >
                     <Text style={styles.deleteButtonText}>🗑️ Eliminar</Text>
                   </TouchableOpacity>
@@ -738,22 +463,21 @@ export default function CarnetScreen() {
       </ScrollView>
       )}
 
-      {/* Modal Seleccionar Mascota */}
-      <Modal visible={showPetsModal} animationType="slide" transparent={true}>
+      <Modal visible={mostrarPaginaMascotas} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Seleccionar Mascota</Text>
-            {pets.map((pet) => (
+            {mascotas.map((pet) => (
               <TouchableOpacity
                 key={pet.id}
                 style={styles.petOption}
                 onPress={() => {
-                  setSelectedPet(pet);
-                  setShowPetsModal(false);
+                  setMascotaSeleccionada(pet);
+                  setMostrarPaginaMascotas(false);
                 }}
               >
                 <Image 
-                  source={{ uri: getPetPhotoUrl(pet.foto) }} 
+                  source={{ uri: obtenerURLdeFoto(pet.foto) }} 
                   style={styles.petOptionImage} 
                 />
                 <View style={styles.petOptionInfo}>
@@ -764,7 +488,7 @@ export default function CarnetScreen() {
                 </View>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity style={styles.cancelButton} onPress={() => setShowPetsModal(false)}>
+            <TouchableOpacity style={styles.cancelButton} onPress={() => setMostrarPaginaMascotas(false)}>
               <Text style={styles.cancelButtonText}>Cancelar</Text>
             </TouchableOpacity>
           </View>
@@ -772,7 +496,7 @@ export default function CarnetScreen() {
       </Modal>
 
       {/* Modal Agregar Registro */}
-      <Modal visible={showAddModal} animationType="slide" transparent={true}>
+      <Modal visible={mostrarPaginaNuevoRegistro} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, styles.addModalContent]}>
             <Text style={styles.modalTitle}>Agregar Registro</Text>
@@ -782,19 +506,19 @@ export default function CarnetScreen() {
                 <TouchableOpacity
                   style={[
                     styles.typeOption,
-                    newRecord.tipo_medicamento === 'Vacuna' && styles.selectedType,
+                    nuevoRegistro.tipo_medicamento === 'Vacuna' && styles.selectedType,
                   ]}
-                  onPress={() => setNewRecord({ ...newRecord, tipo_medicamento: 'Vacuna' })}
+                  onPress={() => setNuevoRegistro({ ...nuevoRegistro, tipo_medicamento: 'Vacuna' })}
                 >
                   <Text style={styles.typeText}>VACUNA</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[
                     styles.typeOption,
-                    newRecord.tipo_medicamento === 'Desparasitación' && styles.selectedType,
+                    nuevoRegistro.tipo_medicamento === 'Desparasitación' && styles.selectedType,
                   ]}
                   onPress={() =>
-                    setNewRecord({ ...newRecord, tipo_medicamento: 'Desparasitación' })
+                    setNuevoRegistro({ ...nuevoRegistro, tipo_medicamento: 'Desparasitación' })
                   }
                 >
                   <Text style={styles.typeText}>DESPARACITACION</Text>
@@ -805,24 +529,24 @@ export default function CarnetScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Ej: Vacuna Antirrábica"
-                value={newRecord.nombre_medicamento}
-                onChangeText={(text) => setNewRecord({ ...newRecord, nombre_medicamento: text })}
+                value={nuevoRegistro.nombre_medicamento}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, nombre_medicamento: text })}
               />
 
               <Text style={styles.label}>ID Lote *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ej: RB2024A"
-                value={newRecord.id_lote}
-                onChangeText={(text) => setNewRecord({ ...newRecord, id_lote: text })}
+                value={nuevoRegistro.id_lote}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, id_lote: text })}
               />
 
               <Text style={styles.label}>Laboratorio</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Ej: Zoetis"
-                value={newRecord.laboratorio}
-                onChangeText={(text) => setNewRecord({ ...newRecord, laboratorio: text })}
+                value={nuevoRegistro.laboratorio}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, laboratorio: text })}
               />
 
               <Text style={styles.label}>Peso (kg) *</Text>
@@ -830,29 +554,27 @@ export default function CarnetScreen() {
                 style={styles.input}
                 placeholder="Ej: 25.5"
                 keyboardType="numeric"
-                value={newRecord.peso?.toString()}
-                onChangeText={(text) => setNewRecord({ ...newRecord, peso: parseFloat(text) || 0 })}
+                value={nuevoRegistro.peso?.toString()}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, peso: parseFloat(text)})}
               />
 
-              <Text style={styles.label}>Fecha de Elaboración (DD/MM/AAAA)</Text>
+              <Text style={styles.label}>Fecha de Aplicación (DD/MM/AAAA) *</Text>
               <View style={styles.dateRow}>
                 <TextInput
                   style={[styles.input, styles.dateInput]}
                   placeholder="DD"
                   keyboardType="numeric"
                   maxLength={2}
-                  value={elaboracionDia}
+                  value={aplicacionDia}
                   onChangeText={(text) => {
-                    setElaboracionDia(text);
-                    if (text && elaboracionMes && elaboracionAno) {
+                    setAplicacionDia(text);
+                    if (text && aplicacionMes && aplicacionAno) {
                       const day = parseInt(text);
-                      const month = parseInt(elaboracionMes) - 1;
-                      const year = parseInt(elaboracionAno);
+                      const month = parseInt(aplicacionMes) - 1;
+                      const year = parseInt(aplicacionAno);
                       if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, fecha_elaboracion: new Date(year, month, day) });
+                        setNuevoRegistro({ ...nuevoRegistro, fecha_aplicacion: new Date(year, month, day) });
                       }
-                    } else if (!text && !elaboracionMes && !elaboracionAno) {
-                      setNewRecord({ ...newRecord, fecha_elaboracion: null });
                     }
                   }}
                 />
@@ -862,102 +584,135 @@ export default function CarnetScreen() {
                   placeholder="MM"
                   keyboardType="numeric"
                   maxLength={2}
-                  value={elaboracionMes}
+                  value={aplicacionMes}
                   onChangeText={(text) => {
-                    setElaboracionMes(text);
-                    if (elaboracionDia && text && elaboracionAno) {
-                      const day = parseInt(elaboracionDia);
+                    setAplicacionMes(text);
+                    if (aplicacionDia && text && aplicacionAno) {
+                      const day = parseInt(aplicacionDia);
                       const month = parseInt(text) - 1;
-                      const year = parseInt(elaboracionAno);
+                      const year = parseInt(aplicacionAno);
                       if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, fecha_elaboracion: new Date(year, month, day) });
+                        setNuevoRegistro({ ...nuevoRegistro, fecha_aplicacion: new Date(year, month, day) });
                       }
-                    } else if (!elaboracionDia && !text && !elaboracionAno) {
-                      setNewRecord({ ...newRecord, fecha_elaboracion: null });
                     }
                   }}
                 />
                 <Text style={styles.dateSeparator}>/</Text>
                 <TextInput
-                  style={[styles.input, styles.dateInputYear]}
+                  style={[styles.input, styles.dateInputYear, fechaAplicacionError && { borderColor: 'red', backgroundColor: '#ffe6e6' }]}
                   placeholder="AAAA"
                   keyboardType="numeric"
                   maxLength={4}
-                  value={elaboracionAno}
+                  value={aplicacionAno}
                   onChangeText={(text) => {
-                    setElaboracionAno(text);
-                    if (elaboracionDia && elaboracionMes && text) {
-                      const day = parseInt(elaboracionDia);
-                      const month = parseInt(elaboracionMes) - 1;
+                    setAplicacionAno(text);
+                    if (aplicacionDia && aplicacionMes && text) {
+                      const day = parseInt(aplicacionDia);
+                      const month = parseInt(aplicacionMes) - 1;
                       const year = parseInt(text);
                       if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, fecha_elaboracion: new Date(year, month, day) });
+                        setNuevoRegistro({ ...nuevoRegistro, fecha_aplicacion: new Date(year, month, day) });
                       }
-                    } else if (!elaboracionDia && !elaboracionMes && !text) {
-                      setNewRecord({ ...newRecord, fecha_elaboracion: null });
                     }
                   }}
                 />
+                {fechaAplicacionError && <Text style={styles.errorText}>{fechaAplicacionError}</Text>}
               </View>
 
-              <Text style={styles.label}>Fecha de Vencimiento (DD/MM/AAAA) *</Text>
+              <Text style={styles.label}>Fecha de elaboración del medicamento (MM/AAAA)</Text>
               <View style={styles.dateRow}>
-                <TextInput
-                  style={[styles.input, styles.dateInput]}
-                  placeholder="DD"
-                  keyboardType="numeric"
-                  maxLength={2}
-                  value={vencimientoDia}
-                  onChangeText={(text) => {
-                    setVencimientoDia(text);
-                    if (text && vencimientoMes && vencimientoAno) {
-                      const day = parseInt(text);
-                      const month = parseInt(vencimientoMes) - 1;
-                      const year = parseInt(vencimientoAno);
-                      if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, fecha_vencimiento: new Date(year, month, day) });
+                <View style={{ flex: 1 }}>
+                  <Picker
+                    selectedValue={elaboracionMes}
+                    onValueChange={(val) => {
+                      setElaboracionMes(String(val));
+                      if (val !== '' && elaboracionAno !== '') {
+                        const monthNum = parseInt(String(val), 10);
+                        const year = parseInt(elaboracionAno, 10);
+                        setNuevoRegistro({ ...nuevoRegistro, mes_elaboracion_medicamento: monthNum, ano_elaboracion_medicamento: year });
+                      } else {
+                        setNuevoRegistro({ ...nuevoRegistro, mes_elaboracion_medicamento: null, ano_elaboracion_medicamento: nuevoRegistro.ano_elaboracion_medicamento ?? null });
                       }
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <Picker.Item label="MM" value="" />
+                    {Array.from({ length: 12 }).map((_, i) => {
+                      const month = i + 1;
+                      const label = month < 10 ? `0${month}` : `${month}`;
+                      return <Picker.Item key={month} label={label} value={`${month}`} />;
+                    })}
+                  </Picker>
+                </View>
                 <Text style={styles.dateSeparator}>/</Text>
-                <TextInput
-                  style={[styles.input, styles.dateInput]}
-                  placeholder="MM"
-                  keyboardType="numeric"
-                  maxLength={2}
-                  value={vencimientoMes}
-                  onChangeText={(text) => {
-                    setVencimientoMes(text);
-                    if (vencimientoDia && text && vencimientoAno) {
-                      const day = parseInt(vencimientoDia);
-                      const month = parseInt(text) - 1;
-                      const year = parseInt(vencimientoAno);
-                      if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, fecha_vencimiento: new Date(year, month, day) });
+                <View style={{ flex: 1.5 }}>
+                  <Picker
+                    selectedValue={elaboracionAno}
+                    onValueChange={(val) => {
+                      setElaboracionAno(String(val));
+                      if (elaboracionMes !== '' && val !== '') {
+                        const monthNum = parseInt(elaboracionMes, 10);
+                        const year = parseInt(String(val), 10);
+                        setNuevoRegistro({ ...nuevoRegistro, mes_elaboracion_medicamento: monthNum, ano_elaboracion_medicamento: year });
+                      } else {
+                        setNuevoRegistro({ ...nuevoRegistro, ano_elaboracion_medicamento: null });
                       }
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <Picker.Item label="AAAA" value="" />
+                    {Array.from({ length: 2025 - 2000 + 1 }).map((_, i) => {
+                      const y = 2000 + i;
+                      return <Picker.Item key={y} label={`${y}`} value={`${y}`} />;
+                    })}
+                  </Picker>
+                </View>
+              </View>
+
+              <Text style={styles.label}>Fecha de vencimiento del medicamento (MM/AAAA) *</Text>
+              <View style={styles.dateRow}>
+                <View style={{ flex: 1 }}>
+                  <Picker
+                    selectedValue={vencimientoMes}
+                    onValueChange={(val) => {
+                      setVencimientoMes(String(val));
+                      if (val !== '' && vencimientoAno !== '') {
+                        const monthNum = parseInt(String(val), 10);
+                        const year = parseInt(vencimientoAno, 10);
+                        setNuevoRegistro({ ...nuevoRegistro, mes_vencimiento_medicamento: monthNum, ano_vencimiento_medicamento: year });
+                      } else {
+                        setNuevoRegistro({ ...nuevoRegistro, mes_vencimiento_medicamento: 0, ano_vencimiento_medicamento: nuevoRegistro.ano_vencimiento_medicamento ?? 0 });
+                      }
+                    }}
+                  >
+                    <Picker.Item label="MM" value="" />
+                    {Array.from({ length: 12 }).map((_, i) => {
+                      const month = i + 1;
+                      const label = month < 10 ? `0${month}` : `${month}`;
+                      return <Picker.Item key={month} label={label} value={`${month}`} />;
+                    })}
+                  </Picker>
+                </View>
                 <Text style={styles.dateSeparator}>/</Text>
-                <TextInput
-                  style={[styles.input, styles.dateInputYear]}
-                  placeholder="AAAA"
-                  keyboardType="numeric"
-                  maxLength={4}
-                  value={vencimientoAno}
-                  onChangeText={(text) => {
-                    setVencimientoAno(text);
-                    if (vencimientoDia && vencimientoMes && text) {
-                      const day = parseInt(vencimientoDia);
-                      const month = parseInt(vencimientoMes) - 1;
-                      const year = parseInt(text);
-                      if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, fecha_vencimiento: new Date(year, month, day) });
+                <View style={{ flex: 1.5 }}>
+                  <Picker
+                    selectedValue={vencimientoAno}
+                    onValueChange={(val) => {
+                      setVencimientoAno(String(val));
+                      if (vencimientoMes !== '' && val !== '') {
+                        const monthNum = parseInt(vencimientoMes, 10);
+                        const year = parseInt(String(val), 10);
+                        setNuevoRegistro({ ...nuevoRegistro, mes_vencimiento_medicamento: monthNum, ano_vencimiento_medicamento: year });
+                      } else {
+                        setNuevoRegistro({ ...nuevoRegistro, ano_vencimiento_medicamento: 0 });
                       }
-                    }
-                  }}
-                />
+                    }}
+                  >
+                    <Picker.Item label="AAAA" value="" />
+                    {Array.from({ length: 2040 - 2010 + 1 }).map((_, i) => {
+                      const y = 2010 + i;
+                      return <Picker.Item key={y} label={`${y}`} value={`${y}`} />;
+                    })}
+                  </Picker>
+                </View>
               </View>
 
               <Text style={styles.label}>Próxima Dosis (DD/MM/AAAA)</Text>
@@ -975,10 +730,10 @@ export default function CarnetScreen() {
                       const month = parseInt(proximaMes) - 1;
                       const year = parseInt(proximaAno);
                       if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, proxima_dosis: new Date(year, month, day) });
+                        setNuevoRegistro({ ...nuevoRegistro, proxima_dosis: new Date(year, month, day) });
                       }
                     } else if (!text && !proximaMes && !proximaAno) {
-                      setNewRecord({ ...newRecord, proxima_dosis: null });
+                      setNuevoRegistro({ ...nuevoRegistro, proxima_dosis: null });
                     }
                   }}
                 />
@@ -996,10 +751,10 @@ export default function CarnetScreen() {
                       const month = parseInt(text) - 1;
                       const year = parseInt(proximaAno);
                       if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, proxima_dosis: new Date(year, month, day) });
+                        setNuevoRegistro({ ...nuevoRegistro, proxima_dosis: new Date(year, month, day) });
                       }
                     } else if (!proximaDia && !text && !proximaAno) {
-                      setNewRecord({ ...newRecord, proxima_dosis: null });
+                      setNuevoRegistro({ ...nuevoRegistro, proxima_dosis: null });
                     }
                   }}
                 />
@@ -1017,21 +772,22 @@ export default function CarnetScreen() {
                       const month = parseInt(proximaMes) - 1;
                       const year = parseInt(text);
                       if (day > 0 && day <= 31 && month >= 0 && month < 12 && year > 1900) {
-                        setNewRecord({ ...newRecord, proxima_dosis: new Date(year, month, day) });
+                        setNuevoRegistro({ ...nuevoRegistro, proxima_dosis: new Date(year, month, day) });
                       }
                     } else if (!proximaDia && !proximaMes && !text) {
-                      setNewRecord({ ...newRecord, proxima_dosis: null });
+                      setNuevoRegistro({ ...nuevoRegistro, proxima_dosis: null });
                     }
                   }}
                 />
+                {proximaDosisError && <Text style={styles.errorText}>{proximaDosisError}</Text>}
               </View>
 
               <Text style={styles.label}>Veterinaria *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Nombre de la veterinaria"
-                value={newRecord.nombre_veterinaria}
-                onChangeText={(text) => setNewRecord({ ...newRecord, nombre_veterinaria: text })}
+                value={nuevoRegistro.nombre_veterinaria}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, nombre_veterinaria: text })}
               />
 
               <Text style={styles.label}>Teléfono Veterinaria</Text>
@@ -1039,24 +795,24 @@ export default function CarnetScreen() {
                 style={styles.input}
                 placeholder="Teléfono de contacto (Opcional)"
                 keyboardType="phone-pad"
-                value={newRecord.telefono_veterinaria}
-                onChangeText={(text) => setNewRecord({ ...newRecord, telefono_veterinaria: text })}
+                value={nuevoRegistro.telefono_veterinaria ?? ''}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, telefono_veterinaria: text })}
               />
 
               <Text style={styles.label}>Dirección Veterinaria *</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Dirección de la veterinaria"
-                value={newRecord.direccion_veterinaria}
-                onChangeText={(text) => setNewRecord({ ...newRecord, direccion_veterinaria: text })}
+                value={nuevoRegistro.direccion_veterinaria}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, direccion_veterinaria: text })}
               />
 
               <Text style={styles.label}>Observaciones</Text>
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Observaciones adicionales..."
-                value={newRecord.observaciones}
-                onChangeText={(text) => setNewRecord({ ...newRecord, observaciones: text })}
+                value={nuevoRegistro.observaciones ?? ''}
+                onChangeText={(text) => setNuevoRegistro({ ...nuevoRegistro, observaciones: text })}
                 multiline
                 numberOfLines={3}
               />
@@ -1065,7 +821,7 @@ export default function CarnetScreen() {
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowAddModal(false)}
+                onPress={() => setMostrarPaginaNuevoRegistro(false)}
                 disabled={submitting}
               >
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
@@ -1074,10 +830,10 @@ export default function CarnetScreen() {
                 style={[
                   styles.modalButton, 
                   styles.saveButton, 
-                  (submitting || !isFormValid()) && { opacity: 0.5, backgroundColor: '#ccc' }
+                  (submitting || !isFormularioValid()) && { opacity: 0.5, backgroundColor: '#ccc' }
                 ]}
-                onPress={handleAddRecord}
-                disabled={submitting || !isFormValid()}
+                onPress={crearRegistroCarnet}
+                disabled={submitting || !isFormularioValid()}
               >
                 {submitting ? (
                   <ActivityIndicator color="#fff" />
@@ -1091,7 +847,7 @@ export default function CarnetScreen() {
       </Modal>
 
       {/* Modal Editar Registro */}
-      <Modal visible={showEditModal} animationType="slide" transparent={true}>
+      <Modal visible={mostrarPaginaEditarRegistro} animationType="slide" transparent={true}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, styles.editModalContent]}>
             <Text style={styles.modalTitle}>Editar Registro</Text>
@@ -1103,24 +859,24 @@ export default function CarnetScreen() {
                 style={styles.input}
                 placeholder="Teléfono de contacto"
                 keyboardType="phone-pad"
-                value={editingRecord?.telefono_veterinaria || ''}
-                onChangeText={(text) => setEditingRecord(prev => prev ? {...prev, telefono_veterinaria: text} : null)}
+                value={editarRegistro?.telefono_veterinaria || ''}
+                onChangeText={(text) => setEditarRegistro(prev => prev ? {...prev, telefono_veterinaria: text} : null)}
               />
 
               <Text style={styles.label}>Próxima Dosis</Text>
               <TextInput
                 style={styles.input}
                 placeholder="DD/MM/AAAA (Opcional)"
-                value={editingRecord?.proxima_dosis ? formatDate(editingRecord.proxima_dosis) : ''}
+                value={editarRegistro?.proxima_dosis ? (editarRegistro.proxima_dosis ? editarRegistro.proxima_dosis.toLocaleDateString('es-ES') : 'N/A') : ''}
                 onChangeText={(text) => {
                   if (text.length === 10) {
                     const parts = text.split('/');
                     if (parts.length === 3) {
                       const date = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
-                      setEditingRecord(prev => prev ? {...prev, proxima_dosis: date} : null);
+                      setEditarRegistro(prev => prev ? {...prev, proxima_dosis: date} : null);
                     }
                   } else if (text === '') {
-                    setEditingRecord(prev => prev ? {...prev, proxima_dosis: null} : null);
+                    setEditarRegistro(prev => prev ? {...prev, proxima_dosis: null} : null);
                   }
                 }}
               />
@@ -1129,8 +885,8 @@ export default function CarnetScreen() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Observaciones adicionales..."
-                value={editingRecord?.observaciones || ''}
-                onChangeText={(text) => setEditingRecord(prev => prev ? {...prev, observaciones: text} : null)}
+                value={editarRegistro?.observaciones || ''}
+                onChangeText={(text) => setEditarRegistro(prev => prev ? {...prev, observaciones: text} : null)}
                 multiline
                 numberOfLines={4}
               />
@@ -1140,8 +896,8 @@ export default function CarnetScreen() {
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
-                  setShowEditModal(false);
-                  setEditingRecord(null);
+                  setMostrarPaginaEditarRegistro(false);
+                  setEditarRegistro(null);
                 }}
                 disabled={submitting}
               >
@@ -1149,7 +905,7 @@ export default function CarnetScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, styles.saveButton, submitting && { opacity: 0.6 }]}
-                onPress={handleEditRecord}
+                onPress={editarRegistroCarnet}
                 disabled={submitting}
               >
                 {submitting ? (
@@ -1545,5 +1301,10 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 16,
+    fontSize: 14,
   },
 });

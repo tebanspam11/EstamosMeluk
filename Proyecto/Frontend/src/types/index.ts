@@ -20,7 +20,7 @@ export interface Mascota {
   fecha_nacimiento: Date;
   sexo: string;
   color: string | null;
-  peso: string | null;
+  peso: string;
   foto: string | null;
   alergias: string | null;
   enfermedades: string | null;
@@ -28,8 +28,6 @@ export interface Mascota {
   created_at: Date;
   updated_at: Date;
 }
-
-export interface Pet extends Mascota {}
 
 export interface Evento {
   id: number;
@@ -75,21 +73,21 @@ export interface DocumentoMascota {
 export interface CarnetDigital {
   id: number;
   id_mascota: number;
-  tipo_medicamento: string;
+  tipo_medicamento: 'Vacuna' | 'Desparasitación';
   nombre_medicamento: string;
   fecha_aplicacion: Date;
-  laboratorio: string | null;
+  laboratorio: string;
   id_lote: string;
-  fecha_elaboracion: Date | null;
-  fecha_vencimiento: Date;
+  mes_elaboracion_medicamento: number | null;
+  ano_elaboracion_medicamento: number | null;
+  mes_vencimiento_medicamento: number;
+  ano_vencimiento_medicamento: number;
   peso: number;
   nombre_veterinaria: string;
   telefono_veterinaria: string | null;
   direccion_veterinaria: string;
   proxima_dosis: Date | null;
   observaciones: string | null;
-  created_at: Date;
-  updated_at: Date;
 }
 
 export interface PetFormData {

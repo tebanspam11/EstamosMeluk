@@ -1,53 +1,47 @@
 import prisma from '../../prisma/client.js';
 
-export const obtenerMascotas = async (req, res) => {
-  const { userId } = req.user; // Del token JWT
+export const obtenerMascotas = async (request, response) => {
+  
+  const { userId } = request.user;
 
   const mascotas = await prisma.mascota.findMany({where: { id_usuario: userId }, orderBy: { created_at: 'desc' }});
 
-  res.json(mascotas);
+  response.status(201).json(mascotas);
 };
 
 export const crearMascota = async (req, res) => {
-  const { userId } = req.user; // Del token JWT
-  const datos = req.body;
 
-  const nueva = await prisma.mascota.create({
-    data: {
-      ...datos,
-      id_usuario: userId
-    }
-  });
+  const { userId } = req.user;
+  
+  const datosNuevaMascota = req.body;
 
-  res.status(201).json(nueva);
+  const nuevaMascota = await prisma.mascota.create({data: { ...datosNuevaMascota, id_usuario: userId }});
+
+  res.status(201).json({ message: 'Tu mascota ha sido creada exitosamente', nuevaMascota });
 };
 
 export const editarMascota = async (req, res) => {
-  const { userId } = req.user; // Del token JWT
-  const { id } = req.params;
-  const datos = req.body;
 
-  const mascota = await prisma.mascota.findFirst({where: {id: parseInt(id), id_usuario: userId}});
+  const { mascotaId } = req.params;
 
-  const mascotaActualizada = await prisma.mascota.update({where: { id: parseInt(id) }, data: datos});
+  const datosMascotaActualizada = req.body;
+  
+  const mascotaActualizada = await prisma.mascota.update({where: { id: parseInt(mascotaId) }, data: datosMascotaActualizada});
 
-  res.json(mascotaActualizada);
+  res.status(201).json({ message: 'Tu mascota ha sido actualizada exitosamente', mascotaActualizada });
 };
 
 export const eliminarMascota = async (req, res) => {
+    
+    const { mascotaId } = req.params;
 
-    const { userId } = req.user; // Del token JWT
-    const { id } = req.params;
+    await prisma.evento.deleteMany({where: { id_mascota: parseInt(mascotaId) }});
 
-    const mascota = await prisma.mascota.findFirst({where: {id: parseInt(id),id_usuario: userId}});
+    await prisma.documento_Mascota.deleteMany({where: { id_mascota: parseInt(mascotaId) }});
 
-    await prisma.evento.deleteMany({where: { id_mascota: parseInt(id) }});
+    await prisma.carnet_Digital.deleteMany({where: { id_mascota: parseInt(mascotaId) }});
 
-    await prisma.documento_Mascota.deleteMany({where: { id_mascota: parseInt(id) }});
+    await prisma.mascota.delete({where: { id: parseInt(mascotaId) }});
 
-    await prisma.carnet_Digital.deleteMany({where: { id_mascota: parseInt(id) }});
-
-    await prisma.mascota.delete({where: { id: parseInt(id) }});
-
-    res.json({ message: '⚠︎ Mascota eliminada correctamente' });
+    res.status(201).json({ message: 'Tu mascota ha sido eliminada exitosamente' });
 };

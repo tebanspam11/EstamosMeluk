@@ -3,14 +3,7 @@ import { API_URL } from '../../src/config/api.ts';
 import { formatPhoneColombia } from '../../src/utils/formatPhone.ts';
 import { useGoogleAuth } from '../../src/hooks/useGoogleAuth.ts';
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-  KeyboardAvoidingView,
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, 
   Platform,
   ScrollView,
   Image,
@@ -36,6 +29,7 @@ export default function LoginScreen({ navigation }: any) {
 
   const handleLogin = async () => {
     setLoading(true);
+
     const normalizedIdentifier = identifier.includes('@') ? identifier.trim() : identifier.replace(/[\s\-()]/g, '');
 
     const response = await fetch(`${API_URL}/auth/login`, {
@@ -47,16 +41,17 @@ export default function LoginScreen({ navigation }: any) {
     const data = await response.json();
 
     if (data && response.ok && data.ok) {
+      
       await AsyncStorage.setItem("token", data.token);
       await AsyncStorage.setItem("userId", data.userId.toString());
       await AsyncStorage.setItem("keepLogged", data.keepLogged ? "true" : "false");
 
-      Alert.alert('Login exitoso');
-      navigation.replace('Home');
+      Alert.alert('Login exitoso', 'Empieza a cuidar a tus mascotas con PocketVet', [
+        { text: 'Ir a Home', onPress: () => navigation.replace('Home') }
+      ]);
 
-    } else {
-      Alert.alert('Error de autenticación', data?.error);
-    }
+    } else Alert.alert('Error de autenticación', data?.error, [ { text: 'Intentar de nuevo' } ]);
+
     setLoading(false);
   };
 
@@ -65,15 +60,11 @@ export default function LoginScreen({ navigation }: any) {
   };
 
   const handleIdentifierChange = (text: string) => {
-    if (text.includes('@')) {
-      setIdentifier(text);
-    } else {
+    if (text.includes('@')) setIdentifier(text);
+    else {
       const hasLetters = /[a-zA-Z]/.test(text);
-      if (hasLetters) {
-        setIdentifier(text);
-      } else {
-        setIdentifier(formatPhoneColombia(text));
-      }
+      if (hasLetters) setIdentifier(text);
+      else setIdentifier(formatPhoneColombia(text));
     }
   };
 
@@ -83,7 +74,6 @@ export default function LoginScreen({ navigation }: any) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.title}>PocketVet</Text>
           <Text style={styles.subtitle}>Cuida a tus mascotas</Text>
@@ -93,7 +83,6 @@ export default function LoginScreen({ navigation }: any) {
           <Image source={LogoImage} style={styles.headerImage} resizeMode="contain" />
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
           <Text style={styles.label}>Email/Telefono</Text>
           <TextInput
@@ -117,7 +106,6 @@ export default function LoginScreen({ navigation }: any) {
             autoCapitalize="none"
           />
 
-          {/* Checkbox - Recordar sesión */}
           <TouchableOpacity 
             style={styles.checkboxContainer}
             onPress={() => setKeepLogged(!keepLogged)}
@@ -131,11 +119,6 @@ export default function LoginScreen({ navigation }: any) {
             <Text style={styles.checkboxLabel}>Recordar mi sesión</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.replace('ForgotPassword')}>
-            <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
-          </TouchableOpacity>
-
-          {/* Login Button */}
           <TouchableOpacity
             style={[
               styles.loginButton,
@@ -149,14 +132,12 @@ export default function LoginScreen({ navigation }: any) {
             </Text>
           </TouchableOpacity>
 
-          {/* Divider */}
           <View style={styles.divider}>
             <View style={styles.dividerLine} />
             <Text style={styles.dividerText}>o</Text>
             <View style={styles.dividerLine} />
           </View>
 
-          {/* Google Login Button */}
           <TouchableOpacity 
             style={styles.googleButton} 
             onPress={handleGoogleLogin}
@@ -170,14 +151,18 @@ export default function LoginScreen({ navigation }: any) {
               {googleLoading ? 'Conectando con Google...' : 'Continuar con Google'}
             </Text>
           </TouchableOpacity>
-
-          {/* Register Link */}
+        <View style={styles.bottomContainer}>
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>¿No tienes cuenta? </Text>
             <TouchableOpacity onPress={() => navigation.replace('Register')}>
               <Text style={styles.registerLink}>Regístrate</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity onPress={() => navigation.replace('ForgotPassword')}>
+            <Text style={styles.forgotPassword}>¿Olvidaste tu contraseña?</Text>
+          </TouchableOpacity>
+        </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -191,8 +176,8 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 40,
+    paddingHorizontal: 30,
+    paddingVertical: 25,
   },
   header: {
     alignItems: 'center',
@@ -231,7 +216,7 @@ const styles = StyleSheet.create({
   forgotPassword: {
     color: '#4A90E2',
     textAlign: 'right',
-    marginBottom: 30,
+    fontWeight: "500",
     fontSize: 14,
   },
   checkboxContainer: {
@@ -268,7 +253,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 3,
   },
   loginButtonDisabled: {
     backgroundColor: '#A0C4F8',
@@ -276,12 +261,12 @@ const styles = StyleSheet.create({
   loginButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "500",
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 20,
+    marginVertical: 12,
   },
   dividerLine: {
     flex: 1,
@@ -303,7 +288,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   googleIcon: {
     width: 20,
@@ -323,11 +308,13 @@ const styles = StyleSheet.create({
   registerText: {
     color: '#666',
     fontSize: 14,
+    gap: 10,
   },
   registerLink: {
     color: '#4A90E2',
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "500",
+    gap: 10,
   },
   imageContainer: {
     alignItems: 'center',
@@ -336,5 +323,10 @@ const styles = StyleSheet.create({
   headerImage: {
     width: 150,
     height: 150,
+  },
+  bottomContainer: {
+  alignItems: "center",
+  marginTop: 15,   
+  gap: 30,         
   },
 });

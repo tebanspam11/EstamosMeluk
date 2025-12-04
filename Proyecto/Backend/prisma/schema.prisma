@@ -89,22 +89,24 @@ model Documento_Mascota {
 }
 
 model Carnet_Digital {
-  id                    Int       @id @default(autoincrement())
-  id_mascota            Int
-  tipo_medicamento      String
-  nombre_medicamento    String
-  fecha_aplicacion      DateTime
-  laboratorio           String?
-  id_lote               String
-  fecha_elaboracion     DateTime?
-  fecha_vencimiento     DateTime
-  peso                  Float
-  nombre_veterinaria    String
-  telefono_veterinaria  String?
-  direccion_veterinaria String
-  proxima_dosis         DateTime?
-  observaciones         String?
-  created_at            DateTime  @default(now())
-  updated_at            DateTime  @updatedAt
-  mascota               Mascota   @relation(fields: [id_mascota], references: [id])
+  id                          Int       @id @default(autoincrement())
+  id_mascota                  Int
+  tipo_medicamento            String
+  nombre_medicamento          String
+  fecha_aplicacion            DateTime
+  laboratorio                 String
+  id_lote                     String
+  mes_elaboracion_medicamento Int?
+  ano_elaboracion_medicamento Int?
+  mes_vencimiento_medicamento Int
+  ano_vencimiento_medicamento Int
+  peso                        Float
+  nombre_veterinaria          String
+  telefono_veterinaria        String?
+  direccion_veterinaria       String
+  proxima_dosis               DateTime?
+  observaciones               String?
+  created_at                  DateTime  @default(now())
+  updated_at                  DateTime  @updatedAt
+  mascota                     Mascota   @relation(fields: [id_mascota], references: [id])
 }

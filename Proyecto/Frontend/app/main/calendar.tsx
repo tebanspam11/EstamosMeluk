@@ -168,7 +168,6 @@ export default function CalendarScreen() {
     });
 
     if (response.ok) {
-      // Programar notificaciones si están habilitadas
       if (newEvent.enableNotifications) {
         try {
           const notificationIds = await scheduleMultipleEventReminders(

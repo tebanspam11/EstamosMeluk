@@ -50,9 +50,7 @@ export default function RegisterScreen({ navigation }: any) {
     if (response.ok && data && data.ok) {
       Alert.alert("Su usuario ha sido registrado exitosamente. Por favor, inicie sesión.");
       navigation.replace('Login');
-    } else {
-      Alert.alert('Error en registro', data?.error || JSON.stringify(data));
-    }
+    } else Alert.alert('Error en registro', data?.error || JSON.stringify(data));
   };
 
   const handleGoogleRegister = async () => {

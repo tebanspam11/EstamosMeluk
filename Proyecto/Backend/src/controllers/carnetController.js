@@ -1,83 +1,76 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../../prisma/client.js';
 
-export const crearRegistroCarnet = async (req, res) => {
-    const {
-      id_mascota,
-      tipo_medicamento,
-      nombre_medicamento,
-      fecha_aplicacion,
-      laboratorio,
-      id_lote,
-      fecha_elaboracion,
-      fecha_vencimiento,
+export const crearRegistroCarnet = async (request, response) => {
+
+    const { id_mascota, tipo_medicamento, nombre_medicamento, fecha_aplicacion, laboratorio, id_lote,
+      mes_elaboracion_medicamento,
+      ano_elaboracion_medicamento,
+      mes_vencimiento_medicamento,
+      ano_vencimiento_medicamento,
       peso,
       nombre_veterinaria,
       telefono_veterinaria,
       direccion_veterinaria,
       proxima_dosis,
       observaciones,
-    } = req.body;   
+    } = request.body;
 
-    const registro = await prisma.carnet_Digital.create({
-      data: {
-        id_mascota: parseInt(id_mascota),
-        tipo_medicamento,
-        nombre_medicamento,
-        fecha_aplicacion: new Date(fecha_aplicacion),
-        laboratorio: laboratorio || null,
-        id_lote,
-        fecha_elaboracion: fecha_elaboracion ? new Date(fecha_elaboracion) : null,
-        fecha_vencimiento: new Date(fecha_vencimiento),
-        peso: parseFloat(peso),
-        nombre_veterinaria,
-        telefono_veterinaria: telefono_veterinaria || null,
-        direccion_veterinaria,
-        proxima_dosis: proxima_dosis ? new Date(proxima_dosis) : null,
-        observaciones: observaciones || null,
+    await prisma.carnet_Digital.create({ data: { id_mascota: parseInt(id_mascota),
+      tipo_medicamento,
+      nombre_medicamento,
+      fecha_aplicacion: new Date(fecha_aplicacion),
+      laboratorio,
+      id_lote,
+      mes_elaboracion_medicamento: mes_elaboracion_medicamento ? parseInt(mes_elaboracion_medicamento) : null,
+      ano_elaboracion_medicamento: ano_elaboracion_medicamento ? parseInt(ano_elaboracion_medicamento) : null,
+      mes_vencimiento_medicamento: parseInt(mes_vencimiento_medicamento),
+      ano_vencimiento_medicamento: parseInt(ano_vencimiento_medicamento),
+      peso: parseFloat(peso),
+      nombre_veterinaria,
+      telefono_veterinaria,
+      direccion_veterinaria,
+      proxima_dosis: proxima_dosis ? new Date(proxima_dosis) : null,
+      observaciones,
       },
     });
 
-    res.status(201).json({ message: 'Registro de carnet creado exitosamente', registro });
+    response.json({ ok: true });
 };
 
-export const obtenerRegistrosPorMascota = async (req, res) => {
+export const obtenerRegistrosPorMascota = async (request, response) => {
 
-    const { id_mascota } = req.params;
+    const { id_mascota } = request.params;
 
-    const registros = await prisma.carnet_Digital.findMany({where: { id_mascota: parseInt(id_mascota) }, orderBy: { fecha_aplicacion: 'desc' }});
+    const registroMascota = await prisma.carnet_Digital.findMany({ where: { id_mascota: parseInt(id_mascota) }, orderBy: { fecha_aplicacion: 'desc' } });
 
-    res.status(200).json(registros);
+    response.json(registroMascota);
 };
 
-export const actualizarRegistroCarnet = async (req, res) => {
-    const { id } = req.params;
-    const {
-      tipo_medicamento,
-      nombre_medicamento,
-      fecha_aplicacion,
-      laboratorio,
-      id_lote,
-      fecha_elaboracion,
-      fecha_vencimiento,
+export const actualizarRegistroCarnet = async (request, response) => {
+
+    const { id } = request.params;
+
+    const {tipo_medicamento, nombre_medicamento, fecha_aplicacion, laboratorio, id_lote,
+      mes_elaboracion_medicamento,
+      ano_elaboracion_medicamento,
+      mes_vencimiento_medicamento,
+      ano_vencimiento_medicamento,
       peso,
       nombre_veterinaria,
       telefono_veterinaria,
       direccion_veterinaria,
       proxima_dosis,
       observaciones,
-    } = req.body;
+    } = request.body;
 
-    const registro = await prisma.carnet_Digital.update({
-      where: { id: parseInt(id) },
-      data: {
-        tipo_medicamento,
-        nombre_medicamento,
-        fecha_aplicacion: fecha_aplicacion ? new Date(fecha_aplicacion) : undefined,
+    await prisma.carnet_Digital.update({ where: { id: parseInt(id) },
+      data: { tipo_medicamento, nombre_medicamento, fecha_aplicacion: new Date(fecha_aplicacion),
         laboratorio,
         id_lote,
-        fecha_elaboracion: fecha_elaboracion ? new Date(fecha_elaboracion) : null,
-        fecha_vencimiento: fecha_vencimiento ? new Date(fecha_vencimiento) : undefined,
+        mes_elaboracion_medicamento: mes_elaboracion_medicamento ? parseInt(mes_elaboracion_medicamento) : null,
+        ano_elaboracion_medicamento: ano_elaboracion_medicamento ? parseInt(ano_elaboracion_medicamento) : null,
+        mes_vencimiento_medicamento: parseInt(mes_vencimiento_medicamento),
+        ano_vencimiento_medicamento: parseInt(ano_vencimiento_medicamento),
         peso: peso ? parseFloat(peso) : undefined,
         nombre_veterinaria,
         telefono_veterinaria,
@@ -87,13 +80,14 @@ export const actualizarRegistroCarnet = async (req, res) => {
       },
     });
 
-    res.status(200).json({ message: 'Registro actualizado exitosamente', registro });
+    response.json({ ok: true });
 };
 
-export const eliminarRegistroCarnet = async (req, res) => {
-    const { id } = req.params;
+export const eliminarRegistroCarnet = async (request, response) => {
+
+    const { id } = request.params;
 
     await prisma.carnet_Digital.delete({where: { id: parseInt(id) }});
 
-    res.status(200).json({ message: 'Registro eliminado exitosamente' });
+    response.json({ ok: true });
 };
