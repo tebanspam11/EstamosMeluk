@@ -45,8 +45,6 @@ export const getVets = async (
       if (!lat2 || !lon2) return null;
 
       const tags = item.tags || {};
-
-      // construir dirección lo más completa posible
       const parts = [
         tags["addr:street"] || tags["street"] || tags.addr_street,
         tags["addr:housenumber"] || tags.housenumber,
