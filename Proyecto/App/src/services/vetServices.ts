@@ -19,8 +19,6 @@ export const getVets = async (
     out center;
   `;
 
-  console.log("Searching vets around:", lat, lon, "radius:", radius);
-
   const res = await fetch("https://overpass-api.de/api/interpreter", {
     method: "POST",
     headers: { "Content-Type": "text/plain" },
@@ -28,13 +26,10 @@ export const getVets = async (
   });
 
   if (!res.ok) {
-    console.warn("Overpass API error:", res.status);
-    console.warn(await res.text());
     return [];
   }
 
   const data = await res.json();
-  console.log("Overpass response:", data);
 
   if (!data?.elements) return [];
 
@@ -79,6 +74,5 @@ export const getVets = async (
     })
     .filter(Boolean);
 
-  console.log("Mapped vets:", vets);
   return vets;
 };
