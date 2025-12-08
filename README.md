@@ -1,10 +1,4 @@
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=rect&color=1e293b&height=150&section=header&text=Estamos%20Meluk&fontSize=45&fontColor=ffffff&animation=fadeIn" />
-</p>
 
----
-
-<h1 align="center" style="font-size:42px; color:#4f46e5;">📌 Descripción</h1>
 <div align="justify" style="background-color:#f3f4f6; padding:15px; border-radius:8px;">
 El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones</b> (tareas/talleres), los <b>casos de uso</b> y especialmente los <b>archivos del proyecto</b> para <i>Ingeniería de Software I</i>.
 </div>
