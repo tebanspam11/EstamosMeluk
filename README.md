@@ -82,7 +82,7 @@ El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones<
 <h1 align="center" style="font-size:42px; color:#4f46e5;">📂 Estructura del repositorio</h1>
 
 ```bash
-Estamos Meluk/
+PocketVet/
 ├── Asignaciones/
 ├── Documentación/
 │   ├── Casos de uso/
@@ -92,7 +92,7 @@ Estamos Meluk/
 ```
 Asignaciones/ → Entregas de tareas o talleres relacionados.
 
-Documentación/ →
+Documentación/
 
   Casos de uso/ → Documentos con historiales de usuario.
 
