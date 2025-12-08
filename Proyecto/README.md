@@ -34,7 +34,7 @@ npm install -g expo-cli
 
 ```bash
 git clone https://github.com/tebanspam11/EstamosMeluk
-cd EstamosMeluk/Proyecto/App
+cd PocketVet/Proyecto/App
 ```
 
 2️⃣ Instalar dependencias
