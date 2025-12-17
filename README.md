@@ -1,8 +1,3 @@
-
-<div align="justify" style="background-color:#f3f4f6; padding:15px; border-radius:8px;">
-El repositorio actual trabaja y documenta sistemáticamente las <b>asignaciones</b> (tareas/talleres), los <b>casos de uso</b> y especialmente los <b>archivos del proyecto</b> para <i>Ingeniería de Software I</i>.
-</div>
-
 ---
 
 <p align="center">
